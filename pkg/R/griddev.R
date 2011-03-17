@@ -244,6 +244,35 @@ primToDev.lines <- function(x, dev) {
   devLines(devGrob(x, dev), gparToDevPars(x$gp), dev)
 }
 
+primToDev.polyline <- function(x, dev) {
+  # Attempting to split parameters based on the line
+  # to which it belongs
+  if (is.null(x$id) && is.null(x$id.lengths)) {
+      devLines(devGrob(x, dev), gparToDevPars(x$gp), dev)
+  } else {
+      if (is.null(x$id)) {
+          n <- length(x$id.lengths)
+          id <- rep(1L:n, x$id.lengths)
+      } else {
+          n <- length(unique(x$id))
+          id <- x$id
+      }
+      # Each line has an id, grab corresponding positions
+      listX <- split(x$x, id)
+      listY <- split(x$y, id)
+
+      # Now we want to create a new lineGrob for each line
+      # Naming each line with the polyline name suffixed by its id
+      for (i in 1:n) {
+          lg <- linesGrob(x = listX[[i]],
+                          y = listY[[i]],
+                          gp = x$gp[i],
+                          name = paste(x$name, i, sep="."))
+          devLines(devGrob(lg, dev), gparToDevPars(lg$gp), dev) 
+      }
+  }
+}
+
 # Any more efficient way of doing this?
 # FIXME:  will lose any extra attributes of segments grob
 primToDev.segments <- function(x, dev) {
