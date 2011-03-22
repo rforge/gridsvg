@@ -292,7 +292,32 @@ primToDev.segments <- function(x, dev) {
 }
 
 primToDev.polygon <- function(x, dev) {
-  devPolygon(devGrob(x, dev), gparToDevPars(x$gp), dev)
+  # Attempting to split parameters based on the polygon
+  # to which it belongs
+  if (is.null(x$id) && is.null(x$id.lengths)) {
+      devPolygon(devGrob(x, dev), gparToDevPars(x$gp), dev)
+  } else {
+      if (is.null(x$id)) {
+          n <- length(x$id.lengths)
+          id <- rep(1L:n, x$id.lengths)
+      } else {
+          n <- length(unique(x$id))
+          id <- x$id
+      }
+      # Each polygon has an id, grab corresponding positions
+      listX <- split(x$x, id)
+      listY <- split(x$y, id)
+
+      # Now we want to create a new polygonGrob for each polygon
+      # Naming each polygon with the polygon name suffixed by its id
+      for (i in 1:n) {
+          pg <- polygonGrob(x = listX[[i]],
+                            y = listY[[i]],
+                            gp = x$gp[i],
+                            name = paste(x$name, i, sep="."))
+          devPolygon(devGrob(pg, dev), gparToDevPars(pg$gp), dev)
+      }
+  }
 }
 
 primToDev.pathgrob <- function(x, dev) {
