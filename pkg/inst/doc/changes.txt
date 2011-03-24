@@ -6,6 +6,9 @@ Changes from 0.6-0 to 0.6-1
 
 2.  Polygon grobs now respect the id parameter (Simon)
 
+3.  Semi-transparent colours can now be applied, making use of SVG's
+    fill-opacity and stroke-opacity properties. (Simon)
+
 Changes from 0.5-10 to 0.6-0
 ============================
 

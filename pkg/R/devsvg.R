@@ -64,14 +64,32 @@ devColToSVG <- function(col) {
   if (length(col) > 1)
     warning("Only first colour used")
   # Handle "transparent" as a special case
-  # Semi-transparent colours need a more sophisticated
-  # algorithm (ESPECIALLY when col is opaque but
-  # fill is semi-transparent, or vice versa)
   if (col == "transparent")
       "none"
-  else 
-      paste("rgb(", paste(col2rgb(col), collapse=","), ")", sep="")
+  else {
+      rgbaCol <- col2rgb(col, alpha = TRUE)
+      strokeOpacity <- rgbaCol[4] / 255 # Scaling from [0,255] to [0,1]
+      rgbCol <- rgbaCol[-4]
+      paste("rgb(", paste(rgbCol, collapse=","), "); ",
+            "stroke-opacity: ", strokeOpacity, sep="")
+  }
 }
+
+devFillToSVG <- function(col) {
+  if (length(col) > 1)
+    warning("Only first colour used")
+  # Handle "transparent" as a special case
+  if (col == "transparent")
+      "none"
+  else {
+      rgbaCol <- col2rgb(col, alpha = TRUE)
+      fillOpacity <- rgbaCol[4] / 255 # Scaling from [0,255] to [0,1]
+      rgbCol <- rgbaCol[-4]
+      paste("rgb(", paste(rgbCol, collapse=","), "); ",
+            "fill-opacity: ", fillOpacity, sep="")
+  }
+}
+
 
 devFontSizeToSVG <- function(fontsize, dev) {
     paste(fontsize/72*dev@res, "px", sep="")
@@ -85,7 +103,7 @@ devParToSVGPar <- function(name, par, dev) {
              "none",
              switch(name,
                     col=devColToSVG(par),
-                    fill=devColToSVG(par),
+                    fill=devFillToSVG(par),
                     fontsize=devFontSizeToSVG(par, dev),
                     lwd=devLwdToSVG(par, dev),
                     # By default just pass through the actual value
