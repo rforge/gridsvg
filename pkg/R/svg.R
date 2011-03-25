@@ -234,11 +234,14 @@ svgText <- function(x, y, text, hjust="left", vjust="bottom", rot=0,
                     id=NULL, attributes=svgAttrib(), 
                     style=svgStyle(), svgdev=svgDevice()) {
     # Avoid XML specials in text
-    text <- sub("<", "&lt;",
-                sub(">", "&gt;",
-                    sub("&", "&amp;",
-                        sub("'", "&apos;",
-                            sub("\"", "&quot;", text)))))
+    text <-
+        gsub("<", "&lt;",
+             gsub(">", "&gt;",
+                  gsub("'", "&apos;",
+                       gsub("\"", "&quot;",
+                            # DO & FIRST !!!!
+                            gsub("&", "&amp;",
+                                      text)))))
     n <- max(length(x), length(y), length(text))
     # Flip the y-direction again so that text is drawn "upright"
     # Do the flip in a separate <g> so that can animate the
