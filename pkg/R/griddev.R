@@ -320,6 +320,67 @@ primToDev.polygon <- function(x, dev) {
   }
 }
 
+primToDev.xspline <- function(x, dev) {
+  # Setting up function that turns an xspline into a series of points
+  # which is then used to define a line or path
+  splineToGrob <- function(spline) {
+    splinePoints <- xsplinePoints(spline)
+    if (spline$open) {
+        # Treating as a line because unclosed paths are not filled.
+        # svgPath() assumes all paths are closed to allow for filling
+        # but we are unable to supply parameters to it to allow for 
+        # open paths
+        splineGp <- spline$gp
+        splineGp$fill <- "transparent"
+        linesGrob(x = splinePoints$x,
+                  y = splinePoints$y,
+                  gp = splineGp,
+                  name = spline$name)
+    } else {
+        pathGrob(x = splinePoints$x,
+                 y = splinePoints$y,
+                 gp = spline$gp,
+                 name = spline$name)
+    }
+  }
+
+  # Attempting to split parameters based on the spline to which it belongs
+  if (is.null(x$id) && is.null(x$id.lengths)) {
+      sg <- splineToGrob(x)
+      if ("pathgrob" %in% class(sg))
+          devPath(devGrob(sg, dev), gparToDevPars(sg$gp), dev)
+      else
+          devLines(devGrob(sg, dev), gparToDevPars(sg$gp), dev)
+  } else {
+      if (is.null(x$id)) {
+          n <- length(x$id.lengths)
+          id <- rep(1L:n, x$id.lengths)
+      } else {
+          n <- length(unique(x$id))
+          id <- x$id
+      }
+      # Each xspline has an id, grab corresponding positions
+      listX <- split(x$x, id)
+      listY <- split(x$y, id)
+      listOpen <- split(x$open, id)
+
+      # Now we want to create a new xsplineGrob for each xspline
+      # Naming each xspline with the xspline name suffixed by its id
+      for (i in 1:n) {
+          xsg <- xsplineGrob(x = listX[[i]],
+                             y = listY[[i]],
+                             open = listOpen[[i]],
+                             gp = x$gp[i],
+                             name = paste(x$name, i, sep="."))
+          sg <- splineToGrob(xsg)
+          if ("pathgrob" %in% class(sg))
+              devPath(devGrob(sg, dev), gparToDevPars(sg$gp), dev)
+          else
+              devLines(devGrob(sg, dev), gparToDevPars(sg$gp), dev)
+      }
+  }
+}
+
 primToDev.pathgrob <- function(x, dev) {
   devPath(devGrob(x, dev), gparToDevPars(x$gp), dev)
 }

@@ -9,6 +9,9 @@ Changes from 0.6-0 to 0.6-1
 3.  Semi-transparent colours can now be applied, making use of SVG's
     fill-opacity and stroke-opacity properties. (Simon)
 
+4.  xsplines can be drawn. Currently uses the <polyline> or <path>
+    elements depending on whether the xspline is open or closed. (Simon)
+
 Changes from 0.5-10 to 0.6-0
 ============================
 
