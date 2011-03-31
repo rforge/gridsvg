@@ -35,6 +35,9 @@ export("grid.hyperlink",
        "gridToSVG"
        )
 
+# So other PACKAGES can write translation methods for new grobs
+export("primToDev")
+
 S3method("grobToDev", "grob")
 S3method("grobToDev", "gTree")
 S3method("grobToDev", "linked.grob")
@@ -51,5 +54,6 @@ S3method("primToDev", "circle")
 S3method("primToDev", "points")
 S3method("primToDev", "xaxis")
 S3method("primToDev", "yaxis")
+S3method("primToDev", "xspline")
 S3method("primToDev", "animated.grob")
 
