@@ -347,7 +347,7 @@ primToDev.xspline <- function(x, dev) {
   # Attempting to split parameters based on the spline to which it belongs
   if (is.null(x$id) && is.null(x$id.lengths)) {
       sg <- splineToGrob(x)
-      if ("pathgrob" %in% class(sg))
+      if (inherits(sg, "pathgrob"))
           devPath(devGrob(sg, dev), gparToDevPars(sg$gp), dev)
       else
           devLines(devGrob(sg, dev), gparToDevPars(sg$gp), dev)
@@ -362,18 +362,27 @@ primToDev.xspline <- function(x, dev) {
       # Each xspline has an id, grab corresponding positions
       listX <- split(x$x, id)
       listY <- split(x$y, id)
-      listOpen <- split(x$open, id)
+
+      # If x$shape is not defined for each point, repeat it for all points
+      pointShapes <- rep(x$shape, length.out = length(x$x))
+      listShape <- split(pointShapes, id)
+
+      # Like x$shape, if open is not defined for each grob id, repeat it
+      splineOpen <- rep(x$open, length.out = n)
 
       # Now we want to create a new xsplineGrob for each xspline
       # Naming each xspline with the xspline name suffixed by its id
       for (i in 1:n) {
           xsg <- xsplineGrob(x = listX[[i]],
                              y = listY[[i]],
-                             open = listOpen[[i]],
+                             open = x$open, # Could use splineOpen[i] but grid.xspline seems to apply this for the entire group of grobs
+                             shape = listShape[[i]],
+                             default.units = x$default.units[i],
+                             repEnds = x$repEnds[i],
                              gp = x$gp[i],
                              name = paste(x$name, i, sep="."))
           sg <- splineToGrob(xsg)
-          if ("pathgrob" %in% class(sg))
+          if (inherits(sg, "pathgrob"))
               devPath(devGrob(sg, dev), gparToDevPars(sg$gp), dev)
           else
               devLines(devGrob(sg, dev), gparToDevPars(sg$gp), dev)
