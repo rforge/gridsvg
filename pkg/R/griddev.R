@@ -161,9 +161,24 @@ devGrob.default <- function(x, dev) {
 
 devGrob.lines <- function(x, dev) {
   loc <- locToInches(x$x, x$y, dev)
-  list(x=cx(loc$x, dev),
-       y=cy(loc$y, dev),
-       name=x$name)
+  
+  # Need to add in attributes to know where arrows
+  # go if we have any
+  lineArrow <- x$arrow
+  if (! is.null(lineArrow)) {
+      ends <- switch(lineArrow$ends,
+                     "1" = "first",
+                     "2" = "last",
+                     "3" = "both")
+      list(x=cx(loc$x, dev),
+           y=cy(loc$y, dev),
+           arrow=list(ends = ends),
+           name=x$name)
+  } else {
+      list(x=cx(loc$x, dev),
+           y=cy(loc$y, dev),
+           name=x$name)
+  }
 }
 
 devGrob.polygon <- function(x, dev) {
@@ -174,14 +189,28 @@ devGrob.polygon <- function(x, dev) {
 }
 
 devGrob.pathgrob <- function(x, dev) {
+    pathArrow <- x$arrow
     # The complication is converting the 'x', 'y', and 'id's
     # into lists
     if (is.null(x$id) && is.null(x$id.lengths)) {
         loc <- locToInches(x$x, x$y, dev)
-        list(x=cx(loc$x, dev),
-             y=cy(loc$y, dev),
-             rule=x$rule,
-             name=x$name)
+
+        if (! is.null(pathArrow)) {
+            ends <- switch(pathArrow$ends,
+                           "1" = "first",
+                           "2" = "last",
+                           "3" = "both")
+            list(x=cx(loc$x, dev),
+                 y=cy(loc$y, dev),
+                 arrow=list(ends = ends),
+                 rule=x$rule,
+                 name=x$name) 
+        } else {
+            list(x=cx(loc$x, dev),
+                 y=cy(loc$y, dev),
+                 rule=x$rule,
+                 name=x$name)
+        }
     } else {
         if (is.null(x$id)) {
             n <- length(x$id.lengths)
@@ -194,12 +223,26 @@ devGrob.pathgrob <- function(x, dev) {
         listY <- split(x$y, id)
         listLoc <- mapply(locToInches, listX, listY, MoreArgs=list(dev),
                           SIMPLIFY=FALSE)
-        list(x=lapply(listLoc,
-               function(loc, dev) { cx(loc$x, dev) }, dev),
-             y=lapply(listLoc,
-               function(loc, dev) { cy(loc$y, dev) }, dev),
-             rule=x$rule,
-             name=x$name)
+        if (! is.null(pathArrow)) {
+            ends <- switch(pathArrow$ends,
+                           "1" = "first",
+                           "2" = "last",
+                           "3" = "both")
+            list(x=lapply(listLoc,
+                   function(loc, dev) { cx(loc$x, dev) }, dev),
+                 y=lapply(listLoc,
+                   function(loc, dev) { cy(loc$y, dev) }, dev),
+                 arrow=list(ends=ends),
+                 rule=x$rule,
+                 name=x$name)
+        } else {
+            list(x=lapply(listLoc,
+                   function(loc, dev) { cx(loc$x, dev) }, dev),
+                 y=lapply(listLoc,
+                   function(loc, dev) { cy(loc$y, dev) }, dev),
+                 rule=x$rule,
+                 name=x$name)
+        }
     }
 }
 
@@ -240,7 +283,17 @@ primToDev <- function(x, dev) {
 primToDev.grob <- function(x, dev) {
 }
 
+arrowAddName <- function(arrow, name) {
+  list(angle = arrow$angle,
+       length = arrow$length,
+       ends = arrow$ends,
+       type = arrow$type,
+       name = name)
+}
+
 primToDev.lines <- function(x, dev) {
+  if (! is.null(x$arrow))
+    devArrow(arrowAddName(x$arrow, x$name), gparToDevPars(x$gp), dev)
   devLines(devGrob(x, dev), gparToDevPars(x$gp), dev)
 }
 
@@ -248,6 +301,8 @@ primToDev.polyline <- function(x, dev) {
   # Attempting to split parameters based on the line
   # to which it belongs
   if (is.null(x$id) && is.null(x$id.lengths)) {
+      if (! is.null(x$arrow))
+          devArrow(arrowAddName(x$arrow, x$name), gparToDevPars(x$gp), dev)
       devLines(devGrob(x, dev), gparToDevPars(x$gp), dev)
   } else {
       if (is.null(x$id)) {
@@ -267,7 +322,10 @@ primToDev.polyline <- function(x, dev) {
           lg <- linesGrob(x = listX[[i]],
                           y = listY[[i]],
                           gp = x$gp[i],
+                          arrow = x$arrow,
                           name = paste(x$name, i, sep="."))
+          if (! is.null(lg$arrow))
+              devArrow(arrowAddName(lg$arrow, lg$name), gparToDevPars(lg$gp), dev)
           devLines(devGrob(lg, dev), gparToDevPars(lg$gp), dev) 
       }
   }
@@ -285,9 +343,13 @@ primToDev.segments <- function(x, dev) {
     lg <- linesGrob(unit.c(x$x0[(i-1) %% nx0 + 1],
                            x$x1[(i-1) %% nx1 + 1]),
                     unit.c(x$y0[(i-1) %% ny0 + 1],
-                       x$y1[(i-1) %% ny1 + 1]))
-    devLines(devGrob(lg, dev),
-             gparToDevPars(x$gp), dev)
+                           x$y1[(i-1) %% ny1 + 1]),
+                    arrow = x$arrow,
+                    gp = x$gp,
+                    name = x$name)
+    if (! is.null(lg$arrow))
+      devArrow(arrowAddName(lg$arrow, lg$name), gparToDevPars(lg$gp), dev)
+    devLines(devGrob(lg, dev), gparToDevPars(lg$gp), dev)
   }
 }
 
@@ -335,11 +397,13 @@ primToDev.xspline <- function(x, dev) {
         linesGrob(x = splinePoints$x,
                   y = splinePoints$y,
                   gp = splineGp,
+                  arrow = spline$arrow,
                   name = spline$name)
     } else {
         pathGrob(x = splinePoints$x,
                  y = splinePoints$y,
                  gp = spline$gp,
+                 arrow = spline$arrow,
                  name = spline$name)
     }
   }
@@ -347,10 +411,15 @@ primToDev.xspline <- function(x, dev) {
   # Attempting to split parameters based on the spline to which it belongs
   if (is.null(x$id) && is.null(x$id.lengths)) {
       sg <- splineToGrob(x)
-      if (inherits(sg, "pathgrob"))
+      if (inherits(sg, "pathgrob")) {
+          if (! is.null(sg$arrow))
+              devArrow(arrowAddName(sg$arrow, sg$name), gparToDevPars(sg$gp), dev)
           devPath(devGrob(sg, dev), gparToDevPars(sg$gp), dev)
-      else
+      } else {
+          if (! is.null(sg$arrow))
+              devArrow(arrowAddName(sg$arrow, sg$name), gparToDevPars(sg$gp), dev)
           devLines(devGrob(sg, dev), gparToDevPars(sg$gp), dev)
+      }
   } else {
       if (is.null(x$id)) {
           n <- length(x$id.lengths)
@@ -379,13 +448,19 @@ primToDev.xspline <- function(x, dev) {
                              shape = listShape[[i]],
                              default.units = x$default.units[i],
                              repEnds = x$repEnds[i],
+                             arrow = x$arrow,
                              gp = x$gp[i],
                              name = paste(x$name, i, sep="."))
           sg <- splineToGrob(xsg)
-          if (inherits(sg, "pathgrob"))
+          if (inherits(sg, "pathgrob")) {
+              if (! is.null(sg$arrow))
+                  devArrow(arrowAddName(sg$arrow, sg$name), gparToDevPars(sg$gp), dev)
               devPath(devGrob(sg, dev), gparToDevPars(sg$gp), dev)
-          else
+          } else {
+              if (! is.null(sg$arrow))
+                  devArrow(arrowAddName(sg$arrow, sg$name), gparToDevPars(sg$gp), dev)
               devLines(devGrob(sg, dev), gparToDevPars(sg$gp), dev)
+          }
       }
   }
 }

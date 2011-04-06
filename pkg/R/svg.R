@@ -140,22 +140,101 @@ svgAnimateTranslation <- function(xvalues, yvalues, duration, rep, revert,
                       duration, rep, revert, id, svgdev)  
 }
 
-svgLines <- function(x, y, id=NULL,
+svgLines <- function(x, y, id=NULL, arrow = NULL,
                      attributes=svgAttrib(),
                      style=svgStyle(), svgdev=svgDevice()) {
   n <- max(length(x), length(y))
+
+  # Grabbing arrow info for marker element references
+  if (! is.null(arrow$ends))
+      lineMarkerTxt <- markerTxt(arrow$ends, id)
+  else
+      lineMarkerTxt <- ""
+
   catsvg(paste('<polyline ',
                'id="', getid(id, svgdev), '" ',
                'points="',
                paste(rep(x, length=n), ",",
                      rep(y, length=n), sep="",
                      collapse=" "),
-               '" ', 
+               '" ',
+               lineMarkerTxt,
                svgAttribTxt(attributes), ' ',
                svgStyleCSS(style), 
                ' />\n', sep=""),
          svgdev)  
   incID(svgdev)
+}
+
+svgMarker <- function(x, y, type, ends, name,
+                      style=svgStyle(), svgdev=svgDevice()) {
+    width <- max(x)
+    height <- max(y)
+    if (length(x) != length(y))
+        stop("x and y must be same length")
+    if (is.atomic(x)) {
+        if (is.atomic(y)) {
+            x <- list(x)
+            y <- list(y)
+        } else {
+            stop("'x' and 'y' must both be lists or both be atomic")
+        }
+    }
+    n <- length(x)
+    d <- mapply(
+                function(subx, suby) {
+                    openPath <- paste(c("M",
+                                      rep("L", length(subx) - 1)),
+                                      subx, suby, collapse=" ")
+                    if (type == 2) # Closed arrow
+                      paste(openPath, "Z")
+                    else
+                      openPath
+                }, x, y)
+    markerDefs <- paste('<marker ',
+                        'id="', markerName("both", name), '" ',
+                        'refX="', c(-width, width),
+                        '" refY="', c(-height / 2, height / 2), '" ',
+                        'overflow="visible" ',
+                        'markerUnits="strokeWidth" ',
+                        'markerWidth="', width, '" ',
+                        'markerHeight="', height, '" ',
+                        'orient="auto">\n',
+                        '<path ',
+                        'd="', d, '" ',
+                        c('transform="rotate(180)" ', ''),
+                        svgStyleCSS(style), 
+                        ' />\n',
+                        '</marker>\n', sep="", collapse="")
+    catsvg(paste('<defs>\n',
+                 markerDefs,
+                 '</defs>\n', sep=""),
+           svgdev)
+    incID(svgdev)
+}
+
+markerTxt <- function(ends, name) {
+    mname <- markerName(ends, name)
+    if (ends == "first")
+        lmt <- paste('marker-start="url(#', mname, ')" ', sep="")
+    if (ends == "last")
+        lmt <- paste('marker-end="url(#', mname, ')" ', sep="")
+    if (ends == "both")
+        lmt <- paste(paste('marker-start="url(#', mname[1], ')" ', sep=""),
+                     paste('marker-end="url(#', mname[2], ')" ', sep=""),
+                     sep="")
+    lmt
+}
+
+markerName <- function(ends, name) {
+    if (ends == "first")
+        mname <- paste(name, ".markerStart", sep="")
+    if (ends == "last")
+        mname <- paste(name, ".markerEnd", sep="")
+    if (ends == "both")
+        mname <- c(paste(name, ".markerStart", sep=""),
+                   paste(name, ".markerEnd", sep=""))
+    mname
 }
 
 svgPolygon <- function(x, y, id=NULL,
@@ -179,7 +258,7 @@ svgPolygon <- function(x, y, id=NULL,
 }
 
 # Differs from polygon because it can have sub-paths
-svgPath <- function(x, y, rule, id=NULL,
+svgPath <- function(x, y, rule, id=NULL, arrow=NULL,
                     attributes=svgAttrib(),
                     style=svgStyle(), svgdev=svgDevice()) {
     if (length(x) != length(y))
@@ -200,11 +279,19 @@ svgPath <- function(x, y, rule, id=NULL,
                                 subx, suby, collapse=" "),
                           "Z")
                 }, x, y)
+
+    # Grabbing arrow info for marker element references
+    if (! is.null(arrow$ends))
+        pathMarkerTxt <- markerTxt(arrow$ends, id)
+    else
+        pathMarkerTxt <- ""
+
     catsvg(paste('<path ',
                  'id="', getid(id, svgdev), '" ',
                  'd="', paste(unlist(d), collapse=" "), '" ', 
                  'fill-rule="',
                  switch(rule, winding="nonzero", "evenodd"), '" ',
+                 pathMarkerTxt,
                  svgAttribTxt(attributes), ' ',
                  svgStyleCSS(style), 
                  ' />\n', sep=""),

@@ -160,10 +160,32 @@ setMethod("inchToDevY", signature(device="svgDevice"),
           function(x, device) {
             x * device@res
           })
+
+setMethod("devArrow", signature(device="svgDevice"),
+          function(arrow, gp, device) {
+            # Angle is specified for the arrowhead in degrees, need radians
+            ratAngle <- arrow$angle
+            ratAngle <- ratAngle * (pi / 180)
+
+            # We know the length, it is the adjacent line, need to find the
+            # length of the opposite line for the entire arrowhead, not
+            # just one half
+            midpoint <- tan(ratAngle) * arrow$length
+            arrowWidth <- midpoint * 2
+            
+            xs <- unit.c(unit(0, "inches"), arrow$length, unit(0, "inches"))
+            ys <- unit.c(unit(0, "inches"), midpoint, arrowWidth)
+            loc <- locToInches(xs, ys, device)
+            x <- cx(loc$x, device)
+            y <- cy(loc$y, device)
+
+            svgMarker(x, y, arrow$type, arrow$ends, arrow$name,
+                      devParToSVGStyle(gp, device), device@dev)
+          })
           
 setMethod("devLines", signature(device="svgDevice"),
           function(lines, gp, device) {
-            svgLines(lines$x, lines$y, lines$name,
+            svgLines(lines$x, lines$y, lines$name, lines$arrow,
                      listToSVGAttrib(lines$attributes),
                      devParToSVGStyle(gp, device), device@dev)
           })
@@ -177,7 +199,7 @@ setMethod("devPolygon", signature(device="svgDevice"),
 
 setMethod("devPath", signature(device="svgDevice"),
           function(path, gp, device) {
-            svgPath(path$x, path$y, path$rule, path$name,
+            svgPath(path$x, path$y, path$rule, path$name, path$arrow,
                     listToSVGAttrib(path$attributes),
                     devParToSVGStyle(gp, device), device@dev)
           })

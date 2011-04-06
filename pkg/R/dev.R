@@ -24,6 +24,11 @@ setGeneric("inchToDevY",
              standardGeneric("inchToDevY")
            })
 
+setGeneric("devArrow",
+           function(arrow, gp, device) {
+             standardGeneric("devArrow")
+           })
+
 setGeneric("devStartGroup",
            function(group, gp, device) {
              standardGeneric("devStartGroup")
