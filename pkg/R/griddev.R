@@ -316,6 +316,9 @@ primToDev.polyline <- function(x, dev) {
       listX <- split(x$x, id)
       listY <- split(x$y, id)
 
+      # Grouping each sub-grob
+      devStartGroup(list(name = x$name), NULL, dev)
+
       # Now we want to create a new lineGrob for each line
       # Naming each line with the polyline name suffixed by its id
       for (i in 1:n) {
@@ -328,6 +331,9 @@ primToDev.polyline <- function(x, dev) {
               devArrow(arrowAddName(lg$arrow, lg$name), gparToDevPars(lg$gp), dev)
           devLines(devGrob(lg, dev), gparToDevPars(lg$gp), dev) 
       }
+
+      # Ending the group
+      devEndGroup(dev)
   }
 }
 
@@ -370,6 +376,9 @@ primToDev.polygon <- function(x, dev) {
       listX <- split(x$x, id)
       listY <- split(x$y, id)
 
+      # Grouping each sub-grob
+      devStartGroup(list(name = x$name), NULL, dev)
+
       # Now we want to create a new polygonGrob for each polygon
       # Naming each polygon with the polygon name suffixed by its id
       for (i in 1:n) {
@@ -379,6 +388,9 @@ primToDev.polygon <- function(x, dev) {
                             name = paste(x$name, i, sep="."))
           devPolygon(devGrob(pg, dev), gparToDevPars(pg$gp), dev)
       }
+
+      # Ending the group
+      devEndGroup(dev)
   }
 }
 
@@ -439,6 +451,9 @@ primToDev.xspline <- function(x, dev) {
       # Like x$shape, if open is not defined for each grob id, repeat it
       splineOpen <- rep(x$open, length.out = n)
 
+      # Grouping each sub-grob
+      devStartGroup(list(name = x$name), NULL, dev)
+
       # Now we want to create a new xsplineGrob for each xspline
       # Naming each xspline with the xspline name suffixed by its id
       for (i in 1:n) {
@@ -462,6 +477,9 @@ primToDev.xspline <- function(x, dev) {
               devLines(devGrob(sg, dev), gparToDevPars(sg$gp), dev)
           }
       }
+
+      # Ending the group
+      devEndGroup(dev)
   }
 }
 
