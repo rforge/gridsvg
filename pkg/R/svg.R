@@ -318,7 +318,7 @@ svgRect <- function(x, y, width, height, id=NULL,
 }
 
 svgText <- function(x, y, text, hjust="left", vjust="bottom", rot=0,
-                    id=NULL, attributes=svgAttrib(), 
+                    lineheight=12.15150, id=NULL, attributes=svgAttrib(), 
                     style=svgStyle(), svgdev=svgDevice()) {
     # Avoid XML specials in text
     text <-
@@ -357,7 +357,7 @@ svgText <- function(x, y, text, hjust="left", vjust="bottom", rot=0,
                    ' >\n',
                    '<tspan ',
                    baselineShift(vjust), '>',
-                   rep(text, length=n),
+                   svgTextSplitLines(rep(text, length=n), lineheight, vjust),
                    '</tspan>\n',
                    '</text>\n',
                    '</g>\n',
@@ -367,6 +367,50 @@ svgText <- function(x, y, text, hjust="left", vjust="bottom", rot=0,
     catsvg(texts, svgdev)
     decindent(svgdev)
     incID(svgdev, n)
+}
+
+svgTextSplitLines <- function(text, lineheight, vjust) {
+    # Splitting based on linebreaks
+    splitText <- strsplit(text, "\n")
+
+    # If any line breaks occurred, inspect the list
+    if (length(unlist(splitText)) != length(text)) {
+        svgText <- list()
+        for (i in 1:length(splitText)) {
+            # Only do work if a line break occurred on this line
+            if (length(splitText[[i]]) != 1) {
+                n <- length(splitText[[i]])
+
+                # Need to adjust positioning based on vertical justification.
+                # Horizontal justification is done for us.
+                # Only the first line needs to be modified, the rest are all
+                # just one line below the previous line
+                if (vjust %in% c("centre", "center"))
+                    firstDelta <- -lineheight * (n - 1) / n
+                if (vjust == "bottom")
+                    firstDelta <- -(n - 1) * lineheight
+                if (vjust == "top")
+                    firstDelta <- lineheight
+                lineheight <- c(firstDelta, rep(lineheight, n - 1))
+            
+                svgText[[i]] <- paste('<tspan dy="',
+                                      lineheight,
+                                      '" ',
+                                      'x="0"', # Needs to be pushed to the left
+                                      '>',
+                                      splitText[[i]],
+                                      '</tspan>',
+                                      sep="", collapse="\n")
+            } else {
+                # No splitting occurred, just add the string
+                svgText[[i]] <- splitText[[i]]
+            }
+        }
+        svgText <- paste(unlist(svgText), collapse="\n")
+    } else {
+        svgText <- text
+    }
+    svgText
 }
 
 svgCircle <- function(x, y, r, id=NULL,
