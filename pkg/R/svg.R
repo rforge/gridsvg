@@ -373,12 +373,8 @@ svgTextSplitLines <- function(text, lineheight, vjust) {
     # Splitting based on linebreaks
     splitText <- strsplit(text, "\n")
 
-    # If any line breaks occurred, inspect the list
-    if (length(unlist(splitText)) != length(text)) {
         svgText <- list()
         for (i in 1:length(splitText)) {
-            # Only do work if a line break occurred on this line
-            if (length(splitText[[i]]) != 1) {
                 n <- length(splitText[[i]])
 
                 # Need to adjust positioning based on vertical justification.
@@ -386,7 +382,7 @@ svgTextSplitLines <- function(text, lineheight, vjust) {
                 # Only the first line needs to be modified, the rest are all
                 # just one line below the previous line
                 if (vjust %in% c("centre", "center"))
-                    firstDelta <- -lineheight * (n - 1) / n
+                    firstDelta <- -lineheight * (n - 2) / 2
                 if (vjust == "bottom")
                     firstDelta <- -(n - 1) * lineheight
                 if (vjust == "top")
@@ -401,15 +397,9 @@ svgTextSplitLines <- function(text, lineheight, vjust) {
                                       splitText[[i]],
                                       '</tspan>',
                                       sep="", collapse="\n")
-            } else {
-                # No splitting occurred, just add the string
-                svgText[[i]] <- splitText[[i]]
-            }
         }
         svgText <- paste(unlist(svgText), collapse="\n")
-    } else {
-        svgText <- text
-    }
+
     svgText
 }
 
