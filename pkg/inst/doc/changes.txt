@@ -21,6 +21,8 @@ Changes from 0.6-0 to 0.7-0
 
 7.  Multiline text support added. (Simon)
 
+8.  Initial support for tooltips. (Simon)
+
 
 Changes from 0.5-10 to 0.6-0
 ============================
