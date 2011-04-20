@@ -497,7 +497,39 @@ primToDev.pathgrob <- function(x, dev) {
 }
 
 primToDev.rect <- function(x, dev) {
-  devRect(devGrob(x, dev), gparToDevPars(x$gp), dev)
+  # Finding out how many rects we're dealing with
+  n <- max(length(x$x), length(x$y), length(x$width), length(x$height))
+  # Repeating components as necessary
+  xs <- rep(x$x, length.out = n)
+  ys <- rep(x$y, length.out = n)
+  widths <- rep(x$width, length.out = n)
+  heights <- rep(x$height, length.out = n)
+
+  # If we're dealing with more than one rect, split
+  # into sub grobs, else just draw the rect
+  if (n > 1) {
+      # Grouping each sub-grob
+      devStartGroup(list(name = x$name), NULL, dev)
+
+      for (i in 1:n) {
+          rg <- rectGrob(x = xs[i],
+                         y = ys[i],
+                         width = widths[i],
+                         height = heights[i],
+                         just = x$just,
+                         hjust = x$hjust,
+                         vjust = x$vjust,
+                         default.units = x$default.units,
+                         gp = x$gp,
+                         name = paste(x$name, i, sep="."))
+          devRect(devGrob(rg, dev), gparToDevPars(rg$gp), dev)
+      }
+
+      # Ending the group
+      devEndGroup(dev)
+  } else {
+      devRect(devGrob(x, dev), gparToDevPars(x$gp), dev)
+  }
 }
 
 primToDev.text <- function(x, dev) {
@@ -537,7 +569,34 @@ primToDev.text <- function(x, dev) {
 }
 
 primToDev.circle <- function(x, dev) {
-  devCircle(devGrob(x, dev), gparToDevPars(x$gp), dev)
+  # Finding out how many circles we're dealing with
+  n <- max(length(x$x), length(x$y), length(x$r))
+  # Repeating components as necessary
+  xs <- rep(x$x, length.out = n)
+  ys <- rep(x$y, length.out = n)
+  rs <- rep(x$r, length.out = n)
+
+  # If we're dealing with more than one circle, split
+  # into sub grobs, else just draw the circle
+  if (n > 1) {
+      # Grouping each sub-grob
+      devStartGroup(list(name = x$name), NULL, dev)
+
+      for (i in 1:n) {
+          cg <- circleGrob(x = xs[i],
+                           y = ys[i],
+                           r = rs[i],
+                           default.units = x$default.units,
+                           gp = x$gp,
+                           name = paste(x$name, i, sep="."))
+          devCircle(devGrob(cg, dev), gparToDevPars(cg$gp), dev)
+      }
+
+      # Ending the group
+      devEndGroup(dev)
+  } else {
+      devCircle(devGrob(x, dev), gparToDevPars(x$gp), dev)
+  }
 }
 
 # Quick fix for now
