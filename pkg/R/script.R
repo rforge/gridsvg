@@ -17,8 +17,3 @@ grobToDev.script <- function(x, dev) {
   svgScript(x$body, x$type, svgdev=dev@dev)
 }
 
-addTooltips <- function(filename="Rplots.svg") {
-    grid.DLapply(garnishAllGrobs)
-    grid.script(filename=system.file("js", "tooltip.js", package="gridSVG"))
-    gridToSVG(filename)
-}
