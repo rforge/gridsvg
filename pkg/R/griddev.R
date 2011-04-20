@@ -501,7 +501,39 @@ primToDev.rect <- function(x, dev) {
 }
 
 primToDev.text <- function(x, dev) {
-  devText(devGrob(x, dev), gparToDevPars(x$gp), dev)
+  # Finding out how many pieces of text we're dealing with
+  n <- max(length(x$x), length(x$y), length(x$label))
+  # Repeating components as necessary
+  textX <- rep(x$x, length.out = n)
+  textY <- rep(x$y, length.out = n)
+  textLabel <- rep(x$label, length.out = n)
+  textRot <- rep(x$rot, length.out = n)
+
+  # If we're dealing with more than one label, split the text
+  # into sub grobs, else just draw the text
+  if (n > 1) {
+      # Grouping each sub-grob
+      devStartGroup(list(name = x$name), NULL, dev)
+
+      for (i in 1:n) {
+          tg <- textGrob(x = textX[i],
+                         y = textY[i],
+                         label = textLabel[i],
+                         rot = textRot[i],
+                         just = x$just,
+                         hjust = x$hjust,
+                         vjust = x$vjust,
+                         default.units = x$default.units,
+                         gp = x$gp,
+                         name = paste(x$name, i, sep="."))
+          devText(devGrob(tg, dev), gparToDevPars(tg$gp), dev)
+      }
+
+      # Ending the group
+      devEndGroup(dev)
+  } else {
+      devText(devGrob(x, dev), gparToDevPars(x$gp), dev)
+  }
 }
 
 primToDev.circle <- function(x, dev) {
