@@ -318,7 +318,7 @@ svgRect <- function(x, y, width, height, id=NULL,
 }
 
 svgText <- function(x, y, text, hjust="left", vjust="bottom", rot=0,
-                    lineheight=12.15150, id=NULL, attributes=svgAttrib(), 
+                    lineheight, charheight, id=NULL, attributes=svgAttrib(), 
                     style=svgStyle(), svgdev=svgDevice()) {
     # Avoid XML specials in text
     text <-
@@ -357,7 +357,7 @@ svgText <- function(x, y, text, hjust="left", vjust="bottom", rot=0,
                    ' >\n',
                    '<tspan ',
                    baselineShift(vjust), '>',
-                   svgTextSplitLines(rep(text, length=n), lineheight, vjust),
+                   svgTextSplitLines(rep(text, length=n), lineheight, charheight, vjust),
                    '</tspan>\n',
                    '</text>\n',
                    '</g>\n',
@@ -369,36 +369,36 @@ svgText <- function(x, y, text, hjust="left", vjust="bottom", rot=0,
     incID(svgdev, n)
 }
 
-svgTextSplitLines <- function(text, lineheight, vjust) {
+svgTextSplitLines <- function(text, lineheight, charheight, vjust) {
     # Splitting based on linebreaks
     splitText <- strsplit(text, "\n")
 
-        svgText <- list()
-        for (i in 1:length(splitText)) {
-                n <- length(splitText[[i]])
+    svgText <- list()
+    for (i in 1:length(splitText)) {
+        n <- length(splitText[[i]])
 
-                # Need to adjust positioning based on vertical justification.
-                # Horizontal justification is done for us.
-                # Only the first line needs to be modified, the rest are all
-                # just one line below the previous line
-                if (vjust %in% c("centre", "center"))
-                    firstDelta <- -lineheight * (n - 2) / 2
-                if (vjust == "bottom")
-                    firstDelta <- -(n - 1) * lineheight
-                if (vjust == "top")
-                    firstDelta <- lineheight
-                lineheight <- c(firstDelta, rep(lineheight, n - 1))
-            
-                svgText[[i]] <- paste('<tspan dy="',
-                                      lineheight,
-                                      '" ',
-                                      'x="0"', # Needs to be pushed to the left
-                                      '>',
-                                      splitText[[i]],
-                                      '</tspan>',
-                                      sep="", collapse="\n")
-        }
-        svgText <- paste(unlist(svgText), collapse="\n")
+        # Need to adjust positioning based on vertical justification.
+        # Horizontal justification is done for us.
+        # Only the first line needs to be modified, the rest are all
+        # just one line below the previous line
+        if (vjust %in% c("centre", "center"))
+            firstDelta <- - ((lineheight * (n - 1) - charheight) / 2)
+        if (vjust == "bottom")
+            firstDelta <- - (n - 1) * lineheight
+        if (vjust == "top")
+            firstDelta <- charheight
+        lineheight <- c(firstDelta, rep(lineheight, n - 1))
+    
+        svgText[[i]] <- paste('<tspan dy="',
+                              lineheight,
+                              '" ',
+                              'x="0"', # Needs to be pushed to the left
+                              '>',
+                              splitText[[i]],
+                              '</tspan>',
+                              sep="", collapse="\n")
+    }
+    svgText <- paste(unlist(svgText), collapse="\n")
 
     svgText
 }

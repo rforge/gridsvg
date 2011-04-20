@@ -258,12 +258,21 @@ devGrob.rect <- function(x, dev) {
 
 devGrob.text <- function(x, dev) {
   loc <- locToInches(x$x, x$y, dev)
+  gp <- gparToDevPars(x$gp)
+  textLineHeight <- gp$fontsize * gp$cex * gp$lineheight
+  charHeight <- gp$fontsize * gp$cex
+  # Line and char height are specified in points by default
+  textLineHeight <- cy(unit(textLineHeight, "points"), dev)
+  charHeight <- cy(unit(charHeight, "points"), dev)
+
   list(x=cx(loc$x, dev),
        y=cy(loc$y, dev),
        text=x$label,
        hjust=justTohjust(x$just),
        vjust=justTovjust(x$just),
        rot=x$rot,
+       lineheight=textLineHeight,
+       charheight=charHeight,
        name=x$name)  
 }
 

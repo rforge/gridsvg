@@ -220,12 +220,9 @@ setMethod("devText", signature(device="svgDevice"),
               gp$fill <- gp$col
             gp$col <- NA
 
-            # Calculating the line's height, see ?gpar
-            textLineHeight <- gp$fontsize * gp$cex * gp$lineheight
-
             svgText(text$x, text$y, text$text,
                     text$hjust, text$vjust, text$rot,
-                    textLineHeight, text$name,
+                    text$lineheight, text$charheight, text$name,
                     listToSVGAttrib(text$attributes),
                     devParToSVGStyle(gp, device), device@dev)
           })
