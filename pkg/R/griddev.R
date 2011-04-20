@@ -246,6 +246,18 @@ devGrob.pathgrob <- function(x, dev) {
     }
 }
 
+devGrob.rastergrob <- function(x, dev) {
+  lb <- leftbottom(x$x, x$y, x$width, x$height, x$just, dev)
+  dim <- dimToInches(x$width, x$height, dev)
+
+  list(raster=x$raster,
+       x=cx(lb$x, dev),
+       y=cy(lb$y, dev),
+       width=cw(dim$w, dev),
+       height=ch(dim$h, dev),
+       name=x$name)
+}
+
 devGrob.rect <- function(x, dev) {
   lb <- leftbottom(x$x, x$y, x$width, x$height, x$just, dev)
   dim <- dimToInches(x$width, x$height, dev)
@@ -494,6 +506,52 @@ primToDev.xspline <- function(x, dev) {
 
 primToDev.pathgrob <- function(x, dev) {
   devPath(devGrob(x, dev), gparToDevPars(x$gp), dev)
+}
+
+primToDev.rastergrob <- function(x, dev) {
+  # Finding out how many rasters we're dealing with
+  n <- max(length(x$x), length(x$y), length(x$width), length(x$height))
+  # Repeating components as necessary
+  xs <- rep(x$x, length.out = n)
+  ys <- rep(x$y, length.out = n)
+
+  # If we're missing either of width and height
+  # we're dealing with a raster that occupies all
+  # of its associated dimension
+  if (is.null(x$width))
+    x$width <- unit(1, "npc")
+  if (is.null(x$height))
+    x$height <- unit(1, "npc")
+
+  widths <- rep(x$width, length.out = n)
+  heights <- rep(x$height, length.out = n) 
+  
+  # If we're dealing with more than one raster, split
+  # into sub grobs, else just draw the raster
+  if (n > 1) {
+      # Grouping each sub-grob
+      devStartGroup(list(name = x$name), NULL, dev)
+
+      for (i in 1:n) {
+          rg <- rasterGrob(x$raster,
+                           x = xs[i],
+                           y = ys[i],
+                           width = widths[i],
+                           height = heights[i],
+                           just = x$just,
+                           hjust = x$hjust,
+                           vjust = x$vjust,
+                           default.units = x$default.units,
+                           gp = x$gp,
+                           name = paste(x$name, i, sep="."))
+          devRaster(devGrob(rg, dev), gparToDevPars(rg$gp), dev)
+      }
+
+      # Ending the group
+      devEndGroup(dev)
+  } else {
+      devRaster(devGrob(x, dev), gparToDevPars(x$gp), dev)
+  }
 }
 
 primToDev.rect <- function(x, dev) {

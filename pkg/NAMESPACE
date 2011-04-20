@@ -11,6 +11,7 @@ export("svgOpen",
        "svgClose",
        "svgStartGroup",
        "svgEndGroup",
+       "svgRaster",
        "svgRect",
        "svgLines",
        "svgPolygon",
@@ -48,6 +49,7 @@ S3method("grobToDev", "script")
 
 S3method("primToDev", "grob")
 S3method("primToDev", "lines")
+S3method("primToDev", "rastergrob")
 S3method("primToDev", "rect")
 S3method("primToDev", "segments")
 S3method("primToDev", "polygon")

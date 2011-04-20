@@ -204,6 +204,13 @@ setMethod("devPath", signature(device="svgDevice"),
                     devParToSVGStyle(gp, device), device@dev)
           })
 
+setMethod("devRaster", signature(device="svgDevice"),
+          function(raster, gp, device) {
+            svgRaster(raster$raster, raster$x, raster$y, raster$width, raster$height,
+                      raster$name, raster$just, raster$vjust, raster$hjust, listToSVGAttrib(raster$attributes),
+                      devParToSVGStyle(gp, device), device@dev)
+          })
+
 setMethod("devRect", signature(device="svgDevice"),
           function(rect, gp, device) {
             svgRect(rect$x, rect$y, rect$width, rect$height, rect$name,

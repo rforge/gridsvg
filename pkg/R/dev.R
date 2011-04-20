@@ -54,6 +54,11 @@ setGeneric("devPath",
              standardGeneric("devPath")
            })
 
+setGeneric("devRaster",
+           function(raster, gp, device) {
+             standardGeneric("devRaster")
+           })
+
 setGeneric("devRect",
            function(rect, gp, device) {
              standardGeneric("devRect")
