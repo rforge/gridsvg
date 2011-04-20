@@ -548,8 +548,15 @@ primToDev.points <- function(x, dev) {
     if (!x$pch %in% c(1, 3))
         stop("Unsupported pch value")
     if (x$pch == 1) {
+        # Need to calculate the size of a char in order
+        # to work out the radius in points
+        gp <- gparToDevPars(x$gp)
+        sizeMultiple <- convertUnit(x$size, "char", valueOnly = TRUE)
+        radius <- 0.5 * sizeMultiple * gp$cex * gp$fontsize
+        radius <- unit(radius, "points")        
+
         devCircle(devGrob(circleGrob(x$x, x$y,
-                                     0.5*x$size), dev),
+                                     radius), dev),
                   gparToDevPars(x$gp), dev)
     } else if (x$pch == 3) { 
         # length of x and y already checked in grid.points
