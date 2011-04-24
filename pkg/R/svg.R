@@ -299,31 +299,30 @@ svgPath <- function(x, y, rule, id=NULL, arrow=NULL,
     incID(svgdev)
 }
 
-svgRaster <- function(raster, x, y, width, height, name,
+svgRaster <- function(x, y, width, height, name,
                       just, vjust, hjust,
                       attributes=svgAttrib(), 
                       style=svgStyle(), svgdev=svgDevice()) {
 
-  fileloc <- paste(name, ".png", sep = "")
+  # Need to extract the original grob name in order to link to the image
+  splitName <- unlist(strsplit(name, ".", fixed = TRUE))
+  grobname <- paste(splitName[-length(splitName)], collapse = ".")
 
-  # This raster can only be drawn once per element.
-  png(filename = fileloc, width = width, height = height)
-      grid.raster(raster)
-  dev.off()
+  fileloc <- paste(grobname, ".png", sep = "")
 
   rasters <- paste('<image ',
-                 'id="', name, '" ',
-                 'x="', x, '" ',
-                 'y="', y, '" ',
-                 'width="', width, '" ',
-                 'height="', height, '" ',
-                 'xlink:href="', fileloc, '" ',
-                 # Flipping image vertically to correct orientation
-                 'transform="translate(0, ',  height + (2 * y), ') scale(1, -1)" ',
-                 svgAttribTxt(attributes), ' ',
-                 svgStyleCSS(style),
-                 ' />\n',
-                 sep="")
+                   'id="', name, '" ',
+                   'x="', x, '" ',
+                   'y="', y, '" ',
+                   'width="', width, '" ',
+                   'height="', height, '" ',
+                   'xlink:href="', fileloc, '" ',
+                   # Flipping image vertically to correct orientation
+                   'transform="translate(0, ',  height + (2 * y), ') scale(1, -1)" ',
+                   svgAttribTxt(attributes), ' ',
+                   svgStyleCSS(style),
+                   ' />\n',
+                   sep="")
 
   catsvg(rasters, svgdev)
 }

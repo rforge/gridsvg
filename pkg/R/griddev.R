@@ -250,8 +250,7 @@ devGrob.rastergrob <- function(x, dev) {
   lb <- leftbottom(x$x, x$y, x$width, x$height, x$just, dev)
   dim <- dimToInches(x$width, x$height, dev)
 
-  list(raster=x$raster,
-       x=cx(lb$x, dev),
+  list(x=cx(lb$x, dev),
        y=cy(lb$y, dev),
        width=cw(dim$w, dev),
        height=ch(dim$h, dev),
@@ -526,6 +525,14 @@ primToDev.rastergrob <- function(x, dev) {
   widths <- rep(x$width, length.out = n)
   heights <- rep(x$height, length.out = n) 
   
+  # Generating the filename of the raster
+  fileloc <- paste(x$name, ".png", sep = "")
+
+  # The raster stays the same and is only repeated for each appearance.
+  png(filename = fileloc)
+      grid.raster(x$raster, interpolate = x$interpolate)
+  dev.off()
+
   # If we're dealing with more than one raster, split
   # into sub grobs, else just draw the raster
   if (n > 1) {
@@ -542,7 +549,7 @@ primToDev.rastergrob <- function(x, dev) {
                            hjust = x$hjust,
                            vjust = x$vjust,
                            default.units = x$default.units,
-                           gp = x$gp,
+                           gp = x$gp, # Will be ignored, keeping anyway
                            name = paste(x$name, i, sep="."))
           devRaster(devGrob(rg, dev), gparToDevPars(rg$gp), dev)
       }

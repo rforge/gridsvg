@@ -206,7 +206,7 @@ setMethod("devPath", signature(device="svgDevice"),
 
 setMethod("devRaster", signature(device="svgDevice"),
           function(raster, gp, device) {
-            svgRaster(raster$raster, raster$x, raster$y, raster$width, raster$height,
+            svgRaster(raster$x, raster$y, raster$width, raster$height,
                       raster$name, raster$just, raster$vjust, raster$hjust, listToSVGAttrib(raster$attributes),
                       devParToSVGStyle(gp, device), device@dev)
           })
