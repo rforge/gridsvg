@@ -337,7 +337,7 @@ primToDev.polyline <- function(x, dev) {
       listY <- split(x$y, id)
 
       # Grouping each sub-grob
-      devStartGroup(list(name = x$name, attributes = x$attributes), NULL, dev)
+      devStartGroup(devGrob(x, dev), NULL, dev)
 
       # Now we want to create a new lineGrob for each line
       # Naming each line with the polyline name suffixed by its id
@@ -365,18 +365,26 @@ primToDev.segments <- function(x, dev) {
   ny0 <- length(x$y0)
   ny1 <- length(x$y1)
   n <- max(nx0, nx1, ny0, ny1)
+
+  # Grouping each sub-grob
+  devStartGroup(devGrob(x, dev), NULL, dev)
+
   for (i in 1:n) {
     lg <- linesGrob(unit.c(x$x0[(i-1) %% nx0 + 1],
                            x$x1[(i-1) %% nx1 + 1]),
                     unit.c(x$y0[(i-1) %% ny0 + 1],
                            x$y1[(i-1) %% ny1 + 1]),
                     arrow = x$arrow,
+                    default.units = x$default.units,
                     gp = x$gp,
-                    name = x$name)
+                    name = paste(x$name, i, sep="."))
     if (! is.null(lg$arrow))
       devArrow(arrowAddName(lg$arrow, lg$name), gparToDevPars(lg$gp), dev)
     devLines(devGrob(lg, dev), gparToDevPars(lg$gp), dev)
   }
+
+  # Ending the group
+  devEndGroup(dev)
 }
 
 primToDev.polygon <- function(x, dev) {
@@ -397,7 +405,7 @@ primToDev.polygon <- function(x, dev) {
       listY <- split(x$y, id)
 
       # Grouping each sub-grob
-      devStartGroup(list(name = x$name, attributes = x$attributes), NULL, dev)
+      devStartGroup(devGrob(x, dev), NULL, dev)
 
       # Now we want to create a new polygonGrob for each polygon
       # Naming each polygon with the polygon name suffixed by its id
@@ -472,7 +480,7 @@ primToDev.xspline <- function(x, dev) {
       splineOpen <- rep(x$open, length.out = n)
 
       # Grouping each sub-grob
-      devStartGroup(list(name = x$name, attributes = x$attributes), NULL, dev)
+      devStartGroup(devGrob(x, dev), NULL, dev)
 
       # Now we want to create a new xsplineGrob for each xspline
       # Naming each xspline with the xspline name suffixed by its id
@@ -537,7 +545,7 @@ primToDev.rastergrob <- function(x, dev) {
   # into sub grobs, else just draw the raster
   if (n > 1) {
       # Grouping each sub-grob
-      devStartGroup(list(name = x$name, attributes = x$attributes), NULL, dev)
+      devStartGroup(devGrob(x, dev), NULL, dev)
 
       for (i in 1:n) {
           rg <- rasterGrob(x$raster,
@@ -574,7 +582,7 @@ primToDev.rect <- function(x, dev) {
   # into sub grobs, else just draw the rect
   if (n > 1) {
       # Grouping each sub-grob
-      devStartGroup(list(name = x$name, attributes = x$attributes), NULL, dev)
+      devStartGroup(devGrob(x, dev), NULL, dev)
 
       for (i in 1:n) {
           rg <- rectGrob(x = xs[i],
@@ -610,7 +618,7 @@ primToDev.text <- function(x, dev) {
   # into sub grobs, else just draw the text
   if (n > 1) {
       # Grouping each sub-grob
-      devStartGroup(list(name = x$name, attributes = x$attributes), NULL, dev)
+      devStartGroup(devGrob(x, dev), NULL, dev)
 
       for (i in 1:n) {
           tg <- textGrob(x = textX[i],
@@ -645,7 +653,7 @@ primToDev.circle <- function(x, dev) {
   # into sub grobs, else just draw the circle
   if (n > 1) {
       # Grouping each sub-grob
-      devStartGroup(list(name = x$name, attributes = x$attributes), NULL, dev)
+      devStartGroup(devGrob(x, dev), NULL, dev)
 
       for (i in 1:n) {
           cg <- circleGrob(x = xs[i],
