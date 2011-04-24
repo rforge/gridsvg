@@ -41,6 +41,19 @@ gparToDevPars <- function(gp) {
     devpar
 }
 
+# Repeats all elements in a gpar() so that it is fully defined for n values
+expandGpar <- function(gp, n) {
+    # If there are actually gpar elements defined, repeat them
+    if (length(gp) > 0) {
+        for (i in 1:length(gp)) {
+            gp[[i]] <- rep(gp[[i]], length.out = n)
+        }
+    }
+
+    # Returning the gp
+    gp
+}
+
 # Converting locations and widths
 locToInches <- function(x, y, dev) {
   # Convert x and y to inches
@@ -312,49 +325,62 @@ arrowAddName <- function(arrow, name) {
 }
 
 primToDev.lines <- function(x, dev) {
+  # Grouping the grob
+  devStartGroup(devGrob(x, dev), NULL, dev)
+
+  # This is a bit of a special case where we know there is only one
+  # actual graphical object that is being created, so we are simply
+  # going to modify it's name in place.
+  x$name <- paste(x$name, 1, sep = ".")
+
   if (! is.null(x$arrow))
     devArrow(arrowAddName(x$arrow, x$name), gparToDevPars(x$gp), dev)
   devLines(devGrob(x, dev), gparToDevPars(x$gp), dev)
+
+  # Ending the group
+  devEndGroup(dev)
 }
 
 primToDev.polyline <- function(x, dev) {
-  # Attempting to split parameters based on the line
-  # to which it belongs
+  # If we only have one line
   if (is.null(x$id) && is.null(x$id.lengths)) {
-      if (! is.null(x$arrow))
-          devArrow(arrowAddName(x$arrow, x$name), gparToDevPars(x$gp), dev)
-      devLines(devGrob(x, dev), gparToDevPars(x$gp), dev)
-  } else {
-      if (is.null(x$id)) {
-          n <- length(x$id.lengths)
-          id <- rep(1L:n, x$id.lengths)
-      } else {
-          n <- length(unique(x$id))
-          id <- x$id
-      }
-      # Each line has an id, grab corresponding positions
-      listX <- split(x$x, id)
-      listY <- split(x$y, id)
-
-      # Grouping each sub-grob
-      devStartGroup(devGrob(x, dev), NULL, dev)
-
-      # Now we want to create a new lineGrob for each line
-      # Naming each line with the polyline name suffixed by its id
-      for (i in 1:n) {
-          lg <- linesGrob(x = listX[[i]],
-                          y = listY[[i]],
-                          gp = x$gp[i],
-                          arrow = x$arrow,
-                          name = paste(x$name, i, sep="."))
-          if (! is.null(lg$arrow))
-              devArrow(arrowAddName(lg$arrow, lg$name), gparToDevPars(lg$gp), dev)
-          devLines(devGrob(lg, dev), gparToDevPars(lg$gp), dev) 
-      }
-
-      # Ending the group
-      devEndGroup(dev)
+      x$id <- rep(1L, length(x$x))
   }
+
+  # Multiple lines exist
+  if (is.null(x$id)) {
+      n <- length(x$id.lengths)
+      id <- rep(1L:n, x$id.lengths)
+  } else {
+      n <- length(unique(x$id))
+      id <- x$id
+  }
+
+  # Each line has an id, grab corresponding positions
+  listX <- split(x$x, id)
+  listY <- split(x$y, id)
+
+  # Gp needs to be defined for each sub-grob
+  gp <- expandGpar(x$gp, n)
+
+  # Grouping each sub-grob
+  devStartGroup(devGrob(x, dev), NULL, dev)
+
+  # Now we want to create a new lineGrob for each line
+  # Naming each line with the polyline name suffixed by its id
+  for (i in 1:n) {
+      lg <- linesGrob(x = listX[[i]],
+                      y = listY[[i]],
+                      gp = gp[i],
+                      arrow = x$arrow,
+                      name = paste(x$name, i, sep="."))
+      if (! is.null(lg$arrow))
+          devArrow(arrowAddName(lg$arrow, lg$name), gparToDevPars(lg$gp), dev)
+      devLines(devGrob(lg, dev), gparToDevPars(lg$gp), dev) 
+  }
+
+  # Ending the group
+  devEndGroup(dev)
 }
 
 # Any more efficient way of doing this?
@@ -366,6 +392,9 @@ primToDev.segments <- function(x, dev) {
   ny1 <- length(x$y1)
   n <- max(nx0, nx1, ny0, ny1)
 
+  # Gp needs to be defined for each sub-grob
+  gp <- expandGpar(x$gp, n) 
+
   # Grouping each sub-grob
   devStartGroup(devGrob(x, dev), NULL, dev)
 
@@ -376,7 +405,7 @@ primToDev.segments <- function(x, dev) {
                            x$y1[(i-1) %% ny1 + 1]),
                     arrow = x$arrow,
                     default.units = x$default.units,
-                    gp = x$gp,
+                    gp = gp[i],
                     name = paste(x$name, i, sep="."))
     if (! is.null(lg$arrow))
       devArrow(arrowAddName(lg$arrow, lg$name), gparToDevPars(lg$gp), dev)
@@ -388,38 +417,42 @@ primToDev.segments <- function(x, dev) {
 }
 
 primToDev.polygon <- function(x, dev) {
-  # Attempting to split parameters based on the polygon
-  # to which it belongs
+  # If we have only one polygon
   if (is.null(x$id) && is.null(x$id.lengths)) {
-      devPolygon(devGrob(x, dev), gparToDevPars(x$gp), dev)
-  } else {
-      if (is.null(x$id)) {
-          n <- length(x$id.lengths)
-          id <- rep(1L:n, x$id.lengths)
-      } else {
-          n <- length(unique(x$id))
-          id <- x$id
-      }
-      # Each polygon has an id, grab corresponding positions
-      listX <- split(x$x, id)
-      listY <- split(x$y, id)
-
-      # Grouping each sub-grob
-      devStartGroup(devGrob(x, dev), NULL, dev)
-
-      # Now we want to create a new polygonGrob for each polygon
-      # Naming each polygon with the polygon name suffixed by its id
-      for (i in 1:n) {
-          pg <- polygonGrob(x = listX[[i]],
-                            y = listY[[i]],
-                            gp = x$gp[i],
-                            name = paste(x$name, i, sep="."))
-          devPolygon(devGrob(pg, dev), gparToDevPars(pg$gp), dev)
-      }
-
-      # Ending the group
-      devEndGroup(dev)
+      x$id <- rep(1L, length(x$x))
   }
+
+  # If we have multiple polygons
+  if (is.null(x$id)) {
+      n <- length(x$id.lengths)
+      id <- rep(1L:n, x$id.lengths)
+  } else {
+      n <- length(unique(x$id))
+      id <- x$id
+  }
+
+  # Each polygon has an id, grab corresponding positions
+  listX <- split(x$x, id)
+  listY <- split(x$y, id)
+
+  # Gp needs to be defined for each sub-grob
+  gp <- expandGpar(x$gp, n)
+
+  # Grouping each sub-grob
+  devStartGroup(devGrob(x, dev), NULL, dev)
+
+  # Now we want to create a new polygonGrob for each polygon
+  # Naming each polygon with the polygon name suffixed by its id
+  for (i in 1:n) {
+      pg <- polygonGrob(x = listX[[i]],
+                        y = listY[[i]],
+                        gp = gp[i],
+                        name = paste(x$name, i, sep="."))
+      devPolygon(devGrob(pg, dev), gparToDevPars(pg$gp), dev)
+  }
+
+  # Ending the group
+  devEndGroup(dev)
 }
 
 primToDev.xspline <- function(x, dev) {
@@ -448,9 +481,50 @@ primToDev.xspline <- function(x, dev) {
     }
   }
 
-  # Attempting to split parameters based on the spline to which it belongs
+  # If we have only one spline
   if (is.null(x$id) && is.null(x$id.lengths)) {
-      sg <- splineToGrob(x)
+      x$id <- rep(1L, length(x$x))
+  }
+
+  # If we're dealing with more than one spline
+  if (is.null(x$id)) {
+      n <- length(x$id.lengths)
+      id <- rep(1L:n, x$id.lengths)
+  } else {
+      n <- length(unique(x$id))
+      id <- x$id
+  }
+
+  # Each xspline has an id, grab corresponding positions
+  listX <- split(x$x, id)
+  listY <- split(x$y, id)
+
+  # If x$shape is not defined for each point, repeat it for all points
+  pointShapes <- rep(x$shape, length.out = length(x$x))
+  listShape <- split(pointShapes, id)
+
+  # Like x$shape, if open is not defined for each grob id, repeat it
+  splineOpen <- rep(x$open, length.out = n)
+
+  # Expand the gp such that it fully defines all sub-grobs
+  gp <- expandGpar(x$gp, n)
+
+  # Grouping each sub-grob
+  devStartGroup(devGrob(x, dev), NULL, dev)
+
+  # Now we want to create a new xsplineGrob for each xspline
+  # Naming each xspline with the xspline name suffixed by its id
+  for (i in 1:n) {
+      xsg <- xsplineGrob(x = listX[[i]],
+                         y = listY[[i]],
+                         open = x$open, # Could use splineOpen[i] but grid.xspline applies this for the entire group of grobs
+                         shape = listShape[[i]],
+                         default.units = x$default.units[i],
+                         repEnds = x$repEnds[i],
+                         arrow = x$arrow,
+                         gp = gp[i],
+                         name = paste(x$name, i, sep="."))
+      sg <- splineToGrob(xsg)
       if (inherits(sg, "pathgrob")) {
           if (! is.null(sg$arrow))
               devArrow(arrowAddName(sg$arrow, sg$name), gparToDevPars(sg$gp), dev)
@@ -460,55 +534,10 @@ primToDev.xspline <- function(x, dev) {
               devArrow(arrowAddName(sg$arrow, sg$name), gparToDevPars(sg$gp), dev)
           devLines(devGrob(sg, dev), gparToDevPars(sg$gp), dev)
       }
-  } else {
-      if (is.null(x$id)) {
-          n <- length(x$id.lengths)
-          id <- rep(1L:n, x$id.lengths)
-      } else {
-          n <- length(unique(x$id))
-          id <- x$id
-      }
-      # Each xspline has an id, grab corresponding positions
-      listX <- split(x$x, id)
-      listY <- split(x$y, id)
-
-      # If x$shape is not defined for each point, repeat it for all points
-      pointShapes <- rep(x$shape, length.out = length(x$x))
-      listShape <- split(pointShapes, id)
-
-      # Like x$shape, if open is not defined for each grob id, repeat it
-      splineOpen <- rep(x$open, length.out = n)
-
-      # Grouping each sub-grob
-      devStartGroup(devGrob(x, dev), NULL, dev)
-
-      # Now we want to create a new xsplineGrob for each xspline
-      # Naming each xspline with the xspline name suffixed by its id
-      for (i in 1:n) {
-          xsg <- xsplineGrob(x = listX[[i]],
-                             y = listY[[i]],
-                             open = x$open, # Could use splineOpen[i] but grid.xspline seems to apply this for the entire group of grobs
-                             shape = listShape[[i]],
-                             default.units = x$default.units[i],
-                             repEnds = x$repEnds[i],
-                             arrow = x$arrow,
-                             gp = x$gp[i],
-                             name = paste(x$name, i, sep="."))
-          sg <- splineToGrob(xsg)
-          if (inherits(sg, "pathgrob")) {
-              if (! is.null(sg$arrow))
-                  devArrow(arrowAddName(sg$arrow, sg$name), gparToDevPars(sg$gp), dev)
-              devPath(devGrob(sg, dev), gparToDevPars(sg$gp), dev)
-          } else {
-              if (! is.null(sg$arrow))
-                  devArrow(arrowAddName(sg$arrow, sg$name), gparToDevPars(sg$gp), dev)
-              devLines(devGrob(sg, dev), gparToDevPars(sg$gp), dev)
-          }
-      }
-
-      # Ending the group
-      devEndGroup(dev)
   }
+
+  # Ending the group
+  devEndGroup(dev)
 }
 
 primToDev.pathgrob <- function(x, dev) {
@@ -541,32 +570,29 @@ primToDev.rastergrob <- function(x, dev) {
       grid.raster(x$raster, interpolate = x$interpolate)
   dev.off()
 
-  # If we're dealing with more than one raster, split
-  # into sub grobs, else just draw the raster
-  if (n > 1) {
-      # Grouping each sub-grob
-      devStartGroup(devGrob(x, dev), NULL, dev)
+  # Expand the gp such that it fully defines all sub-grobs
+  gp <- expandGpar(x$gp, n)
 
-      for (i in 1:n) {
-          rg <- rasterGrob(x$raster,
-                           x = xs[i],
-                           y = ys[i],
-                           width = widths[i],
-                           height = heights[i],
-                           just = x$just,
-                           hjust = x$hjust,
-                           vjust = x$vjust,
-                           default.units = x$default.units,
-                           gp = x$gp, # Will be ignored, keeping anyway
-                           name = paste(x$name, i, sep="."))
-          devRaster(devGrob(rg, dev), gparToDevPars(rg$gp), dev)
-      }
+  # Grouping each sub-grob
+  devStartGroup(devGrob(x, dev), NULL, dev)
 
-      # Ending the group
-      devEndGroup(dev)
-  } else {
-      devRaster(devGrob(x, dev), gparToDevPars(x$gp), dev)
+  for (i in 1:n) {
+      rg <- rasterGrob(x$raster,
+                       x = xs[i],
+                       y = ys[i],
+                       width = widths[i],
+                       height = heights[i],
+                       just = x$just,
+                       hjust = x$hjust,
+                       vjust = x$vjust,
+                       default.units = x$default.units,
+                       gp = gp[i], # Will be ignored, keeping anyway
+                       name = paste(x$name, i, sep="."))
+      devRaster(devGrob(rg, dev), gparToDevPars(rg$gp), dev)
   }
+
+  # Ending the group
+  devEndGroup(dev)
 }
 
 primToDev.rect <- function(x, dev) {
@@ -578,31 +604,28 @@ primToDev.rect <- function(x, dev) {
   widths <- rep(x$width, length.out = n)
   heights <- rep(x$height, length.out = n)
 
-  # If we're dealing with more than one rect, split
-  # into sub grobs, else just draw the rect
-  if (n > 1) {
-      # Grouping each sub-grob
-      devStartGroup(devGrob(x, dev), NULL, dev)
+  # Expand the gp such that it fully defines all sub-grobs
+  gp <- expandGpar(x$gp, n)
 
-      for (i in 1:n) {
-          rg <- rectGrob(x = xs[i],
-                         y = ys[i],
-                         width = widths[i],
-                         height = heights[i],
-                         just = x$just,
-                         hjust = x$hjust,
-                         vjust = x$vjust,
-                         default.units = x$default.units,
-                         gp = x$gp,
-                         name = paste(x$name, i, sep="."))
-          devRect(devGrob(rg, dev), gparToDevPars(rg$gp), dev)
-      }
+  # Grouping each sub-grob
+  devStartGroup(devGrob(x, dev), NULL, dev)
 
-      # Ending the group
-      devEndGroup(dev)
-  } else {
-      devRect(devGrob(x, dev), gparToDevPars(x$gp), dev)
+  for (i in 1:n) {
+      rg <- rectGrob(x = xs[i],
+                     y = ys[i],
+                     width = widths[i],
+                     height = heights[i],
+                     just = x$just,
+                     hjust = x$hjust,
+                     vjust = x$vjust,
+                     default.units = x$default.units,
+                     gp = gp[i],
+                     name = paste(x$name, i, sep="."))
+      devRect(devGrob(rg, dev), gparToDevPars(rg$gp), dev)
   }
+
+  # Ending the group
+  devEndGroup(dev)
 }
 
 primToDev.text <- function(x, dev) {
@@ -614,31 +637,28 @@ primToDev.text <- function(x, dev) {
   textLabel <- rep(x$label, length.out = n)
   textRot <- rep(x$rot, length.out = n)
 
-  # If we're dealing with more than one label, split the text
-  # into sub grobs, else just draw the text
-  if (n > 1) {
-      # Grouping each sub-grob
-      devStartGroup(devGrob(x, dev), NULL, dev)
+  # Expand the gp such that it fully defines all sub-grobs
+  gp <- expandGpar(x$gp, n)
 
-      for (i in 1:n) {
-          tg <- textGrob(x = textX[i],
-                         y = textY[i],
-                         label = textLabel[i],
-                         rot = textRot[i],
-                         just = x$just,
-                         hjust = x$hjust,
-                         vjust = x$vjust,
-                         default.units = x$default.units,
-                         gp = x$gp,
-                         name = paste(x$name, i, sep="."))
-          devText(devGrob(tg, dev), gparToDevPars(tg$gp), dev)
-      }
+  # Grouping each sub-grob
+  devStartGroup(devGrob(x, dev), NULL, dev)
 
-      # Ending the group
-      devEndGroup(dev)
-  } else {
-      devText(devGrob(x, dev), gparToDevPars(x$gp), dev)
+  for (i in 1:n) {
+      tg <- textGrob(x = textX[i],
+                     y = textY[i],
+                     label = textLabel[i],
+                     rot = textRot[i],
+                     just = x$just,
+                     hjust = x$hjust,
+                     vjust = x$vjust,
+                     default.units = x$default.units,
+                     gp = gp[i],
+                     name = paste(x$name, i, sep="."))
+      devText(devGrob(tg, dev), gparToDevPars(tg$gp), dev)
   }
+
+  # Ending the group
+  devEndGroup(dev)
 }
 
 primToDev.circle <- function(x, dev) {
@@ -649,27 +669,24 @@ primToDev.circle <- function(x, dev) {
   ys <- rep(x$y, length.out = n)
   rs <- rep(x$r, length.out = n)
 
-  # If we're dealing with more than one circle, split
-  # into sub grobs, else just draw the circle
-  if (n > 1) {
-      # Grouping each sub-grob
-      devStartGroup(devGrob(x, dev), NULL, dev)
+  # Expand the gp such that it fully defines all sub-grobs
+  gp <- expandGpar(x$gp, n)
 
-      for (i in 1:n) {
-          cg <- circleGrob(x = xs[i],
-                           y = ys[i],
-                           r = rs[i],
-                           default.units = x$default.units,
-                           gp = x$gp,
-                           name = paste(x$name, i, sep="."))
-          devCircle(devGrob(cg, dev), gparToDevPars(cg$gp), dev)
-      }
+  # Grouping each sub-grob
+  devStartGroup(devGrob(x, dev), NULL, dev)
 
-      # Ending the group
-      devEndGroup(dev)
-  } else {
-      devCircle(devGrob(x, dev), gparToDevPars(x$gp), dev)
+  for (i in 1:n) {
+      cg <- circleGrob(x = xs[i],
+                       y = ys[i],
+                       r = rs[i],
+                       default.units = x$default.units,
+                       gp = gp[i],
+                       name = paste(x$name, i, sep="."))
+      devCircle(devGrob(cg, dev), gparToDevPars(cg$gp), dev)
   }
+
+  # Ending the group
+  devEndGroup(dev)
 }
 
 # Quick fix for now
@@ -687,23 +704,55 @@ primToDev.points <- function(x, dev) {
         radius <- 0.5 * sizeMultiple * gp$cex * gp$fontsize
         radius <- unit(radius, "points")        
 
-        devCircle(devGrob(circleGrob(x$x, x$y,
-                                     radius), dev),
-                  gparToDevPars(x$gp), dev)
+        # Finding out how many circle points we're dealing with
+        n <- max(length(x$x), length(x$y))
+        # Repeating components as necessary
+        xs <- rep(x$x, length.out = n)
+        ys <- rep(x$y, length.out = n)
+        rs <- rep(radius, length.out = n)
+
+        # Expand the gp such that it fully defines all sub-grobs
+        gp <- expandGpar(x$gp, n)
+
+        # Grouping each sub-grob
+        devStartGroup(devGrob(x, dev), NULL, dev) 
+
+        for (i in 1:n) {
+            devCircle(devGrob(circleGrob(xs[i], ys[i],
+                                         rs[i], name = paste(x$name, i, sep = ".")),
+                                         dev),
+                      gparToDevPars(x$gp), dev)
+        }
+
+        # Ending the group
+        devEndGroup(dev) 
     } else if (x$pch == 3) { 
         # length of x and y already checked in grid.points
         n <- length(x$x)
+
+         # Expand the gp such that it fully defines all sub-grobs
+         gp <- expandGpar(x$gp, n)
+
+         # Grouping each sub-grob
+         devStartGroup(devGrob(x, dev), NULL, dev) 
+
         for (i in 1:n) {
             devLines(devGrob(linesGrob(unit.c(x$x[i] - 0.5*x$size,
                                               x$x[i] + 0.5*x$size),
-                                       x$y[i]), dev),
-                     gparToDevPars(x$gp), dev)
+                                       x$y[i]),
+                                       name = paste(x$name, i, sep = "."),
+                                       dev),
+                     gparToDevPars(gp[i]), dev)
             devLines(devGrob(linesGrob(x$x[i],
                                        unit.c(x$y[i] - 0.5*x$size,
-                                              x$y[i] + 0.5*x$size)), dev),
-                     gparToDevPars(x$gp), dev)
+                                              x$y[i] + 0.5*x$size)),
+                                       name = paste(x$name, i, sep = "."),
+                                       dev),
+                     gparToDevPars(gp[i]), dev)
         }
-        
+
+        # Ending the group
+        devEndGroup(dev) 
     }
 }
   
