@@ -700,67 +700,70 @@ primToDev.circle <- function(x, dev) {
 # Add device method eventually?
 # Could get tricky to do all symbol types here ... (?)
 primToDev.points <- function(x, dev) {
+    # Finding out how many grobs we're going to be dealing with
+    # length of x and y already checked in grid.points
+    n <- length(x$x)
+
+    # Expand the gp such that it fully defines all sub-grobs
+    gp <- expandGpar(x$gp, n)
+
+    # Grouping each sub-grob
+    devStartGroup(devGrob(x, dev), NULL, dev) 
+
     # ONLY pch = 1 or 3 handled
-    if (!x$pch %in% c(1, 3))
+    if (any(!x$pch %in% c(1, 3)))
         stop("Unsupported pch value")
-    if (x$pch == 1) {
-        # Need to calculate the size of a char in order
-        # to work out the radius in points
-        gp <- gparToDevPars(x$gp)
-        sizeMultiple <- convertUnit(x$size, "char", valueOnly = TRUE)
-        radius <- 0.5 * sizeMultiple * gp$cex * gp$fontsize
-        radius <- unit(radius, "points")        
 
-        # Finding out how many circle points we're dealing with
-        n <- max(length(x$x), length(x$y))
-        # Repeating components as necessary
-        xs <- rep(x$x, length.out = n)
-        ys <- rep(x$y, length.out = n)
-        rs <- rep(radius, length.out = n)
+    # These can differ for points
+    pchs <- rep(x$pch, length.out = n)
+    sizes <- rep(x$size, length.out = n)
 
-        # Expand the gp such that it fully defines all sub-grobs
-        gp <- expandGpar(x$gp, n)
+    for (i in 1:n) {
+        if (pchs[i] == 1) {
+            # Need to calculate the size of a char in order
+            # to work out the radius in points
+            pgp <- gparToDevPars(gp[i])
+            sizeMultiple <- convertUnit(sizes[i], "char", valueOnly = TRUE)
+            radius <- 0.5 * sizeMultiple * pgp$cex * pgp$fontsize
+            radius <- unit(radius, "points")        
 
-        # Grouping each sub-grob
-        devStartGroup(devGrob(x, dev), NULL, dev) 
+            # pch = 1 does not have a fill
+            pgp$fill <- 0
 
-        for (i in 1:n) {
-            devCircle(devGrob(circleGrob(xs[i], ys[i],
-                                         rs[i], name = paste(x$name, i, sep = ".")),
+            devCircle(devGrob(circleGrob(x$x[i], x$y[i],
+                                         radius, name = paste(x$name, i, sep = ".")),
                                          dev),
-                      gparToDevPars(x$gp), dev)
+                      gparToDevPars(pgp), dev)
         }
 
-        # Ending the group
-        devEndGroup(dev) 
-    } else if (x$pch == 3) { 
-        # length of x and y already checked in grid.points
-        n <- length(x$x)
+        if (pchs[i] == 3) { 
+            # Because we are dealing with multiple grobs in order to create
+            # this point, we add an additional group, and integer suffixes to 
+            # identify components of the point
 
-         # Expand the gp such that it fully defines all sub-grobs
-         gp <- expandGpar(x$gp, n)
+            # Grouping each sub-grob, here we really do only need a name
+            devStartGroup(list(name = paste(x$name, i, sep = ".")), NULL, dev) 
 
-         # Grouping each sub-grob
-         devStartGroup(devGrob(x, dev), NULL, dev) 
-
-        for (i in 1:n) {
-            devLines(devGrob(linesGrob(unit.c(x$x[i] - 0.5*x$size,
-                                              x$x[i] + 0.5*x$size),
-                                       x$y[i]),
-                                       name = paste(x$name, i, sep = "."),
+            devLines(devGrob(linesGrob(unit.c(x$x[i] - 0.5*sizes[i],
+                                              x$x[i] + 0.5*sizes[i]),
+                                       x$y[i],
+                                       name = paste(x$name, i, 1, sep = ".")),
                                        dev),
                      gparToDevPars(gp[i]), dev)
             devLines(devGrob(linesGrob(x$x[i],
-                                       unit.c(x$y[i] - 0.5*x$size,
-                                              x$y[i] + 0.5*x$size)),
-                                       name = paste(x$name, i, sep = "."),
+                                       unit.c(x$y[i] - 0.5*sizes[i],
+                                              x$y[i] + 0.5*sizes[i]),
+                                       name = paste(x$name, i, 2, sep = ".")),
                                        dev),
                      gparToDevPars(gp[i]), dev)
-        }
 
-        # Ending the group
-        devEndGroup(dev) 
+            # Ending the group
+            devEndGroup(dev) 
+        }
     }
+
+    # Ending the group
+    devEndGroup(dev) 
 }
   
 primToDev.xaxis <- function(x, dev) {
