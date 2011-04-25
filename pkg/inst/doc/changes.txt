@@ -28,6 +28,10 @@ Changes from 0.6-0 to 0.7-0
 
 10. Raster grobs can be drawn. (Simon)
 
+11. Every grob is now grouped in a <g> element. The group receives the name
+    of the original grob but any elements that will be produced from that
+    grob will receive the grob name with an integer suffix. (Simon)
+
 Changes from 0.5-10 to 0.6-0
 ============================
 

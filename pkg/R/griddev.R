@@ -565,8 +565,15 @@ primToDev.rastergrob <- function(x, dev) {
   # Generating the filename of the raster
   fileloc <- paste(x$name, ".png", sep = "")
 
-  # The raster stays the same and is only repeated for each appearance.
-  png(filename = fileloc)
+  # If we are not interpolating we need to know the size of the image
+  # otherwise upon rendering the image will be interpolated
+  if (! x$interpolate)
+    rasterDims <- c(ch(max(heights), dev), cw(max(widths), dev))
+  else
+    rasterDims <- dim(x$raster)
+
+  png(filename = fileloc, width = rasterDims[2], height = rasterDims[1])
+      # The raster stays the same and is only repeated for each appearance.
       grid.raster(x$raster, interpolate = x$interpolate)
   dev.off()
 
