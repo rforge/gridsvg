@@ -54,6 +54,19 @@ expandGpar <- function(gp, n) {
     gp
 }
 
+# Repeats all elements in an arrow() so that it is fully defined for n values
+expandArrow <- function(arrow, n) {
+    # If there is actually an arrow, repeat its components
+    if (! is.null(arrow)) {
+        for (i in 1:length(arrow)) {
+            arrow[[i]] <- rep(arrow[[i]], length.out = n)
+        }
+    }
+
+    # Returning the arrow
+    arrow
+}
+
 # Converting locations and widths
 locToInches <- function(x, y, dev) {
   # Convert x and y to inches
@@ -360,8 +373,9 @@ primToDev.polyline <- function(x, dev) {
   listX <- split(x$x, id)
   listY <- split(x$y, id)
 
-  # Gp needs to be defined for each sub-grob
+  # Gp needs to be defined for each sub-grob, as does arrow
   gp <- expandGpar(x$gp, n)
+  arrows <- expandArrow(x$arrow, n)
 
   # Grouping each sub-grob
   devStartGroup(devGrob(x, dev), NULL, dev)
@@ -372,7 +386,8 @@ primToDev.polyline <- function(x, dev) {
       lg <- linesGrob(x = listX[[i]],
                       y = listY[[i]],
                       gp = gp[i],
-                      arrow = x$arrow,
+                      arrow = arrows[i],
+                      default.units = x$default.units,
                       name = paste(x$name, i, sep="."))
       if (! is.null(lg$arrow))
           devArrow(arrowAddName(lg$arrow, lg$name), gparToDevPars(lg$gp), dev)
@@ -392,8 +407,9 @@ primToDev.segments <- function(x, dev) {
   ny1 <- length(x$y1)
   n <- max(nx0, nx1, ny0, ny1)
 
-  # Gp needs to be defined for each sub-grob
-  gp <- expandGpar(x$gp, n) 
+  # Gp needs to be defined for each sub-grob, as does arrow
+  gp <- expandGpar(x$gp, n)
+  arrows <- expandArrow(x$arrow, n)
 
   # Grouping each sub-grob
   devStartGroup(devGrob(x, dev), NULL, dev)
@@ -403,7 +419,7 @@ primToDev.segments <- function(x, dev) {
                            x$x1[(i-1) %% nx1 + 1]),
                     unit.c(x$y0[(i-1) %% ny0 + 1],
                            x$y1[(i-1) %% ny1 + 1]),
-                    arrow = x$arrow,
+                    arrow = arrows[i],
                     default.units = x$default.units,
                     gp = gp[i],
                     name = paste(x$name, i, sep="."))
@@ -447,6 +463,7 @@ primToDev.polygon <- function(x, dev) {
       pg <- polygonGrob(x = listX[[i]],
                         y = listY[[i]],
                         gp = gp[i],
+                        default.units, x$default.units,
                         name = paste(x$name, i, sep="."))
       devPolygon(devGrob(pg, dev), gparToDevPars(pg$gp), dev)
   }
@@ -471,13 +488,19 @@ primToDev.xspline <- function(x, dev) {
                   y = splinePoints$y,
                   gp = splineGp,
                   arrow = spline$arrow,
+                  default.units = spline$default.units,
                   name = spline$name)
     } else {
-        pathGrob(x = splinePoints$x,
-                 y = splinePoints$y,
-                 gp = spline$gp,
-                 arrow = spline$arrow,
-                 name = spline$name)
+        # Need to add an arrow attribute which path grobs do not usually have.
+        pg <- pathGrob(x = splinePoints$x,
+                       y = splinePoints$y,
+                       gp = spline$gp,
+                       default.units = spline$default.units,
+                       name = spline$name)
+        pg$arrow <- spline$arrow
+
+        # Returning the modified pathgrob
+        pg
     }
   }
 
@@ -503,11 +526,13 @@ primToDev.xspline <- function(x, dev) {
   pointShapes <- rep(x$shape, length.out = length(x$x))
   listShape <- split(pointShapes, id)
 
-  # Like x$shape, if open is not defined for each grob id, repeat it
+  # Like x$shape, if the following attributes not defined for each grob id, repeat it
   splineOpen <- rep(x$open, length.out = n)
+  splineEnds <- rep(x$repEnds, length.out = n)
 
-  # Expand the gp such that it fully defines all sub-grobs
+  # Gp needs to be defined for each sub-grob, as does arrow
   gp <- expandGpar(x$gp, n)
+  arrows <- expandArrow(x$arrow, n)
 
   # Grouping each sub-grob
   devStartGroup(devGrob(x, dev), NULL, dev)
@@ -519,9 +544,9 @@ primToDev.xspline <- function(x, dev) {
                          y = listY[[i]],
                          open = x$open, # Could use splineOpen[i] but grid.xspline applies this for the entire group of grobs
                          shape = listShape[[i]],
-                         default.units = x$default.units[i],
-                         repEnds = x$repEnds[i],
-                         arrow = x$arrow,
+                         default.units = x$default.units,
+                         repEnds = splineEnds[i],
+                         arrow = arrows[i],
                          gp = gp[i],
                          name = paste(x$name, i, sep="."))
       sg <- splineToGrob(xsg)
@@ -728,7 +753,7 @@ primToDev.points <- function(x, dev) {
             radius <- unit(radius, "points")        
 
             # pch = 1 does not have a fill
-            pgp$fill <- 0
+            pgp$fill <- "transparent"
 
             devCircle(devGrob(circleGrob(x$x[i], x$y[i],
                                          radius, name = paste(x$name, i, sep = ".")),
