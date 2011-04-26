@@ -143,7 +143,6 @@ svgAnimateTranslation <- function(xvalues, yvalues, duration, rep, revert,
 svgLines <- function(x, y, id=NULL, arrow = NULL,
                      attributes=svgAttrib(),
                      style=svgStyle(), svgdev=svgDevice()) {
-  n <- max(length(x), length(y))
 
   # Grabbing arrow info for marker element references
   if (! is.null(arrow$ends))
@@ -152,10 +151,10 @@ svgLines <- function(x, y, id=NULL, arrow = NULL,
       lineMarkerTxt <- ""
 
   catsvg(paste('<polyline ',
-               'id="', getid(id, svgdev), '" ',
+               'id="', id, '" ',
                'points="',
-               paste(rep(x, length=n), ",",
-                     rep(y, length=n), sep="",
+               paste(x, ",",
+                     y, sep="",
                      collapse=" "),
                '" ',
                lineMarkerTxt,
@@ -163,7 +162,6 @@ svgLines <- function(x, y, id=NULL, arrow = NULL,
                svgStyleCSS(style), 
                ' />\n', sep=""),
          svgdev)  
-  incID(svgdev)
 }
 
 svgMarker <- function(x, y, type, ends, name,
@@ -180,7 +178,7 @@ svgMarker <- function(x, y, type, ends, name,
             stop("'x' and 'y' must both be lists or both be atomic")
         }
     }
-    n <- length(x)
+
     d <- mapply(
                 function(subx, suby) {
                     openPath <- paste(c("M",
@@ -210,7 +208,6 @@ svgMarker <- function(x, y, type, ends, name,
                  markerDefs,
                  '</defs>\n', sep=""),
            svgdev)
-    incID(svgdev)
 }
 
 markerTxt <- function(ends, name) {
@@ -242,19 +239,18 @@ svgPolygon <- function(x, y, id=NULL,
                        style=svgStyle(), svgdev=svgDevice()) {
   if (length(x) != length(y))
     stop("x and y must be same length")
-  n <- length(x)
+
   catsvg(paste('<polygon ',
-               'id="', getid(id, svgdev), '" ',
+               'id="', id, '" ',
                'points="', 
-               paste(rep(x, length=n), ",",
-                     rep(y, length=n), sep="",
+               paste(x, ",",
+                     y, sep="",
                      collapse=" "),
                '" ', 
                svgAttribTxt(attributes), ' ',
                svgStyleCSS(style), 
                ' />\n', sep=""),
-         svgdev);  
-  incID(svgdev)
+         svgdev)  
 }
 
 # Differs from polygon because it can have sub-paths
@@ -287,7 +283,7 @@ svgPath <- function(x, y, rule, id=NULL, arrow=NULL,
         pathMarkerTxt <- ""
 
     catsvg(paste('<path ',
-                 'id="', getid(id, svgdev), '" ',
+                 'id="', id, '" ',
                  'd="', paste(unlist(d), collapse=" "), '" ', 
                  'fill-rule="',
                  switch(rule, winding="nonzero", "evenodd"), '" ',
@@ -295,8 +291,7 @@ svgPath <- function(x, y, rule, id=NULL, arrow=NULL,
                  svgAttribTxt(attributes), ' ',
                  svgStyleCSS(style), 
                  ' />\n', sep=""),
-           svgdev);  
-    incID(svgdev)
+           svgdev)  
 }
 
 svgRaster <- function(x, y, width, height, name,
@@ -330,19 +325,17 @@ svgRaster <- function(x, y, width, height, name,
 svgRect <- function(x, y, width, height, id=NULL,
                     attributes=svgAttrib(), 
                     style=svgStyle(), svgdev=svgDevice()) {
-  n <- max(length(x), length(y), length(width), length(height))
   rects <- paste('<rect ',
-                 'id="', getid(id, svgdev, n), '" ',
-                 'x="', rep(x, length=n), '" ',
-                 'y="', rep(y, length=n), '" ',
-                 'width="', rep(width, length=n), '" ',
-                 'height="', rep(height, length=n), '" ',
+                 'id="', id, '" ',
+                 'x="', x, '" ',
+                 'y="', y, '" ',
+                 'width="', width, '" ',
+                 'height="', height, '" ',
                  svgAttribTxt(attributes), ' ',
                  svgStyleCSS(style),
                  ' />\n',
                  sep="")
   catsvg(rects, svgdev)
-  incID(svgdev, n)
 }
 
 svgText <- function(x, y, text, hjust="left", vjust="bottom", rot=0,
@@ -357,41 +350,39 @@ svgText <- function(x, y, text, hjust="left", vjust="bottom", rot=0,
                             # DO & FIRST !!!!
                             gsub("&", "&amp;",
                                       text)))))
-    n <- max(length(x), length(y), length(text))
+
     # Flip the y-direction again so that text is drawn "upright"
     # Do the flip in a separate <g> so that can animate the
     # translation easily
     # Use a tspan to do the vertical alignment
     texts <- paste('<g ',
-                   'id="', getid(id, svgdev, n), '" ',
+                   'id="', id, '" ',
                    # Attributes applied to group
                    svgAttribTxt(attributes), ' ',
                    # Only draw a REALLY thin line for the text outline
                    'stroke-width=".1" ',
                    'transform="translate(',
-                   rep(x, length=n), ', ',
-                   rep(y, length=n), ') ',
+                   x, ', ',
+                   y, ') ',
                    '">\n',
                    '<g transform="scale(1, -1)">\n',
                    '<text x="0" y="0" ',
                    if (rot != 0) {
                        paste('transform="rotate(',
                              # Rotation in SVG goes clockwise from +ve x=axis
-                             rep(-rot, length=n),
+                             -rot,
                              ')" ', sep="")
                    } else "",
                    textAnchor(hjust), ' ',
                    svgStyleCSS(style),
                    ' >\n',
-                   svgTextSplitLines(rep(text, length=n), lineheight, charheight, vjust),
+                   svgTextSplitLines(text, lineheight, charheight, vjust),
                    '</text>\n',
                    '</g>\n',
                    '</g>\n',
                    sep="")
-    incindent(svgdev)
+
     catsvg(texts, svgdev)
-    decindent(svgdev)
-    incID(svgdev, n)
 }
 
 svgTextSplitLines <- function(text, lineheight, charheight, vjust) {
@@ -399,30 +390,29 @@ svgTextSplitLines <- function(text, lineheight, charheight, vjust) {
     splitText <- strsplit(text, "\n")
 
     svgText <- list()
-    for (i in 1:length(splitText)) {
-        n <- length(splitText[[i]])
+    n <- length(splitText[[1]])
 
-        # Need to adjust positioning based on vertical justification.
-        # Horizontal justification is done for us.
-        # Only the first line needs to be modified, the rest are all
-        # just one line below the previous line
-        if (vjust %in% c("centre", "center"))
-            firstDelta <- - ((lineheight * (n - 1) - charheight) / 2)
-        if (vjust == "bottom")
-            firstDelta <- - (n - 1) * lineheight
-        if (vjust == "top")
-            firstDelta <- charheight
-        lineheight <- c(firstDelta, rep(lineheight, n - 1))
-    
-        svgText[[i]] <- paste('<tspan dy="',
-                              lineheight,
-                              '" ',
-                              'x="0"', # Needs to be pushed to the left
-                              '>',
-                              splitText[[i]],
-                              '</tspan>',
-                              sep="", collapse="\n")
-    }
+    # Need to adjust positioning based on vertical justification.
+    # Horizontal justification is done for us.
+    # Only the first line needs to be modified, the rest are all
+    # just one line below the previous line
+    if (vjust %in% c("centre", "center"))
+        firstDelta <- - ((lineheight * (n - 1) - charheight) / 2)
+    if (vjust == "bottom")
+        firstDelta <- - (n - 1) * lineheight
+    if (vjust == "top")
+        firstDelta <- charheight
+    lineheight <- c(firstDelta, rep(lineheight, n - 1))
+
+    svgText[[1]] <- paste('<tspan dy="',
+                          lineheight,
+                          '" ',
+                          'x="0"', # Needs to be pushed to the left
+                          '>',
+                          splitText[[1]],
+                          '</tspan>',
+                          sep="", collapse="\n")
+
     svgText <- paste(unlist(svgText), collapse="\n")
 
     svgText
@@ -431,18 +421,18 @@ svgTextSplitLines <- function(text, lineheight, charheight, vjust) {
 svgCircle <- function(x, y, r, id=NULL,
                       attributes=svgAttrib(), 
                       style=svgStyle(), svgdev=svgDevice()) {
-  n <- max(length(x), length(y), length(r))
+
   circles <- paste('<circle ',
-                 'id="', getid(id, svgdev, n), '" ',
-                 'cx="', rep(x, length=n), '" ',
-                 'cy="', rep(y, length=n), '" ',
-                 'r="', rep(r, length=n), '" ',
-                 svgAttribTxt(attributes), ' ',
-                 svgStyleCSS(style),
-                 ' />\n',
-                 sep="")
+                   'id="', id, '" ',
+                   'cx="', x, '" ',
+                   'cy="', y, '" ',
+                   'r="', r, '" ',
+                   svgAttribTxt(attributes), ' ',
+                   svgStyleCSS(style),
+                   ' />\n',
+                   sep="")
+
   catsvg(circles, svgdev)
-  incID(svgdev, n)
 }
 
 svgScript <- function(body, type="text/ecmascript",
