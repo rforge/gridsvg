@@ -463,7 +463,7 @@ primToDev.polygon <- function(x, dev) {
       pg <- polygonGrob(x = listX[[i]],
                         y = listY[[i]],
                         gp = gp[i],
-                        default.units, x$default.units,
+                        default.units = x$default.units,
                         name = paste(x$name, i, sep="."))
       devPolygon(devGrob(pg, dev), gparToDevPars(pg$gp), dev)
   }
