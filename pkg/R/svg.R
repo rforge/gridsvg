@@ -150,6 +150,9 @@ svgLines <- function(x, y, id=NULL, arrow = NULL,
   else
       lineMarkerTxt <- ""
 
+  # Never fill a line
+  style$fill <- "none"
+
   catsvg(paste('<polyline ',
                'id="', id, '" ',
                'points="',

@@ -175,9 +175,8 @@ setMethod("devArrow", signature(device="svgDevice"),
             
             xs <- unit.c(unit(0, "inches"), arrow$length, unit(0, "inches"))
             ys <- unit.c(unit(0, "inches"), midpoint, arrowWidth)
-            loc <- locToInches(xs, ys, device)
-            x <- cx(loc$x, device)
-            y <- cy(loc$y, device)
+            x <- cx(xs, device)
+            y <- cy(ys, device)
 
             svgMarker(x, y, arrow$type, arrow$ends, arrow$name,
                       devParToSVGStyle(gp, device), device@dev)
