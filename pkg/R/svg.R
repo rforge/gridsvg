@@ -189,6 +189,11 @@ svgMarker <- function(x, y, type, ends, name,
                     else
                       openPath
                 }, x, y)
+
+    # If the arrow is open, we don't want to fill it
+    if (type == 1)
+        style$fill <- "none"
+
     markerDefs <- paste('<marker ',
                         'id="', markerName("both", name), '" ',
                         'refX="', c(-width, width),
