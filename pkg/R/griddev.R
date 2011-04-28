@@ -491,16 +491,11 @@ primToDev.xspline <- function(x, dev) {
                   default.units = spline$default.units,
                   name = spline$name)
     } else {
-        # Need to add an arrow attribute which path grobs do not usually have.
-        pg <- pathGrob(x = splinePoints$x,
-                       y = splinePoints$y,
-                       gp = spline$gp,
-                       default.units = spline$default.units,
-                       name = spline$name)
-        pg$arrow <- spline$arrow
-
-        # Returning the modified pathgrob
-        pg
+        pathGrob(x = splinePoints$x,
+                 y = splinePoints$y,
+                 gp = spline$gp,
+                 default.units = spline$default.units,
+                 name = spline$name)
     }
   }
 
@@ -551,8 +546,6 @@ primToDev.xspline <- function(x, dev) {
                          name = paste(x$name, i, sep="."))
       sg <- splineToGrob(xsg)
       if (inherits(sg, "pathgrob")) {
-          if (! is.null(sg$arrow))
-              devArrow(arrowAddName(sg$arrow, sg$name), gparToDevPars(sg$gp), dev)
           devPath(devGrob(sg, dev), gparToDevPars(sg$gp), dev)
       } else {
           if (! is.null(sg$arrow))
