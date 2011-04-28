@@ -6,7 +6,7 @@ vpError <- function() {
 # Functions to take a grid grob and call appropriate
 # functions from dev.R to produce output on a device
 
-# Each function has to convert locations and dimenions
+# Each function has to convert locations and dimensions
 # into device coordinates THEN call the dev.R function
 
 # Convert a unit object to a value in "device" units
@@ -576,13 +576,63 @@ primToDev.rastergrob <- function(x, dev) {
   xs <- rep(x$x, length.out = n)
   ys <- rep(x$y, length.out = n)
 
-  # If we're missing either of width and height
-  # we're dealing with a raster that occupies all
-  # of its associated dimension
-  if (is.null(x$width))
-    x$width <- unit(1, "npc")
-  if (is.null(x$height))
-    x$height <- unit(1, "npc")
+  # Finding the dimensions of the image, c(height, width)
+  rasterDims <- dim(x$raster)
+  rasterHeight <- rasterDims[1]
+  rasterWidth <- rasterDims[2]
+
+  # If we haven't been given any information about the h or w,
+  # blow the image up to the full size but respect the aspect ratio
+  if (is.null(x$width) && is.null(x$height)) {
+      # height > width
+      if (rasterHeight > rasterWidth) {
+          x$height <- unit(1, "npc")
+          x$width <- unit(rasterWidth / rasterHeight, "npc")
+      }
+
+      # width > height
+      if (rasterWidth > rasterHeight) {
+          x$width <- unit(1, "npc")
+          x$height <- unit(rasterHeight / rasterWidth, "npc")
+      }
+
+      # height == width
+      if (rasterHeight == rasterWidth) {
+          x$width <- unit(1, "npc")
+          x$height <- unit(1, "npc")
+      }
+  }
+
+  # If we're missing one of width or height
+  # we need to assure a correct aspect ratio by setting
+  # an appropriate value for the missing dimension
+  if (is.null(x$width)) {
+      heightNpcs <- convertHeight(x$height, "npc", valueOnly = TRUE)
+      widthNpcs <- (rasterWidth / rasterHeight) * heightNpcs
+
+      # If we encounter any widths that exceed the plot boundaries,
+      # stretch/shrink to fit.
+      if (any(widthNpcs > 1)) {
+          widthNpcs[widthNpcs > 1] <- 1
+          x$width <- unit(widthNpcs, "npc")
+      } else {
+          x$width <- (rasterWidth / rasterHeight) * x$height
+      }
+  }
+         
+  if (is.null(x$height)) {
+      widthNpcs <- convertWidth(x$width, "npc", valueOnly = TRUE)
+      heightNpcs <- (rasterHeight / rasterWidth) * widthNpcs
+
+      # If we encounter any heights that exceed the plot boundaries,
+      # stretch/shrink to fit.
+      if (any(heightNpcs > 1)) {
+          heightNpcs[heightNpcs > 1] <- 1
+          x$height <- unit(heightNpcs, "npc")
+      } else {
+          x$height <- (rasterHeight / rasterWidth) * x$width
+      }
+  }
 
   widths <- rep(x$width, length.out = n)
   heights <- rep(x$height, length.out = n) 
@@ -599,7 +649,9 @@ primToDev.rastergrob <- function(x, dev) {
 
   png(filename = fileloc, width = rasterDims[2], height = rasterDims[1])
       # The raster stays the same and is only repeated for each appearance.
-      grid.raster(x$raster, interpolate = x$interpolate)
+      # Given that we know the dimensions of the PNG, we can safely say that
+      # the raster occupies the entireity of both the x and y dimensions.
+      grid.raster(x$raster, width = 1, height = 1, interpolate = x$interpolate)
   dev.off()
 
   # Expand the gp such that it fully defines all sub-grobs

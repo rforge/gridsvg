@@ -532,8 +532,8 @@ svgHeader <- function(width, height, svgdev=svgDevice()) {
                        '"?>', sep=""),
                  '<svg xmlns="http://www.w3.org/2000/svg"',
                  '     xmlns:xlink="http://www.w3.org/1999/xlink"',
-                 '     width="', width, 'px"',
-                 '     height="', height, 'px"',
+                 paste('     width="', width, 'px"', sep=""),
+                 paste('     height="', height, 'px"', sep=""),
                  '     version="1.0">',
                  sep="\n"), svgdev)
     # Invert the y-axis so that y and height values measure "up"
