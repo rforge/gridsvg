@@ -29,6 +29,9 @@ devParNameToSVGStyleName <- function(name) {
          alpha="opacity",
          lty="stroke-dasharray",
          lwd="stroke-width",
+         lineend="stroke-linecap",
+         linejoin="stroke-linejoin",
+         linemitre="stroke-miterlimit",
          NA)
 }
 
@@ -90,9 +93,16 @@ devFillToSVG <- function(col) {
   }
 }
 
-
 devFontSizeToSVG <- function(fontsize, dev) {
     paste(fontsize/72*dev@res, "px", sep="")
+}
+
+devLineJoinToSVG <- function(linejoin, dev) {
+    # Only need to change spelling of mitre, SVG takes american form
+    if (linejoin == "mitre")
+        "miter"
+    else
+        linejoin
 }
 
 devParToSVGPar <- function(name, par, dev) {
@@ -106,6 +116,7 @@ devParToSVGPar <- function(name, par, dev) {
                     fill=devFillToSVG(par),
                     fontsize=devFontSizeToSVG(par, dev),
                     lwd=devLwdToSVG(par, dev),
+                    linejoin=devLineJoinToSVG(par, dev),
                     # By default just pass through the actual value
                     # e.g., lty has already been converted at this point
                     par))
