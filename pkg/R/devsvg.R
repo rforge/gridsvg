@@ -178,11 +178,11 @@ devFontFamilyToSVG <- function(fontfamily, dev) {
     serifFontStack <- c("Times", "Times New Roman", "Liberation Serif", "Nimbus Roman No9 L Regular", "serif")
     monoFontStack <- c("Courier", "Courier New", "Nimbus Mono L", "monospace")
 
-    if (fontfamily %in% c(sansFontStack, "Helvetica-Narrow", "NimbusSan", "NimbusSanCond", "URWHelvetica"))
+    if (fontfamily %in% c(sansFontStack, "sans", "Helvetica-Narrow", "NimbusSan", "NimbusSanCond", "URWHelvetica"))
         fontstack <- sansFontStack
-    else if (fontfamily %in% c("serif", "Times", "Times", "NimbusRom", "URWTimes"))
+    else if (fontfamily %in% c(serifFontStack, "NimbusRom", "URWTimes"))
         fontstack <- serifFontStack
-    else if (fontfamily %in% c("mono", "Courier", "NimbusMon"))
+    else if (fontfamily %in% c(monoFontStack, "mono", "NimbusMon"))
         fontstack <- monoFontStack
     else if (fontfamily %in% c("URWGothic", "AvantGarde"))
         fontstack <- c("AvantGarde", "URWGothic", sansFontStack)
