@@ -23,8 +23,9 @@ devParNameToSVGStyleName <- function(name) {
   switch(name,
          col="stroke",
          fill="fill",
-         # Ignore changes in font (!!)
-         font="fontplaceholder",
+         font="font-weight",
+         fontfamily="font-family",
+         fontface="font-weight",
          fontsize="font-size",
          alpha="opacity",
          lty="stroke-dasharray",
@@ -105,6 +106,104 @@ devLineJoinToSVG <- function(linejoin, dev) {
         linejoin
 }
 
+devFontFaceToSVG <- function(fontface, dev) {
+    # CSS uses two different properties to configure the appearance of a font
+    # Setting defaults to CSS defaults
+    fontWeightCSS <- "normal"
+    fontStyleCSS <- "normal"
+
+    if (is.numeric(fontface)) {
+        if (fontface == 1) {
+            # plain
+            fontWeightCSS <- "normal"
+            fontStyleCSS <- "normal"
+        }
+
+        if (fontface == 2) {
+            # bold
+            fontWeightCSS <- "bold"
+            fontStyleCSS <- "normal"
+        }
+
+        if (fontface == 3) {
+            # italic
+            fontWeightCSS <- "normal"
+            fontStyleCSS <- "italic"
+        }
+
+        if (fontface == 4) {
+            # bold italic
+            fontWeightCSS <- "bold"
+            fontStyleCSS <- "italic"
+        }
+    }
+
+    if (is.character(fontface)) {
+        if (fontface == "plain") {
+            fontWeightCSS <- "normal"
+            fontStyleCSS <- "normal"
+        }
+
+        if (fontface == "bold") {
+            fontWeightCSS <- "bold"
+            fontStyleCSS <- "normal"
+        }
+
+        if (fontface == "italic") {
+            fontWeightCSS <- "normal"
+            fontStyleCSS <- "italic"
+        }
+
+        if (fontface == "oblique") {
+            fontWeightCSS <- "normal"
+            fontStyleCSS <- "oblique"
+        }
+
+        if (fontface == "bold.italic") {
+            fontWeightCSS <- "bold"
+            fontStyleCSS <- "italic"
+        }
+    }
+
+    # We assume that the following is going to be prefixed by a "font-weight: "
+    fontstyle <- paste(fontWeightCSS, "; font-style: ", fontStyleCSS, sep="")
+
+    fontstyle
+}
+
+devFontFamilyToSVG <- function(fontfamily, dev) {
+    # Attempting to set reasonable defaults for the most common fonts.
+    # Order is important here.
+    sansFontStack <- c("Helvetica", "Arial", "FreeSans", "Liberation Sans", "Nimbus Sans L", "sans-serif")
+    serifFontStack <- c("Times", "Times New Roman", "Liberation Serif", "Nimbus Roman No9 L Regular", "serif")
+    monoFontStack <- c("Courier", "Courier New", "Nimbus Mono L", "monospace")
+
+    if (fontfamily %in% c(sansFontStack, "Helvetica-Narrow", "NimbusSan", "NimbusSanCond", "URWHelvetica"))
+        fontstack <- sansFontStack
+    else if (fontfamily %in% c("serif", "Times", "Times", "NimbusRom", "URWTimes"))
+        fontstack <- serifFontStack
+    else if (fontfamily %in% c("mono", "Courier", "NimbusMon"))
+        fontstack <- monoFontStack
+    else if (fontfamily %in% c("URWGothic", "AvantGarde"))
+        fontstack <- c("AvantGarde", "URWGothic", sansFontStack)
+    else if (fontfamily %in% c("URWPalladio", "Palatino"))
+        fontstack <- c("Palatino", "URWPalladio", serifFontStack)
+    else if (fontfamily %in% c("NewCenturySchoolbook", "CenturySch"))
+        fontstack <- c("NewCenturySchoolbook", "CenturySch", serifFontStack)
+    else if (fontfamily %in% c("Bookman", "URWBookman"))
+        fontstack <- c("Bookman", "URWBookman", serifFontStack)
+    else if (fontfamily == "")
+        fontstack <- sansFontStack
+    else
+        fontstack <- c(fontfamily, sansFontStack) # Assume font exists, but also assume sans-serif fallback
+
+    # Formatting the font stack for CSS
+    fontStackCSS <- paste(fontstack, collapse=', ')
+
+    # Returning the font stack
+    fontStackCSS
+}
+
 devParToSVGPar <- function(name, par, dev) {
   if (is.null(par))
     "none"
@@ -115,6 +214,9 @@ devParToSVGPar <- function(name, par, dev) {
                     col=devColToSVG(par),
                     fill=devFillToSVG(par),
                     fontsize=devFontSizeToSVG(par, dev),
+                    font=devFontFaceToSVG(par, dev),
+                    fontface=devFontFaceToSVG(par, dev),
+                    fontfamily=devFontFamilyToSVG(par, dev),
                     lwd=devLwdToSVG(par, dev),
                     linejoin=devLineJoinToSVG(par, dev),
                     # By default just pass through the actual value
