@@ -284,18 +284,11 @@ svgPath <- function(x, y, rule, id=NULL, arrow=NULL,
                           "Z")
                 }, x, y)
 
-    # Grabbing arrow info for marker element references
-    if (! is.null(arrow$ends))
-        pathMarkerTxt <- markerTxt(arrow$ends, id)
-    else
-        pathMarkerTxt <- ""
-
     catsvg(paste('<path ',
                  'id="', id, '" ',
                  'd="', paste(unlist(d), collapse=" "), '" ', 
                  'fill-rule="',
                  switch(rule, winding="nonzero", "evenodd"), '" ',
-                 pathMarkerTxt,
                  svgAttribTxt(attributes), ' ',
                  svgStyleCSS(style), 
                  ' />\n', sep=""),

@@ -229,28 +229,15 @@ devGrob.polygon <- function(x, dev) {
 }
 
 devGrob.pathgrob <- function(x, dev) {
-    pathArrow <- x$arrow
     # The complication is converting the 'x', 'y', and 'id's
     # into lists
     if (is.null(x$id) && is.null(x$id.lengths)) {
         loc <- locToInches(x$x, x$y, dev)
 
-        if (! is.null(pathArrow)) {
-            ends <- switch(pathArrow$ends,
-                           "1" = "first",
-                           "2" = "last",
-                           "3" = "both")
-            list(x=cx(loc$x, dev),
-                 y=cy(loc$y, dev),
-                 arrow=list(ends = ends),
-                 rule=x$rule,
-                 name=x$name) 
-        } else {
-            list(x=cx(loc$x, dev),
-                 y=cy(loc$y, dev),
-                 rule=x$rule,
-                 name=x$name)
-        }
+        list(x=cx(loc$x, dev),
+             y=cy(loc$y, dev),
+             rule=x$rule,
+             name=x$name)
     } else {
         if (is.null(x$id)) {
             n <- length(x$id.lengths)
@@ -263,26 +250,12 @@ devGrob.pathgrob <- function(x, dev) {
         listY <- split(x$y, id)
         listLoc <- mapply(locToInches, listX, listY, MoreArgs=list(dev),
                           SIMPLIFY=FALSE)
-        if (! is.null(pathArrow)) {
-            ends <- switch(pathArrow$ends,
-                           "1" = "first",
-                           "2" = "last",
-                           "3" = "both")
-            list(x=lapply(listLoc,
-                   function(loc, dev) { cx(loc$x, dev) }, dev),
-                 y=lapply(listLoc,
-                   function(loc, dev) { cy(loc$y, dev) }, dev),
-                 arrow=list(ends=ends),
-                 rule=x$rule,
-                 name=x$name)
-        } else {
-            list(x=lapply(listLoc,
-                   function(loc, dev) { cx(loc$x, dev) }, dev),
-                 y=lapply(listLoc,
-                   function(loc, dev) { cy(loc$y, dev) }, dev),
-                 rule=x$rule,
-                 name=x$name)
-        }
+        list(x=lapply(listLoc,
+               function(loc, dev) { cx(loc$x, dev) }, dev),
+             y=lapply(listLoc,
+               function(loc, dev) { cy(loc$y, dev) }, dev),
+             rule=x$rule,
+             name=x$name)
     }
 }
 
@@ -573,7 +546,18 @@ primToDev.xspline <- function(x, dev) {
 }
 
 primToDev.pathgrob <- function(x, dev) {
+  # Grouping the grob
+  devStartGroup(devGrob(x, dev), NULL, dev)
+
+  # This is a bit of a special case where we know there is only one
+  # actual graphical object that is being created, so we are simply
+  # going to modify it's name in place.
+  x$name <- subGrobName(x$name, 1)
+
   devPath(devGrob(x, dev), gparToDevPars(x$gp), dev)
+
+  # Ending the group
+  devEndGroup(dev)
 }
 
 primToDev.rastergrob <- function(x, dev) {
