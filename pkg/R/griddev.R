@@ -34,6 +34,20 @@ cd <- function(x, dev) {
        inchToDevY(convertHeight(x, "inches", valueOnly=TRUE), dev))
 }
 
+# Create a full name for a sub-grob based on the name of a parent grob
+subGrobName <- function(baseGrobName, subGrobName, separator = ".") {
+    paste(baseGrobName, subGrobName, sep=separator)
+}
+
+# Return the base grob name given the full name of a sub-grob
+baseGrobName <- function(subGrobName, separator = ".") {
+  splitName <- unlist(strsplit(subGrobName, separator, fixed = TRUE))
+  grobName <- paste(splitName[-length(splitName)], collapse = separator)
+
+  # Returning the base name
+  grobName
+}
+
 # Convert a gpar object to an device-neutral graphical parameter list
 gparToDevPars <- function(gp) {
     devpar <- get.gpar()
@@ -344,7 +358,7 @@ primToDev.lines <- function(x, dev) {
   # This is a bit of a special case where we know there is only one
   # actual graphical object that is being created, so we are simply
   # going to modify it's name in place.
-  x$name <- paste(x$name, 1, sep = ".")
+  x$name <- subGrobName(x$name, 1)
 
   if (! is.null(x$arrow))
     devArrow(arrowAddName(x$arrow, x$name), gparToDevPars(x$gp), dev)
@@ -388,7 +402,7 @@ primToDev.polyline <- function(x, dev) {
                       gp = gp[i],
                       arrow = arrows[i],
                       default.units = x$default.units,
-                      name = paste(x$name, i, sep="."))
+                      name = subGrobName(x$name, i))
       if (! is.null(lg$arrow))
           devArrow(arrowAddName(lg$arrow, lg$name), gparToDevPars(lg$gp), dev)
       devLines(devGrob(lg, dev), gparToDevPars(lg$gp), dev) 
@@ -422,7 +436,7 @@ primToDev.segments <- function(x, dev) {
                     arrow = arrows[i],
                     default.units = x$default.units,
                     gp = gp[i],
-                    name = paste(x$name, i, sep="."))
+                    name = subGrobName(x$name, i))
     if (! is.null(lg$arrow))
       devArrow(arrowAddName(lg$arrow, lg$name), gparToDevPars(lg$gp), dev)
     devLines(devGrob(lg, dev), gparToDevPars(lg$gp), dev)
@@ -464,7 +478,7 @@ primToDev.polygon <- function(x, dev) {
                         y = listY[[i]],
                         gp = gp[i],
                         default.units = x$default.units,
-                        name = paste(x$name, i, sep="."))
+                        name = subGrobName(x$name, i))
       devPolygon(devGrob(pg, dev), gparToDevPars(pg$gp), dev)
   }
 
@@ -543,7 +557,7 @@ primToDev.xspline <- function(x, dev) {
                          repEnds = splineEnds[i],
                          arrow = arrows[i],
                          gp = gp[i],
-                         name = paste(x$name, i, sep="."))
+                         name = subGrobName(x$name, i))
       sg <- splineToGrob(xsg)
       if (inherits(sg, "pathgrob")) {
           devPath(devGrob(sg, dev), gparToDevPars(sg$gp), dev)
@@ -664,7 +678,7 @@ primToDev.rastergrob <- function(x, dev) {
                        vjust = x$vjust,
                        default.units = x$default.units,
                        gp = gp[i], # Will be ignored, keeping anyway
-                       name = paste(x$name, i, sep="."))
+                       name = subGrobName(x$name, i))
       devRaster(devGrob(rg, dev), gparToDevPars(rg$gp), dev)
   }
 
@@ -697,7 +711,7 @@ primToDev.rect <- function(x, dev) {
                      vjust = x$vjust,
                      default.units = x$default.units,
                      gp = gp[i],
-                     name = paste(x$name, i, sep="."))
+                     name = subGrobName(x$name, i))
       devRect(devGrob(rg, dev), gparToDevPars(rg$gp), dev)
   }
 
@@ -730,7 +744,7 @@ primToDev.text <- function(x, dev) {
                      vjust = x$vjust,
                      default.units = x$default.units,
                      gp = gp[i],
-                     name = paste(x$name, i, sep="."))
+                     name = subGrobName(x$name, i))
       devText(devGrob(tg, dev), gparToDevPars(tg$gp), dev)
   }
 
@@ -758,7 +772,7 @@ primToDev.circle <- function(x, dev) {
                        r = rs[i],
                        default.units = x$default.units,
                        gp = gp[i],
-                       name = paste(x$name, i, sep="."))
+                       name = subGrobName(x$name, i))
       devCircle(devGrob(cg, dev), gparToDevPars(cg$gp), dev)
   }
 
@@ -801,7 +815,7 @@ primToDev.points <- function(x, dev) {
             pgp$fill <- "transparent"
 
             devCircle(devGrob(circleGrob(x$x[i], x$y[i],
-                                         radius, name = paste(x$name, i, sep = ".")),
+                                         radius, name = subGrobName(x$name, i)),
                                          dev),
                       gparToDevPars(pgp), dev)
         }
@@ -810,20 +824,21 @@ primToDev.points <- function(x, dev) {
             # Because we are dealing with multiple grobs in order to create
             # this point, we add an additional group, and integer suffixes to 
             # identify components of the point
+            pointGroupName <- subGrobName(x$name, i)
 
             # Grouping each sub-grob, here we really do only need a name
-            devStartGroup(list(name = paste(x$name, i, sep = ".")), NULL, dev) 
+            devStartGroup(list(name = pointGroupName), NULL, dev) 
 
             devLines(devGrob(linesGrob(unit.c(x$x[i] - 0.5*sizes[i],
                                               x$x[i] + 0.5*sizes[i]),
                                        x$y[i],
-                                       name = paste(x$name, i, 1, sep = ".")),
+                                       name = subGrobName(pointGroupName, 1)),
                                        dev),
                      gparToDevPars(gp[i]), dev)
             devLines(devGrob(linesGrob(x$x[i],
                                        unit.c(x$y[i] - 0.5*sizes[i],
                                               x$y[i] + 0.5*sizes[i]),
-                                       name = paste(x$name, i, 2, sep = ".")),
+                                       name = subGrobName(pointGroupName, 2)),
                                        dev),
                      gparToDevPars(gp[i]), dev)
 

@@ -308,9 +308,7 @@ svgRaster <- function(x, y, width, height, name,
                       style=svgStyle(), svgdev=svgDevice()) {
 
   # Need to extract the original grob name in order to link to the image
-  splitName <- unlist(strsplit(name, ".", fixed = TRUE))
-  grobname <- paste(splitName[-length(splitName)], collapse = ".")
-
+  grobname <- baseGrobName(name)
   fileloc <- paste(grobname, ".png", sep = "")
 
   rasters <- paste('<image ',

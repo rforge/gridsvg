@@ -46,6 +46,11 @@ Changes from 0.6-0 to 0.7-0
     are present in names(pdfFonts()) and names(postscriptFonts()) are given
     a reasonable attempt. (Simon)
 
+15. Naming of grobs has been refactored into a function call, subGrobName().
+    To get the base name of the grob again, baseGrobName() should be used.
+    This allows an easier switch to a different naming scheme if necessary.
+    (Simon)
+
 Changes from 0.5-10 to 0.6-0
 ============================
 
