@@ -149,20 +149,41 @@ leftbottom <- function(x, y, width, height, just, dev) {
 
 # Generate hjust/vjust from just
 justTohjust <- function(just) {
-  if (is.na(match(just[1], c("left", "right"))))
-    "centre"
-  else
-    just[1]
+  if (length(just) > 1)
+    just <- just[1]
+
+  if (is.numeric(just)) {
+    # Rounding to nearest of 0, 0.5, 1
+    roundedJust <- round(2 * just) / 2
+    switch(as.character(roundedJust),
+           "0" = "left",
+           "0.5" = "centre",
+           "1" = "right")
+  } else {
+    if (is.na(match(just[1], c("left", "right"))))
+      "centre"
+    else
+      just[1]
+  }
 }
 
 justTovjust <- function(just) {
-  if (length(just) > 1) {
+  if (length(just) > 1)
     just <- just[2]
+
+  if (is.numeric(just)) {
+    # Rounding to nearest of 0, 0.5, 1
+    roundedJust <- round(2 * just) / 2
+    switch(as.character(roundedJust),
+           "0" = "bottom",
+           "0.5" = "centre",
+           "1" = "top")
+  } else {
+    if (is.na(match(just[1], c("top", "bottom"))))
+      "centre"
+    else
+      just
   }
-  if (is.na(match(just[1], c("top", "bottom"))))
-    "centre"
-  else
-    just
 }
 
 # Grob to SVG
@@ -206,7 +227,7 @@ devGrob.lines <- function(x, dev) {
   # go if we have any
   lineArrow <- x$arrow
   if (! is.null(lineArrow)) {
-      ends <- switch(lineArrow$ends,
+      ends <- switch(as.character(lineArrow$ends),
                      "1" = "first",
                      "2" = "last",
                      "3" = "both")
@@ -289,11 +310,21 @@ devGrob.text <- function(x, dev) {
   textLineHeight <- cy(unit(textLineHeight, "points"), dev)
   charHeight <- cy(unit(charHeight, "points"), dev)
 
+  # Checking whether to use just or [h/v]just
+  # Will convert numerics to strings in justTo_just function
+  just <- rep(x$just, length.out = 2)
+  if (! is.null(x$hjust))
+    just[1] <- justTohjust(x$hjust)
+  if (! is.null(x$vjust))
+    just[2] <-justTovjust(x$vjust)
+  hjust <- just[1]
+  vjust <- just[2]
+
   list(x=cx(loc$x, dev),
        y=cy(loc$y, dev),
        text=x$label,
-       hjust=justTohjust(x$just),
-       vjust=justTovjust(x$just),
+       hjust=hjust,
+       vjust=vjust,
        rot=x$rot,
        lineheight=textLineHeight,
        charheight=charHeight,

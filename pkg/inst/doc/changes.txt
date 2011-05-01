@@ -53,6 +53,9 @@ Changes from 0.6-0 to 0.7-0
 
 16. Initial support for frameGrobs (and cellGrobs). (Simon)
 
+17. Numerical justification of text is supported. Justification parameters
+    are rounded so they belong to one of {0, 0.5, 1}. (Simon)
+
 Changes from 0.5-10 to 0.6-0
 ============================
 
