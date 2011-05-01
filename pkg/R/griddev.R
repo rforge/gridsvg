@@ -859,6 +859,34 @@ primToDev.yaxis <- function(x, dev) {
   } 
 }
 
+primToDev.frame <- function(x, dev) {
+  if (!is.null(x$framevp)) {
+    pushViewport(x$framevp, recording = FALSE)
+    devStartGroup(devGrob(x, dev), gparToDevPars(x$gp), dev)
+  }
+
+  lapply(x$children, grobToDev, dev)
+
+  if (!is.null(x$framevp)) {
+    popViewport(grid:::depth(x$framevp), recording = FALSE)
+    devEndGroup(dev)
+  }
+}
+
+primToDev.cellGrob <- function(x, dev) {
+  if (!is.null(x$cellvp)) {
+    pushViewport(x$cellvp, recording = FALSE)
+    devStartGroup(devGrob(x, dev), gparToDevPars(x$gp), dev)
+  }
+
+  lapply(x$children, grobToDev, dev)
+
+  if (!is.null(x$cellvp)) {
+    popViewport(grid:::depth(x$cellvp), recording = FALSE)
+    devEndGroup(dev)
+  }
+}
+
 grobToDev.gTree <- function(x, dev) {
   depth <- 0
   if (!is.null(x$vp))
@@ -873,9 +901,11 @@ grobToDev.gTree <- function(x, dev) {
     upViewport(grid:::depth(x$childrenvp))
   }
   primToDev(x, dev)
-  devStartGroup(devGrob(x, dev), gparToDevPars(x$gp), dev)
-  lapply(x$children, grobToDev, dev)
-  devEndGroup(dev)
+  if (! inherits(x, c("frame", "cellGrob"))) {
+    devStartGroup(devGrob(x, dev), gparToDevPars(x$gp), dev)
+    lapply(x$children, grobToDev, dev)
+    devEndGroup(dev)
+  }
   if (depth > 0) {
     upViewport(depth)
     devEndGroup(dev)
