@@ -313,6 +313,8 @@ devGrob.text <- function(x, dev) {
   # Checking whether to use just or [h/v]just
   # Will convert numerics to strings in justTo_just function
   just <- rep(x$just, length.out = 2)
+  just <- c(justTohjust(just[1]),
+            justTovjust(just[2]))
   if (! is.null(x$hjust))
     just[1] <- justTohjust(x$hjust)
   if (! is.null(x$vjust))
