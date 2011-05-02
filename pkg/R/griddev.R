@@ -892,7 +892,16 @@ primToDev.yaxis <- function(x, dev) {
   } 
 }
 
-primToDev.frame <- function(x, dev) {
+grobToDev.frame <- function(x, dev) {
+  depth <- 0
+  if (!is.null(x$vp))
+    if (!inherits(x$vp, "vpPath"))
+      vpError()
+    else {
+      depth <- downViewport(x$vp)
+      devStartGroup(devGrob(x$vp, dev), gparToDevPars(get.gpar()), dev)
+    }
+
   if (!is.null(x$framevp)) {
     pushViewport(x$framevp, recording = FALSE)
     devStartGroup(devGrob(x, dev), gparToDevPars(x$gp), dev)
@@ -901,21 +910,40 @@ primToDev.frame <- function(x, dev) {
   lapply(x$children, grobToDev, dev)
 
   if (!is.null(x$framevp)) {
-    popViewport(grid:::depth(x$framevp), recording = FALSE)
+    devEndGroup(dev)
+    upViewport(recording = FALSE)
+  }
+
+  if (depth > 0) {
+    upViewport(depth)
     devEndGroup(dev)
   }
 }
 
-primToDev.cellGrob <- function(x, dev) {
+grobToDev.cellGrob <- function(x, dev) {
+  depth <- 0
+  if (!is.null(x$vp))
+    if (!inherits(x$vp, "vpPath"))
+      vpError()
+    else {
+      depth <- downViewport(x$vp)
+      devStartGroup(devGrob(x$vp, dev), gparToDevPars(get.gpar()), dev)
+    }
+
   if (!is.null(x$cellvp)) {
     pushViewport(x$cellvp, recording = FALSE)
     devStartGroup(devGrob(x, dev), gparToDevPars(x$gp), dev)
   }
 
-  lapply(x$children, grobToDev, dev)
+  lapply(x$children, primToDev, dev)
 
   if (!is.null(x$cellvp)) {
-    popViewport(grid:::depth(x$cellvp), recording = FALSE)
+    devEndGroup(dev)
+    upViewport(grid:::depth(x$cellvp), recording = FALSE)
+  }
+
+  if (depth > 0) {
+    upViewport(depth)
     devEndGroup(dev)
   }
 }
@@ -934,11 +962,9 @@ grobToDev.gTree <- function(x, dev) {
     upViewport(grid:::depth(x$childrenvp))
   }
   primToDev(x, dev)
-  if (! inherits(x, c("frame", "cellGrob"))) {
-    devStartGroup(devGrob(x, dev), gparToDevPars(x$gp), dev)
-    lapply(x$children, grobToDev, dev)
-    devEndGroup(dev)
-  }
+  devStartGroup(devGrob(x, dev), gparToDevPars(x$gp), dev)
+  lapply(x$children, grobToDev, dev)
+  devEndGroup(dev)
   if (depth > 0) {
     upViewport(depth)
     devEndGroup(dev)
