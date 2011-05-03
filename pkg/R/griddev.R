@@ -935,7 +935,19 @@ grobToDev.cellGrob <- function(x, dev) {
     devStartGroup(devGrob(x, dev), gparToDevPars(x$gp), dev)
   }
 
-  lapply(x$children, primToDev, dev)
+  lapply(x$children, function(child, dev) {
+    if (!is.null(child$vp)) {
+      pushViewport(child$vp, recording = FALSE)
+      devStartGroup(devGrob(child$vp, dev), gparToDevPars(x$gp), dev)
+    }
+
+    primToDev(child, dev)
+
+    if (!is.null(child$vp)) {
+      devEndGroup(dev)
+      popViewport(recording = FALSE)
+    }
+  }, dev)
 
   if (!is.null(x$cellvp)) {
     devEndGroup(dev)
