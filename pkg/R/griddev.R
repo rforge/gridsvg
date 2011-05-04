@@ -197,17 +197,26 @@ grobToDev.default <- function(x, dev) {
 
 grobToDev.grob <- function(x, dev) {
   depth <- 0
-  if (!is.null(x$vp))
-    if (!inherits(x$vp, "vpPath"))
-      vpError()
-    else {
+  if (!is.null(x$vp)) {
+    if (!inherits(x$vp, "vpPath")) {
+      pushViewport(x$vp)
+      devStartGroup(devGrob(x$vp, dev), gparToDevPars(get.gpar()), dev)
+    } else {
       depth <- downViewport(x$vp)
       devStartGroup(devGrob(x$vp, dev), gparToDevPars(get.gpar()), dev)
     }
+  }
   primToDev(x, dev)
-  if (depth > 0) {
-    upViewport(depth)
-    devEndGroup(dev)
+  if (!is.null(x$vp)) {
+    if (!inherits(x$vp, "vpPath")) {
+      devEndGroup(dev)
+      popViewport(grid:::depth(x$vp))
+    } else {
+      if (depth > 0) {
+        upViewport(depth)
+        devEndGroup(dev)
+      }
+    }
   }
 }
 
@@ -894,13 +903,15 @@ primToDev.yaxis <- function(x, dev) {
 
 grobToDev.frame <- function(x, dev) {
   depth <- 0
-  if (!is.null(x$vp))
-    if (!inherits(x$vp, "vpPath"))
-      vpError()
-    else {
+  if (!is.null(x$vp)) {
+    if (!inherits(x$vp, "vpPath")) {
+      pushViewport(x$vp)
+      devStartGroup(devGrob(x$vp, dev), gparToDevPars(get.gpar()), dev)
+    } else {
       depth <- downViewport(x$vp)
       devStartGroup(devGrob(x$vp, dev), gparToDevPars(get.gpar()), dev)
     }
+  }
 
   if (!is.null(x$framevp)) {
     pushViewport(x$framevp, recording = FALSE)
@@ -914,61 +925,67 @@ grobToDev.frame <- function(x, dev) {
     upViewport(recording = FALSE)
   }
 
-  if (depth > 0) {
-    upViewport(depth)
-    devEndGroup(dev)
+  if (!is.null(x$vp)) {
+    if (!inherits(x$vp, "vpPath")) {
+      devEndGroup(dev)
+      popViewport(grid:::depth(x$vp))
+    } else {
+      if (depth > 0) {
+        upViewport(depth)
+        devEndGroup(dev)
+      }
+    }
   }
 }
 
 grobToDev.cellGrob <- function(x, dev) {
   depth <- 0
-  if (!is.null(x$vp))
-    if (!inherits(x$vp, "vpPath"))
-      vpError()
-    else {
+  if (!is.null(x$vp)) {
+    if (!inherits(x$vp, "vpPath")) {
+      pushViewport(x$vp)
+      devStartGroup(devGrob(x$vp, dev), gparToDevPars(get.gpar()), dev)
+    } else {
       depth <- downViewport(x$vp)
       devStartGroup(devGrob(x$vp, dev), gparToDevPars(get.gpar()), dev)
     }
+  }
 
   if (!is.null(x$cellvp)) {
     pushViewport(x$cellvp, recording = FALSE)
     devStartGroup(devGrob(x, dev), gparToDevPars(x$gp), dev)
   }
 
-  lapply(x$children, function(child, dev) {
-    if (!is.null(child$vp)) {
-      pushViewport(child$vp, recording = FALSE)
-      devStartGroup(devGrob(child$vp, dev), gparToDevPars(x$gp), dev)
-    }
-
-    primToDev(child, dev)
-
-    if (!is.null(child$vp)) {
-      devEndGroup(dev)
-      popViewport(recording = FALSE)
-    }
-  }, dev)
+  lapply(x$children, grobToDev, dev)
 
   if (!is.null(x$cellvp)) {
     devEndGroup(dev)
     upViewport(grid:::depth(x$cellvp), recording = FALSE)
   }
 
-  if (depth > 0) {
-    upViewport(depth)
-    devEndGroup(dev)
+  if (!is.null(x$vp)) {
+    if (!inherits(x$vp, "vpPath")) {
+      devEndGroup(dev)
+      popViewport(grid:::depth(x$vp))
+    } else {
+      if (depth > 0) {
+        upViewport(depth)
+        devEndGroup(dev)
+      }
+    }
   }
 }
 
 grobToDev.gTree <- function(x, dev) {
   depth <- 0
-  if (!is.null(x$vp))
-    if (!inherits(x$vp, "vpPath"))
-      vpError()
-    else {
+  if (!is.null(x$vp)) {
+    if (!inherits(x$vp, "vpPath")) {
+      pushViewport(x$vp)
+      devStartGroup(devGrob(x$vp, dev), gparToDevPars(get.gpar()), dev)
+    } else {
       depth <- downViewport(x$vp)
       devStartGroup(devGrob(x$vp, dev), gparToDevPars(get.gpar()), dev)
     }
+  }
   if (!is.null(x$childrenvp)) {
     pushViewport(x$childrenvp)
     upViewport(grid:::depth(x$childrenvp))
@@ -977,9 +994,16 @@ grobToDev.gTree <- function(x, dev) {
   devStartGroup(devGrob(x, dev), gparToDevPars(x$gp), dev)
   lapply(x$children, grobToDev, dev)
   devEndGroup(dev)
-  if (depth > 0) {
-    upViewport(depth)
-    devEndGroup(dev)
+  if (!is.null(x$vp)) {
+    if (!inherits(x$vp, "vpPath")) {
+      devEndGroup(dev)
+      popViewport(grid:::depth(x$vp))
+    } else {
+      if (depth > 0) {
+        upViewport(depth)
+        devEndGroup(dev)
+      }
+    }
   }
 }
 
