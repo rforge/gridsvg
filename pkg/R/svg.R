@@ -5,7 +5,7 @@ svgOpen <- function(filename="Rplots.svg", width=200, height=200) {
   # create a "wrapper" html file
   htmlfile <- file(paste(filename, ".html", sep=""), "w")
   cat(paste('<object data="', filename, '" type="image/svg+xml"',
-            ' width="', width, 'px" height="', height, 'px"> </object>\n',
+            ' width="', ceiling(width), 'px" height="', ceiling(height), 'px"> </object>\n',
             sep=''), file=htmlfile)
   
   svgdev <- svgDevice(file(filename, 'w'), width, height)

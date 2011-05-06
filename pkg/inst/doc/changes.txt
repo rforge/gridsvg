@@ -56,6 +56,12 @@ Changes from 0.6-0 to 0.7-0
 17. Numerical justification of text is supported. Justification parameters
     are rounded so they belong to one of {0, 0.5, 1}. (Simon)
 
+18. gTree support has been improved, all lattice demos can now be drawn, along with
+    some ggplot plots (assuming pchs are supported). (Simon)
+
+19. The HTML file that is produced now rounds the height and width attributes up to
+    the nearest integer to avoid scrollbars becoming visible. (Simon)
+
 Changes from 0.5-10 to 0.6-0
 ============================
 
