@@ -26,6 +26,8 @@ export("svgOpen",
        )
 
 export("grid.hyperlink",
+       "setSVGFonts",
+       "getSVGFonts",
        "hyperlinkGrob",
        "grid.animate",
        "animateGrob",

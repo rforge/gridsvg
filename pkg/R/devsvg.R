@@ -171,31 +171,62 @@ devFontFaceToSVG <- function(fontface, dev) {
     fontstyle
 }
 
-devFontFamilyToSVG <- function(fontfamily, dev) {
-    # Attempting to set reasonable defaults for the most common fonts.
-    # Order is important here.
-    sansFontStack <- c("Helvetica", "Arial", "FreeSans", "Liberation Sans", "Nimbus Sans L", "sans-serif")
-    serifFontStack <- c("Times", "Times New Roman", "Liberation Serif", "Nimbus Roman No9 L Regular", "serif")
-    monoFontStack <- c("Courier", "Courier New", "Nimbus Mono L", "monospace")
+getSVGFonts <- function() {
+    get("gridSVG.fonts", env = .gridSVGEnv)
+}
 
-    if (fontfamily %in% c(sansFontStack, "sans", "Helvetica-Narrow", "NimbusSan", "NimbusSanCond", "URWHelvetica"))
-        fontstack <- sansFontStack
-    else if (fontfamily %in% c(serifFontStack, "NimbusRom", "URWTimes"))
-        fontstack <- serifFontStack
-    else if (fontfamily %in% c(monoFontStack, "mono", "NimbusMon"))
-        fontstack <- monoFontStack
-    else if (fontfamily %in% c("URWGothic", "AvantGarde"))
-        fontstack <- c("AvantGarde", "URWGothic", sansFontStack)
-    else if (fontfamily %in% c("URWPalladio", "Palatino"))
-        fontstack <- c("Palatino", "URWPalladio", serifFontStack)
-    else if (fontfamily %in% c("NewCenturySchoolbook", "CenturySch"))
-        fontstack <- c("NewCenturySchoolbook", "CenturySch", serifFontStack)
-    else if (fontfamily %in% c("Bookman", "URWBookman"))
-        fontstack <- c("Bookman", "URWBookman", serifFontStack)
-    else if (fontfamily == "")
-        fontstack <- sansFontStack
+setSVGFonts <- function(fontStacks) {
+    if (! all(names(fontStacks) == c("sans", "serif", "mono")))
+        stop("Font settings must have fonts available for 'sans', 'serif' and 'mono'.")
+
+    # Need to ensure that basic font fallbacks are available and
+    # are placed at the end of each of the font stacks.
+    if (! "sans-serif" %in% fontStacks$sans) {
+        fontStacks$sans <- c(fontStacks$sans, "sans-serif")
+    } else if (tail(fontStacks$sans, n = 1) != "sans-serif") {
+        ind <- which(fontStacks$sans == "sans-serif")
+        cleanedSans <- fontStacks$sans[-ind]
+        fontStacks$sans <- c(cleanedSans, "sans-serif")
+    }
+    if (! "serif" %in% fontStacks$serif) {
+        fontStacks$serif <- c(fontStacks$serif, "serif")
+    } else if (tail(fontStacks$serif, n = 1) != "serif") {
+        ind <- which(fontStacks$serif == "serif")
+        cleanedSerif <- fontStacks$serif[-ind]
+        fontStacks$serif <- c(cleanedSerif, "serif")
+    }
+    if (! "monospace" %in% fontStacks$mono) {
+        fontStacks$mono <- c(fontStacks$mono, "monospace")
+    } else if (tail(fontStacks$mono, n = 1) != "monospace") {
+        ind <- which(fontStacks$mono == "monospace")
+        cleanedMono <- fontStacks$mono[-ind]
+        fontStacks$mono <- c(cleanedMono, "monospace")
+    }
+
+    assign("gridSVG.fonts", fontStacks, env = .gridSVGEnv)
+}
+
+# Setting default font stacks
+sansFontStack <- c("Helvetica", "Arial", "FreeSans",
+                   "Liberation Sans", "Nimbus Sans L", "sans-serif")
+serifFontStack <- c("Times", "Times New Roman", "Liberation Serif",
+                    "Nimbus Roman No9 L Regular", "serif")
+monoFontStack <- c("Courier", "Courier New", "Nimbus Mono L", "monospace")
+setSVGFonts(list(sans = sansFontStack,
+                 serif = serifFontStack,
+                 mono = monoFontStack))
+
+devFontFamilyToSVG <- function(fontfamily, dev) {
+    currentFonts <- getSVGFonts()
+
+    if (fontfamily %in% c(currentFonts$sans, "sans"))
+        fontstack <- currentFonts$sans
+    else if (fontfamily %in% currentFonts$serif)
+        fontstack <- currentFonts$serif
+    else if (fontfamily %in% c(currentFonts$mono, "mono"))
+        fontstack <- currentFonts$mono
     else
-        fontstack <- c(fontfamily, sansFontStack) # Assume font exists, but also assume sans-serif fallback
+        fontstack <- c(fontfamily, currentFonts$sans) # Assume font exists, but also assume sans-serif fallback
 
     # Formatting the font stack for CSS
     fontStackCSS <- paste(fontstack, collapse=', ')
