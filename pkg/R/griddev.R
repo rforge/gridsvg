@@ -757,7 +757,7 @@ primToDev.text <- function(x, dev) {
   } else {
     # Checking that no element of label vector is empty
     textLabel <- sapply(x$label, function(t) {
-      if (length(t) == 0)
+      if (nchar(t) == 0 | length(t) == 0)
         " "
       else
         t

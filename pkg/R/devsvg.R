@@ -225,8 +225,10 @@ devFontFamilyToSVG <- function(fontfamily, dev) {
         fontstack <- currentFonts$serif
     else if (fontfamily %in% c(currentFonts$mono, "mono"))
         fontstack <- currentFonts$mono
-    else
+    else if (nchar(fontfamily) > 0)
         fontstack <- c(fontfamily, currentFonts$sans) # Assume font exists, but also assume sans-serif fallback
+    else
+        fontstack <- currentFonts$sans # Assuming a sans-serif font
 
     # Formatting the font stack for CSS
     fontStackCSS <- paste(fontstack, collapse=', ')
