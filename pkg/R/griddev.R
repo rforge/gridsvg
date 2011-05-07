@@ -673,12 +673,9 @@ primToDev.rastergrob <- function(x, dev) {
   # Generating the filename of the raster
   fileloc <- paste(x$name, ".png", sep = "")
 
-  # If we are not interpolating we need to know the size of the image
-  # otherwise upon rendering the image will be interpolated
-  if (! x$interpolate)
-    rasterDims <- c(ch(max(heights), dev), cw(max(widths), dev))
-  else
-    rasterDims <- dim(x$raster)
+  # Because of issues regarding interpolation, it's best just to
+  # store the raster with as large a dimension as possible.
+  rasterDims <- c(ch(max(heights), dev), cw(max(widths), dev))
 
   png(filename = fileloc, width = rasterDims[2], height = rasterDims[1])
       # The raster stays the same and is only repeated for each appearance.
@@ -751,8 +748,22 @@ primToDev.text <- function(x, dev) {
   # Repeating components as necessary
   textX <- rep(x$x, length.out = n)
   textY <- rep(x$y, length.out = n)
-  textLabel <- rep(x$label, length.out = n)
   textRot <- rep(x$rot, length.out = n)
+
+  # If any given label is a vector of length 0, we don't want NA to appear
+  if (length(x$label) == 0) {
+    textLabel <- " "
+    textLabel <- rep(textLabel, length.out = n)
+  } else {
+    # Checking that no element of label vector is empty
+    textLabel <- sapply(x$label, function(t) {
+      if (length(t) == 0)
+        " "
+      else
+        t
+    })
+    textLabel <- rep(x$label, length.out = n)
+  }
 
   # Expand the gp such that it fully defines all sub-grobs
   gp <- expandGpar(x$gp, n)
