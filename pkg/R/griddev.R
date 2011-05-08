@@ -832,7 +832,7 @@ primToDev.points <- function(x, dev) {
     devStartGroup(devGrob(x, dev), NULL, dev) 
 
     # ONLY pch = 1 or 3 handled
-    if (any(!x$pch %in% c(0:7, 16, 19, 20)))
+    if (any(!x$pch %in% c(0:25, 32:127)))
         stop("Unsupported pch value")
 
     # These can differ for points
@@ -1003,6 +1003,267 @@ primToDev.points <- function(x, dev) {
             devEndGroup(dev) 
         }
 
+        if (pchs[i] == 8) {
+            # Because we are dealing with multiple grobs in order to create
+            # this point, we add an additional group, and integer suffixes to 
+            # identify components of the point
+            pointGroupName <- subGrobName(x$name, i)
+
+            # Grouping each sub-grob, here we really do only need a name
+            devStartGroup(list(name = pointGroupName), NULL, dev) 
+
+            devLines(devGrob(linesGrob(unit.c(x$x[i] - 0.5*sizes[i],
+                                              x$x[i] + 0.5*sizes[i]),
+                                       x$y[i],
+                                       name = subGrobName(pointGroupName, 1),
+                                       default.units = x$default.units),
+                                       dev),
+                     gparToDevPars(pgp), dev)
+            devLines(devGrob(linesGrob(x$x[i],
+                                       unit.c(x$y[i] - 0.5*sizes[i],
+                                              x$y[i] + 0.5*sizes[i]),
+                                       name = subGrobName(pointGroupName, 2),
+                                       default.units = x$default.units),
+                                       dev),
+                     gparToDevPars(pgp), dev)
+            devLines(devGrob(linesGrob(unit.c(x$x[i] - 0.5*sizes[i], x$x[i] + 0.5*sizes[i]),
+                                       unit.c(x$y[i] + 0.5*sizes[i], x$y[i] - 0.5*sizes[i]),
+                                       name = subGrobName(pointGroupName, 3),
+                                       default.units = x$default.units),
+                                       dev),
+                     gparToDevPars(pgp), dev)
+            devLines(devGrob(linesGrob(unit.c(x$x[i] - 0.5*sizes[i], x$x[i] + 0.5*sizes[i]),
+                                       unit.c(x$y[i] - 0.5*sizes[i], x$y[i] + 0.5*sizes[i]),
+                                       name = subGrobName(pointGroupName, 4),
+                                       default.units = x$default.units),
+                                       dev),
+                     gparToDevPars(pgp), dev)
+
+            # Ending the group
+            devEndGroup(dev) 
+        }
+
+        if (pchs[i] == 9) {
+            # Because we are dealing with multiple grobs in order to create
+            # this point, we add an additional group, and integer suffixes to 
+            # identify components of the point
+            pointGroupName <- subGrobName(x$name, i)
+
+            # Grouping each sub-grob, here we really do only need a name
+            devStartGroup(list(name = pointGroupName), NULL, dev) 
+
+            devLines(devGrob(linesGrob(unit.c(x$x[i] - 0.5*sizes[i],
+                                              x$x[i] + 0.5*sizes[i]),
+                                       x$y[i],
+                                       name = subGrobName(pointGroupName, 1),
+                                       default.units = x$default.units),
+                                       dev),
+                     gparToDevPars(pgp), dev)
+            devLines(devGrob(linesGrob(x$x[i],
+                                       unit.c(x$y[i] - 0.5*sizes[i],
+                                              x$y[i] + 0.5*sizes[i]),
+                                       name = subGrobName(pointGroupName, 2),
+                                       default.units = x$default.units),
+                                       dev),
+                     gparToDevPars(pgp), dev)
+            devLines(devGrob(linesGrob(unit.c(x$x[i] - 0.5*sizes[i], x$x[i],
+                                              x$x[i] + 0.5*sizes[i], x$x[i], x$x[i] - 0.5*sizes[i]),
+                                       unit.c(x$y[i], x$y[i] + 0.5*sizes[i],
+                                              x$y[i], x$y[i] - 0.5*sizes[i], x$y[i]),
+                                       name = subGrobName(pointGroupName, 3),
+                                       default.units = x$default.units),
+                                       dev),
+                     gparToDevPars(pgp), dev)
+
+            # Ending the group
+            devEndGroup(dev) 
+        }
+
+        if (pchs[i] == 10) {
+            # pch = 10 does not have a fill
+            pgp$fill <- "transparent"
+
+            radius <- 0.5 * pointsize
+
+            # Because we are dealing with multiple grobs in order to create
+            # this point, we add an additional group, and integer suffixes to 
+            # identify components of the point
+            pointGroupName <- subGrobName(x$name, i)
+
+            # Grouping each sub-grob, here we really do only need a name
+            devStartGroup(list(name = pointGroupName), NULL, dev) 
+
+            devLines(devGrob(linesGrob(unit.c(x$x[i] - 0.5*sizes[i],
+                                              x$x[i] + 0.5*sizes[i]),
+                                       x$y[i],
+                                       name = subGrobName(pointGroupName, 1),
+                                       default.units = x$default.units),
+                                       dev),
+                     gparToDevPars(pgp), dev)
+            devLines(devGrob(linesGrob(x$x[i],
+                                       unit.c(x$y[i] - 0.5*sizes[i],
+                                              x$y[i] + 0.5*sizes[i]),
+                                       name = subGrobName(pointGroupName, 2),
+                                       default.units = x$default.units),
+                                       dev),
+                     gparToDevPars(pgp), dev)
+            devCircle(devGrob(circleGrob(x$x[i], x$y[i],
+                                         radius, name = subGrobName(pointGroupName, 3),
+                                         default.units = x$default.units),
+                                         dev),
+                      gparToDevPars(pgp), dev)
+
+            # Ending the group
+            devEndGroup(dev)
+        }
+
+        if (pchs[i] == 11) {
+            # pch = 11 does not have a fill
+            pgp$fill <- "transparent"
+
+            # Because we are dealing with multiple grobs in order to create
+            # this point, we add an additional group, and integer suffixes to 
+            # identify components of the point
+            pointGroupName <- subGrobName(x$name, i)
+
+            # Grouping each sub-grob, here we really do only need a name
+            devStartGroup(list(name = pointGroupName), NULL, dev) 
+
+            devLines(devGrob(linesGrob(unit.c(x$x[i] - 0.5*sizes[i], x$x[i],
+                                              x$x[i] + 0.5*sizes[i], x$x[i] - 0.5*sizes[i]),
+                                       unit.c(x$y[i] - 0.5*sizes[i], x$y[i] + 0.5*sizes[i],
+                                              x$y[i] - 0.5*sizes[i], x$y[i] - 0.5*sizes[i]),
+                                       name = subGrobName(pointGroupName, 1),
+                                       default.units = x$default.units),
+                                       dev),
+                     gparToDevPars(pgp), dev)
+            devLines(devGrob(linesGrob(unit.c(x$x[i] - 0.5*sizes[i], x$x[i] + 0.5*sizes[i],
+                                       x$x[i], x$x[i] - 0.5*sizes[i]),
+                                       unit.c(x$y[i] + 0.5*sizes[i], x$y[i] + 0.5*sizes[i],
+                                              x$y[i] - 0.5*sizes[i], x$y[i] + 0.5*sizes[i]),
+                                       name = subGrobName(pointGroupName, 2),
+                                       default.units = x$default.units),
+                                       dev),
+                     gparToDevPars(pgp), dev)
+
+            # Ending the group
+            devEndGroup(dev)
+        }
+
+        if (pchs[i] == 12) {
+            # pch = 12 does not have a fill
+            pgp$fill <- "transparent"
+
+            # Because we are dealing with multiple grobs in order to create
+            # this point, we add an additional group, and integer suffixes to 
+            # identify components of the point
+            pointGroupName <- subGrobName(x$name, i)
+
+            # Grouping each sub-grob, here we really do only need a name
+            devStartGroup(list(name = pointGroupName), NULL, dev) 
+
+            devRect(devGrob(rectGrob(x$x[i], x$y[i],
+                                     sizes[i], sizes[i], name = subGrobName(pointGroupName, 1),
+                                     default.units = x$default.units),
+                                     dev),
+                      gparToDevPars(pgp), dev)
+            devLines(devGrob(linesGrob(unit.c(x$x[i] - 0.5*sizes[i],
+                                              x$x[i] + 0.5*sizes[i]),
+                                       x$y[i],
+                                       name = subGrobName(pointGroupName, 2),
+                                       default.units = x$default.units),
+                                       dev),
+                     gparToDevPars(pgp), dev)
+            devLines(devGrob(linesGrob(x$x[i],
+                                       unit.c(x$y[i] - 0.5*sizes[i],
+                                              x$y[i] + 0.5*sizes[i]),
+                                       name = subGrobName(pointGroupName, 3),
+                                       default.units = x$default.units),
+                                       dev),
+                     gparToDevPars(pgp), dev)
+
+            # Ending the group
+            devEndGroup(dev)
+        }
+
+        if (pchs[i] == 13) {
+            # pch = 12 does not have a fill
+            pgp$fill <- "transparent"
+
+            radius <- 0.5 * pointsize
+
+            # Because we are dealing with multiple grobs in order to create
+            # this point, we add an additional group, and integer suffixes to 
+            # identify components of the point
+            pointGroupName <- subGrobName(x$name, i)
+
+            # Grouping each sub-grob, here we really do only need a name
+            devStartGroup(list(name = pointGroupName), NULL, dev) 
+
+            devCircle(devGrob(circleGrob(x$x[i], x$y[i],
+                                         radius, name = subGrobName(pointGroupName, 1),
+                                         default.units = x$default.units),
+                                         dev),
+                      gparToDevPars(pgp), dev)
+            devLines(devGrob(linesGrob(unit.c(x$x[i] - 0.5*sizes[i], x$x[i] + 0.5*sizes[i]),
+                                       unit.c(x$y[i] + 0.5*sizes[i], x$y[i] - 0.5*sizes[i]),
+                                       name = subGrobName(pointGroupName, 2),
+                                       default.units = x$default.units),
+                                       dev),
+                     gparToDevPars(pgp), dev)
+            devLines(devGrob(linesGrob(unit.c(x$x[i] - 0.5*sizes[i], x$x[i] + 0.5*sizes[i]),
+                                       unit.c(x$y[i] - 0.5*sizes[i], x$y[i] + 0.5*sizes[i]),
+                                       name = subGrobName(pointGroupName, 3),
+                                       default.units = x$default.units),
+                                       dev),
+                     gparToDevPars(pgp), dev)
+
+            # Ending the group
+            devEndGroup(dev)
+        }
+
+        if (pchs[i] == 14) {
+            # pch = 12 does not have a fill
+            pgp$fill <- "transparent"
+
+            # Because we are dealing with multiple grobs in order to create
+            # this point, we add an additional group, and integer suffixes to 
+            # identify components of the point
+            pointGroupName <- subGrobName(x$name, i)
+
+            # Grouping each sub-grob, here we really do only need a name
+            devStartGroup(list(name = pointGroupName), NULL, dev) 
+
+            devRect(devGrob(rectGrob(x$x[i], x$y[i],
+                                     sizes[i], sizes[i], name = subGrobName(pointGroupName, 1),
+                                     default.units = x$default.units),
+                                     dev),
+                      gparToDevPars(pgp), dev)
+            devLines(devGrob(linesGrob(unit.c(x$x[i] - 0.5*sizes[i], x$x[i],
+                                              x$x[i] + 0.5*sizes[i]),
+                                       unit.c(x$y[i] - 0.5*sizes[i], x$y[i] + 0.5*sizes[i],
+                                              x$y[i] - 0.5*sizes[i]),
+                                       name = subGrobName(pointGroupName, 2),
+                                       default.units = x$default.units),
+                                       dev),
+                     gparToDevPars(pgp), dev)
+
+            # Ending the group
+            devEndGroup(dev)
+        }
+
+        if (pchs[i] == 15) {
+            # pch = 15 does not have a border
+            pgp$fill <- pgp$col
+            pgp$col <- "transparent"
+
+            devRect(devGrob(rectGrob(x$x[i], x$y[i],
+                                     sizes[i], sizes[i], name = subGrobName(x$name, i),
+                                     default.units = x$default.units),
+                                     dev),
+                      gparToDevPars(pgp), dev)
+        }
+
         if (pchs[i] == 16) {
             radius <- 0.5 * pointsize
 
@@ -1015,6 +1276,36 @@ primToDev.points <- function(x, dev) {
                                          default.units = x$default.units),
                                          dev),
                       gparToDevPars(pgp), dev)
+        }
+
+        if (pchs[i] == 17) {
+            # pch = 17 does not have a border
+            pgp$fill <- pgp$col
+            pgp$col <- "transparent"
+
+            devPolygon(devGrob(polygonGrob(unit.c(x$x[i] - 0.5*sizes[i], x$x[i],
+                                                  x$x[i] + 0.5*sizes[i], x$x[i] - 0.5*sizes[i]),
+                                           unit.c(x$y[i] - 0.5*sizes[i], x$y[i] + 0.5*sizes[i],
+                                                  x$y[i] - 0.5*sizes[i], x$y[i] - 0.5*sizes[i]),
+                                           name = subGrobName(x$name, i),
+                                           default.units = x$default.units),
+                               dev),
+                     gparToDevPars(pgp), dev)
+        }
+
+        if (pchs[i] == 18) {
+            # pch = 18 does not have a border
+            pgp$fill <- pgp$col
+            pgp$col <- "transparent"
+
+            devPolygon(devGrob(polygonGrob(unit.c(x$x[i] - 0.5*sizes[i], x$x[i],
+                                                  x$x[i] + 0.5*sizes[i], x$x[i], x$x[i] - 0.5*sizes[i]),
+                                           unit.c(x$y[i], x$y[i] + 0.5*sizes[i],
+                                                  x$y[i], x$y[i] - 0.5*sizes[i], x$y[i]),
+                                           name = subGrobName(x$name, i),
+                                           default.units = x$default.units),
+                               dev),
+                     gparToDevPars(pgp), dev)
         }
 
         if (pchs[i] == 19) {
@@ -1041,6 +1332,65 @@ primToDev.points <- function(x, dev) {
                                          default.units = x$default.units),
                                          dev),
                       gparToDevPars(pgp), dev)
+        }
+
+        if (pchs[i] == 21) {
+            radius <- 0.5 * pointsize
+
+            devCircle(devGrob(circleGrob(x$x[i], x$y[i],
+                                         radius, name = subGrobName(x$name, i),
+                                         default.units = x$default.units),
+                                         dev),
+                      gparToDevPars(pgp), dev)
+        }
+
+        if (pchs[i] == 22) {
+            devRect(devGrob(rectGrob(x$x[i], x$y[i],
+                                     sizes[i], sizes[i], name = subGrobName(x$name, i),
+                                     default.units = x$default.units),
+                                     dev),
+                      gparToDevPars(pgp), dev)
+        }
+
+        if (pchs[i] == 23) {
+            devPolygon(devGrob(polygonGrob(unit.c(x$x[i] - 0.5*sizes[i], x$x[i],
+                                                  x$x[i] + 0.5*sizes[i], x$x[i], x$x[i] - 0.5*sizes[i]),
+                                           unit.c(x$y[i], x$y[i] + 0.5*sizes[i],
+                                                  x$y[i], x$y[i] - 0.5*sizes[i], x$y[i]),
+                                           name = subGrobName(x$name, i),
+                                           default.units = x$default.units),
+                               dev),
+                     gparToDevPars(pgp), dev)
+        }
+
+        if (pchs[i] == 24) {
+            devPolygon(devGrob(polygonGrob(unit.c(x$x[i] - 0.5*sizes[i], x$x[i],
+                                                  x$x[i] + 0.5*sizes[i], x$x[i] - 0.5*sizes[i]),
+                                           unit.c(x$y[i] - 0.5*sizes[i], x$y[i] + 0.5*sizes[i],
+                                                  x$y[i] - 0.5*sizes[i], x$y[i] - 0.5*sizes[i]),
+                                           name = subGrobName(x$name, i),
+                                           default.units = x$default.units),
+                               dev),
+                     gparToDevPars(pgp), dev)
+        }
+
+        if (pchs[i] == 25) {
+            devPolygon(devGrob(polygonGrob(unit.c(x$x[i] - 0.5*sizes[i], x$x[i] + 0.5*sizes[i],
+                                                  x$x[i], x$x[i] - 0.5*sizes[i]),
+                                           unit.c(x$y[i] + 0.5*sizes[i], x$y[i] + 0.5*sizes[i],
+                                                  x$y[i] - 0.5*sizes[i], x$y[i] + 0.5*sizes[i]),
+                                           name = subGrobName(x$name, i),
+                                           default.units = x$default.units),
+                               dev),
+                     gparToDevPars(pgp), dev)
+        }
+
+        if (pchs[i] %in% 32:127) {
+            asciiChar <-  parse(text = paste("\"\\", structure(pchs[i], class = "octmode"), "\"", sep = ""))[[1]]
+
+            devText(devGrob(textGrob(asciiChar, x$x[i], x$y[i]),
+                                     dev),
+                    gparToDevPars(pgp), dev)
         }
     }
 
