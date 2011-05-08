@@ -7,7 +7,7 @@ svgOpen <- function(filename="Rplots.svg", width=200, height=200) {
   cat(paste('<object data="', filename, '" type="image/svg+xml"',
             ' width="', ceiling(width), 'px" height="', ceiling(height), 'px"> </object>\n',
             sep=''), file=htmlfile)
-  
+  close(htmlfile)
   svgdev <- svgDevice(file(filename, 'w'), width, height)
   svgHeader(width, height, svgdev)
   return(svgdev)
