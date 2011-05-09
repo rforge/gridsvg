@@ -842,12 +842,7 @@ primToDev.points <- function(x, dev) {
     for (i in 1:n) {
         pgp <- gparToDevPars(gp[i])
 
-        # Need to calculate the size of a char, which is affected by cex and fontsize
-        if (attr(sizes[i], "unit") == "char")
-            pointsize <- unit(convertUnit(sizes[i], "char", valueOnly = TRUE) *
-                              pgp$cex * pgp$fontsize, "points")
-        else
-            pointsize <- sizes[i]
+        pointsize <- sizes[i]
 
         if (pchs[i] == 0) {
             # pch = 0 does not have a fill
