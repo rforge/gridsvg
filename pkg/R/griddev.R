@@ -313,11 +313,9 @@ devGrob.rect <- function(x, dev) {
 devGrob.text <- function(x, dev) {
   loc <- locToInches(x$x, x$y, dev)
   gp <- gparToDevPars(x$gp)
-  textLineHeight <- gp$fontsize * gp$cex * gp$lineheight
-  charHeight <- gp$fontsize * gp$cex
-  # Line and char height are specified in points by default
-  textLineHeight <- cy(unit(textLineHeight, "points"), dev)
-  charHeight <- cy(unit(charHeight, "points"), dev)
+  charHeight <- grobHeight(textGrob("M", gp = x$gp))
+  textLineHeight <-  ch(charHeight * gp$lineheight, dev)
+  charHeight <- ch(charHeight, dev)
 
   # Checking whether to use just or [h/v]just
   # Will convert numerics to strings in justTo_just function
@@ -842,7 +840,11 @@ primToDev.points <- function(x, dev) {
     for (i in 1:n) {
         pgp <- gparToDevPars(gp[i])
 
-        pointsize <- sizes[i]
+        # Need to calculate the size of a char, which is affected by cex and fontsize
+        # A textGrob with an "M" will be a good approximation for the point size
+        # when size is a "char"
+        if (attr(sizes[i], "unit") == "char")
+            sizes[i] <- grobHeight(textGrob("M", gp = pgp))
 
         if (pchs[i] == 0) {
             # pch = 0 does not have a fill
@@ -856,7 +858,7 @@ primToDev.points <- function(x, dev) {
         }
 
         if (pchs[i] == 1) {
-            radius <- 0.5 * pointsize
+            radius <- 0.5 * sizes[i]
 
             # pch = 1 does not have a fill
             pgp$fill <- "transparent"
@@ -1078,7 +1080,7 @@ primToDev.points <- function(x, dev) {
             # pch = 10 does not have a fill
             pgp$fill <- "transparent"
 
-            radius <- 0.5 * pointsize
+            radius <- 0.5 * sizes[i]
 
             # Because we are dealing with multiple grobs in order to create
             # this point, we add an additional group, and integer suffixes to 
@@ -1185,7 +1187,7 @@ primToDev.points <- function(x, dev) {
             # pch = 12 does not have a fill
             pgp$fill <- "transparent"
 
-            radius <- 0.5 * pointsize
+            radius <- 0.5 * sizes[i]
 
             # Because we are dealing with multiple grobs in order to create
             # this point, we add an additional group, and integer suffixes to 
@@ -1260,7 +1262,7 @@ primToDev.points <- function(x, dev) {
         }
 
         if (pchs[i] == 16) {
-            radius <- 0.5 * pointsize
+            radius <- 0.5 * sizes[i]
 
             # pch = 16 does not have a border
             pgp$fill <- pgp$col
@@ -1304,7 +1306,7 @@ primToDev.points <- function(x, dev) {
         }
 
         if (pchs[i] == 19) {
-            radius <- 0.5 * pointsize
+            radius <- 0.5 * sizes[i]
 
             # col is specified in place of fill
             pgp$fill <- pgp$col
@@ -1317,7 +1319,7 @@ primToDev.points <- function(x, dev) {
         }
 
         if (pchs[i] == 20) {
-            radius <- 0.5 * 2/3 * pointsize
+            radius <- 0.5 * 2/3 * sizes[i]
 
             # col is specified in place of fill
             pgp$fill <- pgp$col
@@ -1330,7 +1332,7 @@ primToDev.points <- function(x, dev) {
         }
 
         if (pchs[i] == 21) {
-            radius <- 0.5 * pointsize
+            radius <- 0.5 * sizes[i]
 
             devCircle(devGrob(circleGrob(x$x[i], x$y[i],
                                          radius, name = subGrobName(x$name, i),
