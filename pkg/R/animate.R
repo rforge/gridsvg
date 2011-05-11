@@ -42,32 +42,55 @@ animate <- function(x, animation, dev) {
 }
 
 animate.rect <- function(x, animation, dev) {
-  dur <- x$animations$duration
-  rep <- x$animations$rep
-  rev <- x$animations$revert
-  switch(animation,
-         x={
-           lb <- leftbottom(x$animations$x, x$y, x$width, x$height, x$just,
-                            dev)
-           svgAnimateXYWH("x", cx(lb$x, dev),
-                          dur, rep, rev, x$name, dev@dev)
-         },
-         y={
-           lb <- leftbottom(x$x, x$animations$y, x$width, x$height, x$just,
-                            dev)
-           svgAnimateXYWH("y", cy(lb$y, dev),
-                          dur, rep, rev, x$name, dev@dev)
-         },
-         width={
-           dim <- dimToInches(x$animations$width, x$height, dev)
-           svgAnimateXYWH("width", cw(dim$width, dev),
-                          dur, rep, rev, x$name, dev@dev)
-         },
-         height={
-           dim <- dimToInches(x$animations$height, x$height, dev)
-           svgAnimateXYWH("height", cw(dim$height, dev),
-                          dur, rep, rev, x$name, dev@dev)
-         })
+
+  # We may be dealing with multiple rects that need animating
+  n <- max(length(x$x), length(x$y), length(x$width), length(x$height))
+
+  # Repeating animation parameters so that each element can have
+  # distinct values
+  dur <- rep(x$animations$duration, length.out = n)
+  rep <- rep(x$animations$rep, length.out = n)
+  rev <- rep(x$animations$revert, length.out = n)
+
+  for (i in 1:n) {
+    subName <- subGrobName(x$name, i)
+
+    switch(animation,
+           x={
+             if (! is.matrix(x$animations$x))
+               x$animations$x <- matrix(x$animations$x)
+             xunit <- attr(x$x, "unit")
+             lb <- leftbottom(unit(x$animations$x[,i], xunit), x$y, x$width, x$height, x$just,
+                              dev)
+             svgAnimateXYWH("x", cx(lb$x, dev),
+                            dur[i], rep[i], rev[i], subName, dev@dev)
+           },
+           y={
+             if (! is.matrix(x$animations$y))
+               x$animations$y <- matrix(x$animations$y)
+             yunit <- attr(x$y, "unit")
+             lb <- leftbottom(x$x, unit(x$animations$y[,i], yunit), x$width, x$height, x$just,
+                              dev)
+             svgAnimateXYWH("y", cy(lb$y, dev),
+                            dur[i], rep[i], rev[i], subName, dev@dev)
+           },
+           width={
+             if (! is.matrix(x$animations$width))
+               x$animations$width <- matrix(x$animations$width)
+             wunit <- attr(x$width, "unit")
+             dim <- dimToInches(unit(x$animations$width[,i], wunit), x$height, dev)
+             svgAnimateXYWH("width", cw(dim$w, dev),
+                            dur[i], rep[i], rev[i], subName, dev@dev)
+           },
+           height={
+             if (! is.matrix(x$animations$height))
+               x$animations$height <- matrix(x$animations$height)
+             hunit <- attr(x$height, "unit")
+             dim <- dimToInches(x$width, unit(x$animations$height[,i], hunit), dev)
+             svgAnimateXYWH("height", ch(dim$h, dev),
+                            dur[i], rep[i], rev[i], subName, dev@dev)
+           })
+  }
 }
 
 animate.circle <- function(x, animation, dev) {
