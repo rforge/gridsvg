@@ -143,6 +143,81 @@ animate.circle <- function(x, animation, dev) {
   }
 }
 
+animate.points <- function(x, animation, dev) {
+
+  # We may be dealing with multiple points that need animating
+  n <- max(length(x$x), length(x$y), length(x$size))
+
+  # These can differ for points
+  pchs <- rep(x$pch, length.out = n)
+  sizes <- rep(x$size, length.out = n)
+
+  # Repeating animation parameters so that each element can have
+  # distinct values
+  dur <- rep(x$animations$duration, length.out = n)
+  rep <- rep(x$animations$rep, length.out = n)
+  rev <- rep(x$animations$revert, length.out = n)
+
+  # Because grobs can produce multiple elements, if animation is to
+  # occur on a grob it is assumed to occur on all elements, but
+  # elements may simply have their properties assigned to the same
+  # value multiple times.
+  #
+  # Also note that when casting to a matrix, units lose their "unit"
+  # attribute, we have to set this to the same unit as the grob
+  # attribute that is being animated, for this reason, attributes should
+  # be in the same unit prior to calling grid.animate()
+  for (i in 1:n) {
+    subName <- subGrobName(x$name, i)
+
+    switch(animation,
+       x={
+         if (! is.matrix(x$animations$x))
+           x$animations$x <- matrix(x$animations$x)
+         xunit <- attr(x$x, "unit")
+         loc <- locToInches(unit(x$animations$x[,i], xunit), x$y, dev)
+
+         if (pchs[i] == 1)
+           animattr <- "cx"
+         else
+           animattr <- "x"
+         svgAnimateXYWH(animattr, cx(loc$x, dev),
+                        dur[i], rep[i], rev[i], subName, dev@dev)
+       },
+       y={
+         if (! is.matrix(x$animations$y))
+           x$animations$y <- matrix(x$animations$y)
+         yunit <- attr(x$y, "unit")
+         loc <- locToInches(x$x, unit(x$animations$y[,i], yunit), dev)
+
+         if (pchs[i] == 1)
+           animattr <- "cy"
+         else
+           animattr <- "y"
+         svgAnimateXYWH(animattr, cy(loc$y, dev),
+                        dur[i], rep[i], rev[i], subName, dev@dev)
+       },
+       size={
+         if (! is.matrix(x$animations$size))
+           x$animations$size <- matrix(x$animations$size)
+         sunit <- attr(sizes, "unit")
+         pointsize <- cd(unit(x$animations$size[,i], sunit), dev)
+
+         if (pchs[i] == 0) {
+           svgAnimateXYWH("width", pointsize,
+                          dur[i], rep[i], rev[i], subName, dev@dev)
+           svgAnimateXYWH("height", pointsize,
+                          dur[i], rep[i], rev[i], subName, dev@dev)
+         }
+
+         if (pchs[i] == 1) {
+           svgAnimateXYWH("r", pointsize,
+                          dur[i], rep[i], rev[i], subName, dev@dev)
+         }
+       })
+  }
+}
+
 animate.text <- function(x, animation, dev) {
   dur <- x$animations$duration
   rep <- x$animations$rep
