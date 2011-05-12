@@ -844,8 +844,11 @@ primToDev.points <- function(x, dev) {
         # A textGrob with an "M" will be a good approximation for the point size
         # when size is a "char"
         if (attr(sizes[i], "unit") == "char")
-            sizes[i] <- grobHeight(textGrob("M", gp = pgp))
-
+            pointSize <- convertHeight(grobHeight(textGrob("M", gp = pgp)),
+                                       "inches")
+        else
+            pointSize <- sizes[i]
+        
         if (pchs[i] == 0) {
             # pch = 0 does not have a fill
             pgp$fill <- "transparent"
@@ -858,7 +861,7 @@ primToDev.points <- function(x, dev) {
         }
 
         if (pchs[i] == 1) {
-            radius <- 0.5 * sizes[i]
+            radius <- 0.5 * pointSize
 
             # pch = 1 does not have a fill
             pgp$fill <- "transparent"
