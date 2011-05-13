@@ -344,7 +344,7 @@ setMethod("devPolygon", signature(device="svgDevice"),
 
 setMethod("devPath", signature(device="svgDevice"),
           function(path, gp, device) {
-            svgPath(path$x, path$y, path$rule, path$name, path$arrow,
+            svgPath(path$x, path$y, path$rule, path$name,
                     listToSVGAttrib(path$attributes),
                     devParToSVGStyle(gp, device), device@dev)
           })

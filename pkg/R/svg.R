@@ -262,7 +262,7 @@ svgPolygon <- function(x, y, id=NULL,
 }
 
 # Differs from polygon because it can have sub-paths
-svgPath <- function(x, y, rule, id=NULL, arrow=NULL,
+svgPath <- function(x, y, rule, id=NULL,
                     attributes=svgAttrib(),
                     style=svgStyle(), svgdev=svgDevice()) {
     if (length(x) != length(y))

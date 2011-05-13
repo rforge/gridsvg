@@ -854,7 +854,7 @@ primToDev.points <- function(x, dev) {
             pgp$fill <- "transparent"
 
             devRect(devGrob(rectGrob(x$x[i], x$y[i],
-                                     sizes[i], sizes[i], name = subGrobName(x$name, i),
+                                     pointSize, pointSize, name = subGrobName(x$name, i),
                                      default.units = x$default.units),
                                      dev),
                       gparToDevPars(pgp), dev)
@@ -877,10 +877,10 @@ primToDev.points <- function(x, dev) {
             # pch = 2 does not have a fill
             pgp$fill <- "transparent"
 
-            devLines(devGrob(linesGrob(unit.c(x$x[i] - 0.5*sizes[i], x$x[i],
-                                              x$x[i] + 0.5*sizes[i], x$x[i] - 0.5*sizes[i]),
-                                       unit.c(x$y[i] - 0.5*sizes[i], x$y[i] + 0.5*sizes[i],
-                                              x$y[i] - 0.5*sizes[i], x$y[i] - 0.5*sizes[i]),
+            devLines(devGrob(linesGrob(unit.c(x$x[i] - 0.5*pointSize, x$x[i],
+                                              x$x[i] + 0.5*pointSize, x$x[i] - 0.5*pointSize),
+                                       unit.c(x$y[i] - 0.5*pointSize, x$y[i] + 0.5*pointSize,
+                                              x$y[i] - 0.5*pointSize, x$y[i] - 0.5*pointSize),
                                        name = subGrobName(x$name, i),
                                        default.units = x$default.units),
                                        dev),
@@ -896,16 +896,16 @@ primToDev.points <- function(x, dev) {
             # Grouping each sub-grob, here we really do only need a name
             devStartGroup(list(name = pointGroupName), NULL, dev) 
 
-            devLines(devGrob(linesGrob(unit.c(x$x[i] - 0.5*sizes[i],
-                                              x$x[i] + 0.5*sizes[i]),
+            devLines(devGrob(linesGrob(unit.c(x$x[i] - 0.5*pointSize,
+                                              x$x[i] + 0.5*pointSize),
                                        x$y[i],
                                        name = subGrobName(pointGroupName, 1),
                                        default.units = x$default.units),
                                        dev),
                      gparToDevPars(pgp), dev)
             devLines(devGrob(linesGrob(x$x[i],
-                                       unit.c(x$y[i] - 0.5*sizes[i],
-                                              x$y[i] + 0.5*sizes[i]),
+                                       unit.c(x$y[i] - 0.5*pointSize,
+                                              x$y[i] + 0.5*pointSize),
                                        name = subGrobName(pointGroupName, 2),
                                        default.units = x$default.units),
                                        dev),
@@ -924,14 +924,14 @@ primToDev.points <- function(x, dev) {
             # Grouping each sub-grob, here we really do only need a name
             devStartGroup(list(name = pointGroupName), NULL, dev) 
 
-            devLines(devGrob(linesGrob(unit.c(x$x[i] - 0.5*sizes[i], x$x[i] + 0.5*sizes[i]),
-                                       unit.c(x$y[i] + 0.5*sizes[i], x$y[i] - 0.5*sizes[i]),
+            devLines(devGrob(linesGrob(unit.c(x$x[i] - 0.5*pointSize, x$x[i] + 0.5*pointSize),
+                                       unit.c(x$y[i] + 0.5*pointSize, x$y[i] - 0.5*pointSize),
                                        name = subGrobName(pointGroupName, 1),
                                        default.units = x$default.units),
                                        dev),
                      gparToDevPars(pgp), dev)
-            devLines(devGrob(linesGrob(unit.c(x$x[i] - 0.5*sizes[i], x$x[i] + 0.5*sizes[i]),
-                                       unit.c(x$y[i] - 0.5*sizes[i], x$y[i] + 0.5*sizes[i]),
+            devLines(devGrob(linesGrob(unit.c(x$x[i] - 0.5*pointSize, x$x[i] + 0.5*pointSize),
+                                       unit.c(x$y[i] - 0.5*pointSize, x$y[i] + 0.5*pointSize),
                                        name = subGrobName(pointGroupName, 2),
                                        default.units = x$default.units),
                                        dev),
@@ -945,10 +945,10 @@ primToDev.points <- function(x, dev) {
             # pch = 5 does not have a fill
             pgp$fill <- "transparent"
 
-            devLines(devGrob(linesGrob(unit.c(x$x[i] - 0.5*sizes[i], x$x[i],
-                                              x$x[i] + 0.5*sizes[i], x$x[i], x$x[i] - 0.5*sizes[i]),
-                                       unit.c(x$y[i], x$y[i] + 0.5*sizes[i],
-                                              x$y[i], x$y[i] - 0.5*sizes[i], x$y[i]),
+            devLines(devGrob(linesGrob(unit.c(x$x[i] - 0.5*pointSize, x$x[i],
+                                              x$x[i] + 0.5*pointSize, x$x[i], x$x[i] - 0.5*pointSize),
+                                       unit.c(x$y[i], x$y[i] + 0.5*pointSize,
+                                              x$y[i], x$y[i] - 0.5*pointSize, x$y[i]),
                                        name = subGrobName(x$name, i),
                                        default.units = x$default.units),
                                        dev),
@@ -959,10 +959,10 @@ primToDev.points <- function(x, dev) {
             # pch = 6 does not have a fill
             pgp$fill <- "transparent"
 
-            devLines(devGrob(linesGrob(unit.c(x$x[i] - 0.5*sizes[i], x$x[i] + 0.5*sizes[i],
-                                       x$x[i], x$x[i] - 0.5*sizes[i]),
-                                       unit.c(x$y[i] + 0.5*sizes[i], x$y[i] + 0.5*sizes[i],
-                                              x$y[i] - 0.5*sizes[i], x$y[i] + 0.5*sizes[i]),
+            devLines(devGrob(linesGrob(unit.c(x$x[i] - 0.5*pointSize, x$x[i] + 0.5*pointSize,
+                                       x$x[i], x$x[i] - 0.5*pointSize),
+                                       unit.c(x$y[i] + 0.5*pointSize, x$y[i] + 0.5*pointSize,
+                                              x$y[i] - 0.5*pointSize, x$y[i] + 0.5*pointSize),
                                        name = subGrobName(x$name, i),
                                        default.units = x$default.units),
                                        dev),
@@ -981,20 +981,20 @@ primToDev.points <- function(x, dev) {
             # Grouping each sub-grob, here we really do only need a name
             devStartGroup(list(name = pointGroupName), NULL, dev) 
 
-            devLines(devGrob(linesGrob(unit.c(x$x[i] - 0.5*sizes[i], x$x[i] + 0.5*sizes[i]),
-                                       unit.c(x$y[i] + 0.5*sizes[i], x$y[i] - 0.5*sizes[i]),
+            devLines(devGrob(linesGrob(unit.c(x$x[i] - 0.5*pointSize, x$x[i] + 0.5*pointSize),
+                                       unit.c(x$y[i] + 0.5*pointSize, x$y[i] - 0.5*pointSize),
                                        name = subGrobName(pointGroupName, 1),
                                        default.units = x$default.units),
                                        dev),
                      gparToDevPars(pgp), dev)
-            devLines(devGrob(linesGrob(unit.c(x$x[i] - 0.5*sizes[i], x$x[i] + 0.5*sizes[i]),
-                                       unit.c(x$y[i] - 0.5*sizes[i], x$y[i] + 0.5*sizes[i]),
+            devLines(devGrob(linesGrob(unit.c(x$x[i] - 0.5*pointSize, x$x[i] + 0.5*pointSize),
+                                       unit.c(x$y[i] - 0.5*pointSize, x$y[i] + 0.5*pointSize),
                                        name = subGrobName(pointGroupName, 2),
                                        default.units = x$default.units),
                                        dev),
                      gparToDevPars(pgp), dev)
             devRect(devGrob(rectGrob(x$x[i], x$y[i],
-                                     sizes[i], sizes[i], name = subGrobName(pointGroupName, 3),
+                                     pointSize, pointSize, name = subGrobName(pointGroupName, 3),
                                      default.units = x$default.units),
                                      dev),
                       gparToDevPars(pgp), dev)
@@ -1012,28 +1012,28 @@ primToDev.points <- function(x, dev) {
             # Grouping each sub-grob, here we really do only need a name
             devStartGroup(list(name = pointGroupName), NULL, dev) 
 
-            devLines(devGrob(linesGrob(unit.c(x$x[i] - 0.5*sizes[i],
-                                              x$x[i] + 0.5*sizes[i]),
+            devLines(devGrob(linesGrob(unit.c(x$x[i] - 0.5*pointSize,
+                                              x$x[i] + 0.5*pointSize),
                                        x$y[i],
                                        name = subGrobName(pointGroupName, 1),
                                        default.units = x$default.units),
                                        dev),
                      gparToDevPars(pgp), dev)
             devLines(devGrob(linesGrob(x$x[i],
-                                       unit.c(x$y[i] - 0.5*sizes[i],
-                                              x$y[i] + 0.5*sizes[i]),
+                                       unit.c(x$y[i] - 0.5*pointSize,
+                                              x$y[i] + 0.5*pointSize),
                                        name = subGrobName(pointGroupName, 2),
                                        default.units = x$default.units),
                                        dev),
                      gparToDevPars(pgp), dev)
-            devLines(devGrob(linesGrob(unit.c(x$x[i] - 0.5*sizes[i], x$x[i] + 0.5*sizes[i]),
-                                       unit.c(x$y[i] + 0.5*sizes[i], x$y[i] - 0.5*sizes[i]),
+            devLines(devGrob(linesGrob(unit.c(x$x[i] - 0.5*pointSize, x$x[i] + 0.5*pointSize),
+                                       unit.c(x$y[i] + 0.5*pointSize, x$y[i] - 0.5*pointSize),
                                        name = subGrobName(pointGroupName, 3),
                                        default.units = x$default.units),
                                        dev),
                      gparToDevPars(pgp), dev)
-            devLines(devGrob(linesGrob(unit.c(x$x[i] - 0.5*sizes[i], x$x[i] + 0.5*sizes[i]),
-                                       unit.c(x$y[i] - 0.5*sizes[i], x$y[i] + 0.5*sizes[i]),
+            devLines(devGrob(linesGrob(unit.c(x$x[i] - 0.5*pointSize, x$x[i] + 0.5*pointSize),
+                                       unit.c(x$y[i] - 0.5*pointSize, x$y[i] + 0.5*pointSize),
                                        name = subGrobName(pointGroupName, 4),
                                        default.units = x$default.units),
                                        dev),
@@ -1052,24 +1052,24 @@ primToDev.points <- function(x, dev) {
             # Grouping each sub-grob, here we really do only need a name
             devStartGroup(list(name = pointGroupName), NULL, dev) 
 
-            devLines(devGrob(linesGrob(unit.c(x$x[i] - 0.5*sizes[i],
-                                              x$x[i] + 0.5*sizes[i]),
+            devLines(devGrob(linesGrob(unit.c(x$x[i] - 0.5*pointSize,
+                                              x$x[i] + 0.5*pointSize),
                                        x$y[i],
                                        name = subGrobName(pointGroupName, 1),
                                        default.units = x$default.units),
                                        dev),
                      gparToDevPars(pgp), dev)
             devLines(devGrob(linesGrob(x$x[i],
-                                       unit.c(x$y[i] - 0.5*sizes[i],
-                                              x$y[i] + 0.5*sizes[i]),
+                                       unit.c(x$y[i] - 0.5*pointSize,
+                                              x$y[i] + 0.5*pointSize),
                                        name = subGrobName(pointGroupName, 2),
                                        default.units = x$default.units),
                                        dev),
                      gparToDevPars(pgp), dev)
-            devLines(devGrob(linesGrob(unit.c(x$x[i] - 0.5*sizes[i], x$x[i],
-                                              x$x[i] + 0.5*sizes[i], x$x[i], x$x[i] - 0.5*sizes[i]),
-                                       unit.c(x$y[i], x$y[i] + 0.5*sizes[i],
-                                              x$y[i], x$y[i] - 0.5*sizes[i], x$y[i]),
+            devLines(devGrob(linesGrob(unit.c(x$x[i] - 0.5*pointSize, x$x[i],
+                                              x$x[i] + 0.5*pointSize, x$x[i], x$x[i] - 0.5*pointSize),
+                                       unit.c(x$y[i], x$y[i] + 0.5*pointSize,
+                                              x$y[i], x$y[i] - 0.5*pointSize, x$y[i]),
                                        name = subGrobName(pointGroupName, 3),
                                        default.units = x$default.units),
                                        dev),
@@ -1083,7 +1083,7 @@ primToDev.points <- function(x, dev) {
             # pch = 10 does not have a fill
             pgp$fill <- "transparent"
 
-            radius <- 0.5 * sizes[i]
+            radius <- 0.5 * pointSize
 
             # Because we are dealing with multiple grobs in order to create
             # this point, we add an additional group, and integer suffixes to 
@@ -1093,16 +1093,16 @@ primToDev.points <- function(x, dev) {
             # Grouping each sub-grob, here we really do only need a name
             devStartGroup(list(name = pointGroupName), NULL, dev) 
 
-            devLines(devGrob(linesGrob(unit.c(x$x[i] - 0.5*sizes[i],
-                                              x$x[i] + 0.5*sizes[i]),
+            devLines(devGrob(linesGrob(unit.c(x$x[i] - 0.5*pointSize,
+                                              x$x[i] + 0.5*pointSize),
                                        x$y[i],
                                        name = subGrobName(pointGroupName, 1),
                                        default.units = x$default.units),
                                        dev),
                      gparToDevPars(pgp), dev)
             devLines(devGrob(linesGrob(x$x[i],
-                                       unit.c(x$y[i] - 0.5*sizes[i],
-                                              x$y[i] + 0.5*sizes[i]),
+                                       unit.c(x$y[i] - 0.5*pointSize,
+                                              x$y[i] + 0.5*pointSize),
                                        name = subGrobName(pointGroupName, 2),
                                        default.units = x$default.units),
                                        dev),
@@ -1129,18 +1129,18 @@ primToDev.points <- function(x, dev) {
             # Grouping each sub-grob, here we really do only need a name
             devStartGroup(list(name = pointGroupName), NULL, dev) 
 
-            devLines(devGrob(linesGrob(unit.c(x$x[i] - 0.5*sizes[i], x$x[i],
-                                              x$x[i] + 0.5*sizes[i], x$x[i] - 0.5*sizes[i]),
-                                       unit.c(x$y[i] - 0.5*sizes[i], x$y[i] + 0.5*sizes[i],
-                                              x$y[i] - 0.5*sizes[i], x$y[i] - 0.5*sizes[i]),
+            devLines(devGrob(linesGrob(unit.c(x$x[i] - 0.5*pointSize, x$x[i],
+                                              x$x[i] + 0.5*pointSize, x$x[i] - 0.5*pointSize),
+                                       unit.c(x$y[i] - 0.5*pointSize, x$y[i] + 0.5*pointSize,
+                                              x$y[i] - 0.5*pointSize, x$y[i] - 0.5*pointSize),
                                        name = subGrobName(pointGroupName, 1),
                                        default.units = x$default.units),
                                        dev),
                      gparToDevPars(pgp), dev)
-            devLines(devGrob(linesGrob(unit.c(x$x[i] - 0.5*sizes[i], x$x[i] + 0.5*sizes[i],
-                                       x$x[i], x$x[i] - 0.5*sizes[i]),
-                                       unit.c(x$y[i] + 0.5*sizes[i], x$y[i] + 0.5*sizes[i],
-                                              x$y[i] - 0.5*sizes[i], x$y[i] + 0.5*sizes[i]),
+            devLines(devGrob(linesGrob(unit.c(x$x[i] - 0.5*pointSize, x$x[i] + 0.5*pointSize,
+                                       x$x[i], x$x[i] - 0.5*pointSize),
+                                       unit.c(x$y[i] + 0.5*pointSize, x$y[i] + 0.5*pointSize,
+                                              x$y[i] - 0.5*pointSize, x$y[i] + 0.5*pointSize),
                                        name = subGrobName(pointGroupName, 2),
                                        default.units = x$default.units),
                                        dev),
@@ -1163,20 +1163,20 @@ primToDev.points <- function(x, dev) {
             devStartGroup(list(name = pointGroupName), NULL, dev) 
 
             devRect(devGrob(rectGrob(x$x[i], x$y[i],
-                                     sizes[i], sizes[i], name = subGrobName(pointGroupName, 1),
+                                     pointSize, pointSize, name = subGrobName(pointGroupName, 1),
                                      default.units = x$default.units),
                                      dev),
                       gparToDevPars(pgp), dev)
-            devLines(devGrob(linesGrob(unit.c(x$x[i] - 0.5*sizes[i],
-                                              x$x[i] + 0.5*sizes[i]),
+            devLines(devGrob(linesGrob(unit.c(x$x[i] - 0.5*pointSize,
+                                              x$x[i] + 0.5*pointSize),
                                        x$y[i],
                                        name = subGrobName(pointGroupName, 2),
                                        default.units = x$default.units),
                                        dev),
                      gparToDevPars(pgp), dev)
             devLines(devGrob(linesGrob(x$x[i],
-                                       unit.c(x$y[i] - 0.5*sizes[i],
-                                              x$y[i] + 0.5*sizes[i]),
+                                       unit.c(x$y[i] - 0.5*pointSize,
+                                              x$y[i] + 0.5*pointSize),
                                        name = subGrobName(pointGroupName, 3),
                                        default.units = x$default.units),
                                        dev),
@@ -1190,7 +1190,7 @@ primToDev.points <- function(x, dev) {
             # pch = 12 does not have a fill
             pgp$fill <- "transparent"
 
-            radius <- 0.5 * sizes[i]
+            radius <- 0.5 * pointSize
 
             # Because we are dealing with multiple grobs in order to create
             # this point, we add an additional group, and integer suffixes to 
@@ -1205,14 +1205,14 @@ primToDev.points <- function(x, dev) {
                                          default.units = x$default.units),
                                          dev),
                       gparToDevPars(pgp), dev)
-            devLines(devGrob(linesGrob(unit.c(x$x[i] - 0.5*sizes[i], x$x[i] + 0.5*sizes[i]),
-                                       unit.c(x$y[i] + 0.5*sizes[i], x$y[i] - 0.5*sizes[i]),
+            devLines(devGrob(linesGrob(unit.c(x$x[i] - 0.5*pointSize, x$x[i] + 0.5*pointSize),
+                                       unit.c(x$y[i] + 0.5*pointSize, x$y[i] - 0.5*pointSize),
                                        name = subGrobName(pointGroupName, 2),
                                        default.units = x$default.units),
                                        dev),
                      gparToDevPars(pgp), dev)
-            devLines(devGrob(linesGrob(unit.c(x$x[i] - 0.5*sizes[i], x$x[i] + 0.5*sizes[i]),
-                                       unit.c(x$y[i] - 0.5*sizes[i], x$y[i] + 0.5*sizes[i]),
+            devLines(devGrob(linesGrob(unit.c(x$x[i] - 0.5*pointSize, x$x[i] + 0.5*pointSize),
+                                       unit.c(x$y[i] - 0.5*pointSize, x$y[i] + 0.5*pointSize),
                                        name = subGrobName(pointGroupName, 3),
                                        default.units = x$default.units),
                                        dev),
@@ -1235,14 +1235,14 @@ primToDev.points <- function(x, dev) {
             devStartGroup(list(name = pointGroupName), NULL, dev) 
 
             devRect(devGrob(rectGrob(x$x[i], x$y[i],
-                                     sizes[i], sizes[i], name = subGrobName(pointGroupName, 1),
+                                     pointSize, pointSize, name = subGrobName(pointGroupName, 1),
                                      default.units = x$default.units),
                                      dev),
                       gparToDevPars(pgp), dev)
-            devLines(devGrob(linesGrob(unit.c(x$x[i] - 0.5*sizes[i], x$x[i],
-                                              x$x[i] + 0.5*sizes[i]),
-                                       unit.c(x$y[i] - 0.5*sizes[i], x$y[i] + 0.5*sizes[i],
-                                              x$y[i] - 0.5*sizes[i]),
+            devLines(devGrob(linesGrob(unit.c(x$x[i] - 0.5*pointSize, x$x[i],
+                                              x$x[i] + 0.5*pointSize),
+                                       unit.c(x$y[i] - 0.5*pointSize, x$y[i] + 0.5*pointSize,
+                                              x$y[i] - 0.5*pointSize),
                                        name = subGrobName(pointGroupName, 2),
                                        default.units = x$default.units),
                                        dev),
@@ -1258,14 +1258,14 @@ primToDev.points <- function(x, dev) {
             pgp$col <- "transparent"
 
             devRect(devGrob(rectGrob(x$x[i], x$y[i],
-                                     sizes[i], sizes[i], name = subGrobName(x$name, i),
+                                     pointSize, pointSize, name = subGrobName(x$name, i),
                                      default.units = x$default.units),
                                      dev),
                       gparToDevPars(pgp), dev)
         }
 
         if (pchs[i] == 16) {
-            radius <- 0.5 * sizes[i]
+            radius <- 0.5 * pointSize
 
             # pch = 16 does not have a border
             pgp$fill <- pgp$col
@@ -1283,10 +1283,10 @@ primToDev.points <- function(x, dev) {
             pgp$fill <- pgp$col
             pgp$col <- "transparent"
 
-            devPolygon(devGrob(polygonGrob(unit.c(x$x[i] - 0.5*sizes[i], x$x[i],
-                                                  x$x[i] + 0.5*sizes[i], x$x[i] - 0.5*sizes[i]),
-                                           unit.c(x$y[i] - 0.5*sizes[i], x$y[i] + 0.5*sizes[i],
-                                                  x$y[i] - 0.5*sizes[i], x$y[i] - 0.5*sizes[i]),
+            devPolygon(devGrob(polygonGrob(unit.c(x$x[i] - 0.5*pointSize, x$x[i],
+                                                  x$x[i] + 0.5*pointSize, x$x[i] - 0.5*pointSize),
+                                           unit.c(x$y[i] - 0.5*pointSize, x$y[i] + 0.5*pointSize,
+                                                  x$y[i] - 0.5*pointSize, x$y[i] - 0.5*pointSize),
                                            name = subGrobName(x$name, i),
                                            default.units = x$default.units),
                                dev),
@@ -1298,10 +1298,10 @@ primToDev.points <- function(x, dev) {
             pgp$fill <- pgp$col
             pgp$col <- "transparent"
 
-            devPolygon(devGrob(polygonGrob(unit.c(x$x[i] - 0.5*sizes[i], x$x[i],
-                                                  x$x[i] + 0.5*sizes[i], x$x[i], x$x[i] - 0.5*sizes[i]),
-                                           unit.c(x$y[i], x$y[i] + 0.5*sizes[i],
-                                                  x$y[i], x$y[i] - 0.5*sizes[i], x$y[i]),
+            devPolygon(devGrob(polygonGrob(unit.c(x$x[i] - 0.5*pointSize, x$x[i],
+                                                  x$x[i] + 0.5*pointSize, x$x[i], x$x[i] - 0.5*pointSize),
+                                           unit.c(x$y[i], x$y[i] + 0.5*pointSize,
+                                                  x$y[i], x$y[i] - 0.5*pointSize, x$y[i]),
                                            name = subGrobName(x$name, i),
                                            default.units = x$default.units),
                                dev),
@@ -1309,7 +1309,7 @@ primToDev.points <- function(x, dev) {
         }
 
         if (pchs[i] == 19) {
-            radius <- 0.5 * sizes[i]
+            radius <- 0.5 * pointSize
 
             # col is specified in place of fill
             pgp$fill <- pgp$col
@@ -1322,7 +1322,7 @@ primToDev.points <- function(x, dev) {
         }
 
         if (pchs[i] == 20) {
-            radius <- 0.5 * 2/3 * sizes[i]
+            radius <- 0.5 * 2/3 * pointSize
 
             # col is specified in place of fill
             pgp$fill <- pgp$col
@@ -1335,7 +1335,7 @@ primToDev.points <- function(x, dev) {
         }
 
         if (pchs[i] == 21) {
-            radius <- 0.5 * sizes[i]
+            radius <- 0.5 * pointSize
 
             devCircle(devGrob(circleGrob(x$x[i], x$y[i],
                                          radius, name = subGrobName(x$name, i),
@@ -1346,17 +1346,17 @@ primToDev.points <- function(x, dev) {
 
         if (pchs[i] == 22) {
             devRect(devGrob(rectGrob(x$x[i], x$y[i],
-                                     sizes[i], sizes[i], name = subGrobName(x$name, i),
+                                     pointSize, pointSize, name = subGrobName(x$name, i),
                                      default.units = x$default.units),
                                      dev),
                       gparToDevPars(pgp), dev)
         }
 
         if (pchs[i] == 23) {
-            devPolygon(devGrob(polygonGrob(unit.c(x$x[i] - 0.5*sizes[i], x$x[i],
-                                                  x$x[i] + 0.5*sizes[i], x$x[i], x$x[i] - 0.5*sizes[i]),
-                                           unit.c(x$y[i], x$y[i] + 0.5*sizes[i],
-                                                  x$y[i], x$y[i] - 0.5*sizes[i], x$y[i]),
+            devPolygon(devGrob(polygonGrob(unit.c(x$x[i] - 0.5*pointSize, x$x[i],
+                                                  x$x[i] + 0.5*pointSize, x$x[i], x$x[i] - 0.5*pointSize),
+                                           unit.c(x$y[i], x$y[i] + 0.5*pointSize,
+                                                  x$y[i], x$y[i] - 0.5*pointSize, x$y[i]),
                                            name = subGrobName(x$name, i),
                                            default.units = x$default.units),
                                dev),
@@ -1364,10 +1364,10 @@ primToDev.points <- function(x, dev) {
         }
 
         if (pchs[i] == 24) {
-            devPolygon(devGrob(polygonGrob(unit.c(x$x[i] - 0.5*sizes[i], x$x[i],
-                                                  x$x[i] + 0.5*sizes[i], x$x[i] - 0.5*sizes[i]),
-                                           unit.c(x$y[i] - 0.5*sizes[i], x$y[i] + 0.5*sizes[i],
-                                                  x$y[i] - 0.5*sizes[i], x$y[i] - 0.5*sizes[i]),
+            devPolygon(devGrob(polygonGrob(unit.c(x$x[i] - 0.5*pointSize, x$x[i],
+                                                  x$x[i] + 0.5*pointSize, x$x[i] - 0.5*pointSize),
+                                           unit.c(x$y[i] - 0.5*pointSize, x$y[i] + 0.5*pointSize,
+                                                  x$y[i] - 0.5*pointSize, x$y[i] - 0.5*pointSize),
                                            name = subGrobName(x$name, i),
                                            default.units = x$default.units),
                                dev),
@@ -1375,10 +1375,10 @@ primToDev.points <- function(x, dev) {
         }
 
         if (pchs[i] == 25) {
-            devPolygon(devGrob(polygonGrob(unit.c(x$x[i] - 0.5*sizes[i], x$x[i] + 0.5*sizes[i],
-                                                  x$x[i], x$x[i] - 0.5*sizes[i]),
-                                           unit.c(x$y[i] + 0.5*sizes[i], x$y[i] + 0.5*sizes[i],
-                                                  x$y[i] - 0.5*sizes[i], x$y[i] + 0.5*sizes[i]),
+            devPolygon(devGrob(polygonGrob(unit.c(x$x[i] - 0.5*pointSize, x$x[i] + 0.5*pointSize,
+                                                  x$x[i], x$x[i] - 0.5*pointSize),
+                                           unit.c(x$y[i] + 0.5*pointSize, x$y[i] + 0.5*pointSize,
+                                                  x$y[i] - 0.5*pointSize, x$y[i] + 0.5*pointSize),
                                            name = subGrobName(x$name, i),
                                            default.units = x$default.units),
                                dev),
