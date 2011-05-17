@@ -388,9 +388,19 @@ setMethod("devCircle", signature(device="svgDevice"),
 
 setMethod("devStartGroup", signature(device="svgDevice"),
           function(group, gp, device) {
-            svgStartGroup(group$name,
-                          listToSVGAttrib(group$attributes),
-                          devParToSVGStyle(gp, device), device@dev)
+            clip <- FALSE
+            if (! is.null(group$clip)) {
+              if (group$clip) {
+                clip <- TRUE
+                svgClipPath(group$name, group$vpx, group$vpy,
+                            group$vpw, group$vph, device@dev)
+              }
+            }
+
+            svgStartGroup(group$name, clip=clip,
+                          attributes=listToSVGAttrib(group$attributes),
+                          style=devParToSVGStyle(gp, device),
+                          svgdev=device@dev)
           })
 
 setMethod("devEndGroup", signature(device="svgDevice"),

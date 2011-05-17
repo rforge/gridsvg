@@ -18,12 +18,44 @@ svgClose <- function(svgdev) {
   close(svgDevFile(svgdev))
 }
 
-svgStartGroup <- function(id=NULL, attributes=svgAttrib(),
+svgClipPath <- function(id, vpx, vpy, vpw,
+                        vph, svgdev=svgDevice()) {
+  clipPathID <- paste(id, "clipPath", sep=".")
+  catsvg('<defs>\n', svgdev)
+  incindent(svgdev)
+  catsvg(paste('<clipPath id="', clipPathID,
+               '">\n', sep=""),
+         svgdev)
+  incindent(svgdev)
+  catsvg(paste('<rect x="', vpx, '" ',
+               'y="', vpy, '" ',
+               'width="', vpw, '" ',
+               'height="', vph, '" ',
+               'style="fill: none; stroke: none;"',
+               ' />\n', sep=""),
+         svgdev)
+  decindent(svgdev)
+  catsvg('</clipPath>\n', svgdev)
+  decindent(svgdev)
+  catsvg('</defs>\n', svgdev)
+  decindent(svgdev)
+}
+
+svgClipAttr <- function(id, clip) {
+  if (clip)
+    paste('clip-path="url(#', id, '.clipPath)" ', sep="")
+  else
+    ""
+}
+
+svgStartGroup <- function(id=NULL, clip=FALSE,
+                          attributes=svgAttrib(),
                           style=svgStyle(), svgdev=svgDevice()) {
   incindent(svgdev)
   catsvg(paste('<g ',
                'id="', getid(id, svgdev), '" ',
                svgAttribTxt(attributes), ' ',
+               svgClipAttr(id, clip),
                svgStyleCSS(style), 
                '>\n',
                sep=""), svgdev)

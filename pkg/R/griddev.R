@@ -348,6 +348,78 @@ devGrob.circle <- function(x, dev) {
        name=x$name)
 }
 
+devGrob.vpPath <- function(x, dev) {
+  vp <- current.viewport()
+  tm <- current.transform()
+  if (is.null(vp$clip)) {
+    clip <- FALSE
+    list(name=x$name, clip=clip)
+  } else if (is.na(vp$clip) | ! vp$clip) {
+    clip <- FALSE
+    list(name=x$name, clip=clip)
+  } else {
+    clip <- TRUE
+
+    transloc <- c(0, 0, 1) %*% tm
+    loc <- (transloc / transloc[3])[-3]
+
+    list(vpx=cx(unit(loc[1], "inches"), dev),
+         vpy=cy(unit(loc[2], "inches"), dev),
+         vpw=cw(unit(1, "npc"), dev),
+         vph=ch(unit(1, "npc"), dev),
+         name=x$name,    
+         clip=clip)
+  }  
+}
+
+devGrob.frame <- function(x, dev) {
+  fvp <- x
+  tm <- current.transform()
+  if (is.null(fvp$clip)) {
+    clip <- FALSE
+    list(name=x$name, clip=clip)
+  } else if (is.na(fvp$clip) | ! fvp$clip) {
+    clip <- FALSE
+    list(name=x$name, clip=clip)
+  } else {
+    clip <- TRUE
+
+    transloc <- c(0, 0, 1) %*% tm
+    loc <- (transloc / transloc[3])[-3]
+
+    list(vpx=cx(unit(loc[1], "inches"), dev),
+         vpy=cy(unit(loc[2], "inches"), dev),
+         vpw=cw(unit(1, "npc"), dev),
+         vph=ch(unit(1, "npc"), dev),
+         name=x$name,    
+         clip=clip)
+  }  
+}
+
+devGrob.cellGrob <- function(x, dev) {
+  cvp <- x
+  tm <- current.transform()
+  if (is.null(cvp$clip)) {
+    clip <- FALSE
+    list(name=x$name, clip=clip)
+  } else if (is.na(cvp$clip) | ! cvp$clip) {
+    clip <- FALSE
+    list(name=x$name, clip=clip)
+  } else {
+    clip <- TRUE
+
+    transloc <- c(0, 0, 1) %*% tm
+    loc <- (transloc / transloc[3])[-3]
+
+    list(vpx=cx(unit(loc[1], "inches"), dev),
+         vpy=cy(unit(loc[2], "inches"), dev),
+         vpw=cw(unit(1, "npc"), dev),
+         vph=ch(unit(1, "npc"), dev),
+         name=x$name,    
+         clip=clip)
+  }  
+}
+
 # Prim to Dev
 primToDev <- function(x, dev) {
   UseMethod("primToDev")
