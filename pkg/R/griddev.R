@@ -348,15 +348,52 @@ devGrob.circle <- function(x, dev) {
        name=x$name)
 }
 
+vpUsageTable <- data.frame(vpname = character(0),
+                           count = integer(0),
+                           stringsAsFactors=FALSE)
+assign("vpUsageTable", vpUsageTable, env = .gridSVGEnv)
+
+# Because viewports can be pushed into many times, and each
+# time we push we start a group, we need a *unique* id for that
+# group, otherwise clipping paths don't work correctly
+getvpID <- function(vpname) {
+  # Finding out how many times a VP has been pushed to so fara
+  vput <- get("vpUsageTable", env = .gridSVGEnv)
+  vpcount <- vput[vput$vpname == vpname, "count"]
+
+  # If the VP name is not in the usage table, add it
+  if (length(vpcount) == 0) {
+    vpcount <- 0
+    assign("vpUsageTable", rbind(vput,
+                                 data.frame(vpname = vpname,
+                                            count = vpcount,
+                                            stringsAsFactors = FALSE)),
+           env = .gridSVGEnv)
+    vput <- get("vpUsageTable", env = .gridSVGEnv)
+  }
+
+  # Incrementing the vp appearance counter and storing it
+  vpcount <- vpcount + 1
+  vput[vput$vpname == vpname, "count"] <- vpcount
+  assign("vpUsageTable", vput, env = .gridSVGEnv)
+
+  vpID <- paste(vpname,
+                vpcount,
+                sep=".")
+
+  # Returning the vpID
+  vpID
+}
+
 devGrob.vpPath <- function(x, dev) {
   vp <- current.viewport()
   tm <- current.transform()
   if (is.null(vp$clip)) {
     clip <- FALSE
-    list(name=x$name, clip=clip)
+    list(name=getvpID(vp$name), clip=clip)
   } else if (is.na(vp$clip) | ! vp$clip) {
     clip <- FALSE
-    list(name=x$name, clip=clip)
+    list(name=getvpID(vp$name), clip=clip)
   } else {
     clip <- TRUE
 
@@ -367,7 +404,7 @@ devGrob.vpPath <- function(x, dev) {
          vpy=cy(unit(loc[2], "inches"), dev),
          vpw=cw(unit(1, "npc"), dev),
          vph=ch(unit(1, "npc"), dev),
-         name=x$name,    
+         name=getvpID(vp$name),
          clip=clip)
   }  
 }

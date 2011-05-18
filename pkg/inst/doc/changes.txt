@@ -66,6 +66,10 @@ Changes from 0.6-0 to 0.7-0
 
 21. pchs 0:25 and 32:127 are supported. (Simon)
 
+22. Clipping to viewports is now possible. This occurs at the group level so that
+    when a viewport is pushed to, its name is now suffixed with the number of times
+    that the viewport has been pushed to. (Simon)
+
 Changes from 0.5-10 to 0.6-0
 ============================
 
