@@ -34,7 +34,7 @@ animateGrob <- function(grob, ...,
 }
   
 grid.animate <- function(path, ...) {
-  grid.set(path, animateGrob(grid.get(path), ...))
+  grid.set(path, animateGrob(grid.get(path), ...), redraw=FALSE)
 }
 
 animate <- function(x, animation, dev) {
@@ -117,29 +117,29 @@ animate.circle <- function(x, animation, dev) {
     subName <- subGrobName(x$name, i)
 
     switch(animation,
-       x={
-         if (! is.matrix(x$animations$x))
-           x$animations$x <- matrix(x$animations$x)
-         xunit <- attr(x$x, "unit")
-         loc <- locToInches(unit(x$animations$x[,i], xunit), x$y, dev)
-         svgAnimateXYWH("cx", cx(loc$x, dev),
-                        dur[i], rep[i], rev[i], subName, dev@dev)
-       },
-       y={
-         if (! is.matrix(x$animations$y))
-           x$animations$y <- matrix(x$animations$y)
-         yunit <- attr(x$y, "unit")
-         loc <- locToInches(x$x, unit(x$animations$y[,i], yunit), dev)
-         svgAnimateXYWH("cy", cy(loc$y, dev),
-                        dur[i], rep[i], rev[i], subName, dev@dev)
-       },
-       r={
-         if (! is.matrix(x$animations$r))
-           x$animations$r <- matrix(x$animations$r)
-         runit <- attr(x$r, "unit")
-         svgAnimateXYWH("r", cd(unit(x$animations$r[,i], runit), dev),
-                        dur[i], rep[i], rev[i], subName, dev@dev)
-       })
+           x={
+               if (! is.matrix(x$animations$x))
+                   x$animations$x <- matrix(x$animations$x)
+               xunit <- attr(x$x, "unit")
+               loc <- locToInches(unit(x$animations$x[,i], xunit), x$y[i], dev)
+               svgAnimateXYWH("cx", cx(loc$x, dev),
+                              dur[i], rep[i], rev[i], subName, dev@dev)
+           },
+           y={
+               if (! is.matrix(x$animations$y))
+                   x$animations$y <- matrix(x$animations$y)
+               yunit <- attr(x$y, "unit")
+               loc <- locToInches(x$x[i], unit(x$animations$y[,i], yunit), dev)
+               svgAnimateXYWH("cy", cy(loc$y, dev),
+                              dur[i], rep[i], rev[i], subName, dev@dev)
+           },
+           r={
+               if (! is.matrix(x$animations$r))
+                   x$animations$r <- matrix(x$animations$r)
+               runit <- attr(x$r, "unit")
+               svgAnimateXYWH("r", cd(unit(x$animations$r[,i], runit), dev),
+                              dur[i], rep[i], rev[i], subName, dev@dev)
+           })
   }
 }
 
@@ -219,27 +219,55 @@ animate.points <- function(x, animation, dev) {
 }
 
 animate.text <- function(x, animation, dev) {
-  dur <- x$animations$duration
-  rep <- x$animations$rep
-  rev <- x$animations$revert
-  # Special case if animating BOTH x and y
-  if (all(c("x", "y") %in% names(x$animations))) {
-    loc <- locToInches(x$animations$x, x$animations$y, dev)
-    svgAnimateTranslation(cx(loc$x, dev), cy(loc$y, dev),
-                          dur, rep, rev, x$name, dev@dev)
-  } else {
-    switch(animation,
-           x={
-             loc <- locToInches(x$animations$x, x$y, dev)
-             svgAnimateTranslation(cx(loc$x, dev), cy(loc$y, dev),
-                                   dur, rep, rev, x$name, dev@dev)
-           },
-           y={
-             loc <- locToInches(x$x, x$animations$y, dev)
-             svgAnimateTranslation(cx(loc$x, dev), cy(loc$y, dev),
-                                   dur, rep, rev, x$name, dev@dev)
-           })
-  }
+    
+    # We may be dealing with multiple points that need animating
+    n <- max(length(x$x), length(x$y), length(x$label))
+
+    # Repeating animation parameters so that each element can have
+    # distinct values
+    dur <- rep(x$animations$duration, length.out = n)
+    rep <- rep(x$animations$rep, length.out = n)
+    rev <- rep(x$animations$revert, length.out = n)
+
+    for (i in 1:n) {
+        subName <- subGrobName(x$name, i)
+
+        # Special case if animating BOTH x and y
+        if (all(c("x", "y") %in% names(x$animations))) {
+            if (! is.matrix(x$animations$x))
+                x$animations$y <- matrix(x$animations$x)
+            if (! is.matrix(x$animations$y))
+                x$animations$y <- matrix(x$animations$y)
+            loc <- locToInches(x$animations$x[,i], x$animations$y[,i], dev)
+            svgAnimateTranslation(cx(loc$x, dev), cy(loc$y, dev),
+                                  dur, rep, rev, x$name, dev@dev)
+        } else {
+            switch(animation,
+                   x={
+                       if (! is.matrix(x$animations$x))
+                           x$animations$y <- matrix(x$animations$x)
+                       loc <- locToInches(x$animations$x[,i], x$y[i], dev)
+                       svgAnimateTranslation(cx(loc$x, dev), cy(loc$y, dev),
+                                             dur, rep, rev, x$name, dev@dev)
+                   },
+                   y={
+                       if (! is.matrix(x$animations$y))
+                           x$animations$y <- matrix(x$animations$y)
+                       loc <- locToInches(x$x[i], x$animations$y[,i], dev)
+                       svgAnimateTranslation(cx(loc$x, dev), cy(loc$y, dev),
+                                             dur, rep, rev, x$name, dev@dev)
+                   },
+                   # Any other attribute
+                   {
+                       if (! is.matrix(x$animations[[animation]]))
+                           x$animations$r <- matrix(x$animations[[animation]])
+                       svgAnimate(animation,
+                                  paste(x$animations[[animation]][,i],
+                                        collapse=";"),
+                                  dur[i], rep[i], rev[i], subName, dev@dev)
+                   })
+        }
+    }
 }
 
 animate.lines <- function(x, animation, dev) {
@@ -270,7 +298,7 @@ primToDev.animated.grob <- function(x, dev) {
   animations <- x$animations[!names(x$animations) %in%
                              c("duration", "id", "rep", "revert")]
   for (i in names(animations)) 
-    animate(x, i, dev)
+      animate(x, i, dev)
   NextMethod()
 }
 
