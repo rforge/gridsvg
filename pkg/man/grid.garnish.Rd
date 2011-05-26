@@ -11,13 +11,15 @@
 }
 \usage{
 garnishGrob(x, ...)
-grid.garnish(path, ..., redraw=TRUE)
+grid.garnish(path, ..., grep=grep, redraw=TRUE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{x}{A grob.}
   \item{path}{ A grob path specifying a drawn grob. }
   \item{...}{ Arbitrary SVG attribute settings. }
+  \item{grep}{A logical indicating whether to treat the \code{path}
+    as a regular expression.}
   \item{redraw}{A logical indicating whether to redraw the current page.}
 }
 \value{

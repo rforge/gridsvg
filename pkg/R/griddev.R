@@ -314,7 +314,12 @@ devGrob.text <- function(x, dev) {
   loc <- locToInches(x$x, x$y, dev)
   gp <- gparToDevPars(x$gp)
   charHeight <- grobHeight(textGrob("M", gp = x$gp))
-  textLineHeight <-  ch(charHeight * gp$lineheight, dev)
+  # The R graphics engine does some crazy-ass calculations to
+  # determine line height.  This does WAAAAY back so we just
+  # have to swallow and follow along.
+  # textLineHeight <-  ch(charHeight * gp$lineheight, dev)
+  textLineHeight <- ch(unit(gp$lineheight * gp$cex *
+                            graphics::par("cin")[2], "inches"), dev)
   charHeight <- ch(charHeight, dev)
 
   # Checking whether to use just or [h/v]just

@@ -89,6 +89,16 @@ animate.rect <- function(x, animation, dev) {
              dim <- dimToInches(x$width, unit(x$animations$height[,i], hunit), dev)
              svgAnimateXYWH("height", ch(dim$h, dev),
                             dur[i], rep[i], rev[i], subName, dev@dev)
+           },
+           # Any other attribute
+           {
+               if (! is.matrix(x$animations[[animation]]))
+                   x$animations[[animation]] <-
+                       matrix(x$animations[[animation]])
+               svgAnimate(animation,
+                          paste(x$animations[[animation]][,i],
+                                collapse=";"),
+                          dur[i], rep[i], rev[i], subName, dev@dev)
            })
   }
 }
@@ -139,6 +149,16 @@ animate.circle <- function(x, animation, dev) {
                runit <- attr(x$r, "unit")
                svgAnimateXYWH("r", cd(unit(x$animations$r[,i], runit), dev),
                               dur[i], rep[i], rev[i], subName, dev@dev)
+           },
+           # Any other attribute
+           {
+               if (! is.matrix(x$animations[[animation]]))
+                   x$animations[[animation]] <-
+                       matrix(x$animations[[animation]])
+               svgAnimate(animation,
+                          paste(x$animations[[animation]][,i],
+                                collapse=";"),
+                          dur[i], rep[i], rev[i], subName, dev@dev)
            })
   }
 }
@@ -260,7 +280,8 @@ animate.text <- function(x, animation, dev) {
                    # Any other attribute
                    {
                        if (! is.matrix(x$animations[[animation]]))
-                           x$animations$r <- matrix(x$animations[[animation]])
+                           x$animations[[animation]] <-
+                               matrix(x$animations[[animation]])
                        svgAnimate(animation,
                                   paste(x$animations[[animation]][,i],
                                         collapse=";"),

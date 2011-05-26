@@ -10,8 +10,9 @@ garnishGrob <- function(x, ...) {
   x
 }
 
-grid.garnish <- function(path, ..., redraw=TRUE) {
-  grid.set(path, garnishGrob(grid.get(path), ...), redraw=redraw)
+grid.garnish <- function(path, ..., grep=FALSE, redraw=FALSE) {
+  grid.set(path, garnishGrob(grid.get(path, grep=grep), ...),
+           grep=grep, redraw=redraw)
 }
 
 devGrob.svg.grob <- function(x, dev) {
