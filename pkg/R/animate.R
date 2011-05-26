@@ -274,6 +274,7 @@ animate.lines <- function(x, animation, dev) {
   dur <- x$animations$duration
   rep <- x$animations$rep
   rev <- x$animations$revert
+
   # Special case if animating BOTH x and y
   if (all(c("x", "y") %in% names(x$animations))) {
     loc <- locToInches(x$animations$x, x$animations$y, dev)
@@ -293,6 +294,64 @@ animate.lines <- function(x, animation, dev) {
   
 }
 
+animate.polyline <- function(x, animation, dev) {
+  # If we only have one line
+  if (is.null(x$id) && is.null(x$id.lengths)) {
+      x$id <- rep(1L, length(x$x))
+  }
+
+  # Multiple lines exist
+  if (is.null(x$id)) {
+      n <- length(x$id.lengths)
+      id <- rep(1L:n, x$id.lengths)
+  } else {
+      n <- length(unique(x$id))
+      id <- x$id
+  }
+
+  # Repeating animation parameters so that each element can have
+  # distinct values
+  dur <- rep(x$animations$duration, length.out = n)
+  rep <- rep(x$animations$rep, length.out = n)
+  rev <- rep(x$animations$revert, length.out = n)
+
+  for (i in 1:n) {
+    subName <- subGrobName(x$name, i)
+
+    switch(animation,
+           points={
+             # This is a bit of a special case to allow a line to "grow"
+             # over time. Specified as a character matrix, with a column
+             # for each line, but each row contains the points needed to
+             # draw a line at each step.
+             # The format of the line is "x1,y1 x2,y2 ... xn,yn"
+             xunit <- attr(x$x, "unit")
+             yunit <- attr(x$y, "unit")
+             rows <- nrow(x$animations$points)
+             pointsValues <- character(0)
+
+             for (j in 1:rows) {
+               rowPoints <- x$animations$points[j, i]
+               vals <- as.numeric(strsplit(rowPoints, "[, ]")[[1]])
+               nvals <- length(vals)
+               xvals <- vals[seq(1, nvals, by = 2)]
+               yvals <- vals[seq(2, nvals, by = 2)]
+               xvals <- unit(xvals, xunit)
+               yvals <- unit(yvals, yunit)
+               loc <- locToInches(xvals, yvals, dev)
+               xs <- cx(loc$x, dev)
+               ys <- cy(loc$y, dev)
+
+               pointsValues <- c(pointsValues, paste(xs, ",", ys, " ", sep="", collapse=""))
+             }
+             svgAnimate(animation,
+                        paste(pointsValues, collapse=";"),
+                        dur[i], rep[i], rev[i], subName, dev@dev)
+           })
+  }
+
+           
+}
 
 primToDev.animated.grob <- function(x, dev) {
   animations <- x$animations[!names(x$animations) %in%
