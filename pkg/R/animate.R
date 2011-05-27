@@ -195,9 +195,9 @@ animate.points <- function(x, animation, dev) {
          if (! is.matrix(x$animations$x))
            x$animations$x <- matrix(x$animations$x)
          xunit <- attr(x$x, "unit")
-         loc <- locToInches(unit(x$animations$x[,i], xunit), x$y, dev)
+         loc <- locToInches(unit(x$animations$x[,i], xunit), x$y[i], dev)
 
-         if (pchs[i] == 1)
+         if (pchs[i] == 1 || pchs[i] == 16)
            animattr <- "cx"
          else
            animattr <- "x"
@@ -208,9 +208,9 @@ animate.points <- function(x, animation, dev) {
          if (! is.matrix(x$animations$y))
            x$animations$y <- matrix(x$animations$y)
          yunit <- attr(x$y, "unit")
-         loc <- locToInches(x$x, unit(x$animations$y[,i], yunit), dev)
+         loc <- locToInches(x$x[i], unit(x$animations$y[,i], yunit), dev)
 
-         if (pchs[i] == 1)
+         if (pchs[i] == 1 || pchs[i] == 16)
            animattr <- "cy"
          else
            animattr <- "y"
@@ -230,7 +230,7 @@ animate.points <- function(x, animation, dev) {
                           dur[i], rep[i], rev[i], subName, dev@dev)
          }
 
-         if (pchs[i] == 1) {
+         if (pchs[i] == 1 || pchs[i] == 16) {
            svgAnimateXYWH("r", pointsize,
                           dur[i], rep[i], rev[i], subName, dev@dev)
          }
