@@ -25,6 +25,11 @@ export("svgOpen",
        "svgStyle"
        )
 
+export("animValue",
+       "animUnit",
+       "as.animValue",
+       "as.animUnit")
+
 export("grid.hyperlink",
        "setSVGFonts",
        "getSVGFonts",
@@ -63,3 +68,16 @@ S3method("primToDev", "yaxis")
 S3method("primToDev", "xspline")
 S3method("primToDev", "animated.grob")
 
+S3method("as.animUnit", "animUnit")
+S3method("as.animUnit", "numeric")
+S3method("as.animUnit", "unit")
+S3method("as.animUnit", "matrix")
+S3method("as.animUnit", "list")
+S3method("as.animValue", "animValue")
+S3method("as.animValue", "numeric")
+S3method("as.animValue", "character")
+S3method("as.animValue", "matrix")
+S3method("as.animValue", "list")
+
+S3method("print", "animValue")
+S3method("print", "animUnit")

@@ -78,12 +78,13 @@ svgEndLink <- function(svgdev=svgDevice()) {
   decindent(svgdev)
 }
 
-svgAnimate <- function(attrib, values, duration, rep, revert, id=NULL, 
+svgAnimate <- function(attrib, values, begin, duration, rep, revert, id=NULL, 
                        svgdev=svgDevice()) {
   n <- if (is.null(id)) 1 else length(unique(id))
   catsvg(paste('<animate ',
                'xlink:href="#', getid(id, svgdev, n), '" ',
                'attributeName="', attrib, '" ',
+               'begin="', begin, 's" ',
                'dur="', duration, 's" ',
                'values="', values, '" ',
                'repeatCount="',
@@ -100,12 +101,12 @@ svgAnimate <- function(attrib, values, duration, rep, revert, id=NULL,
 # and I have a strong suspicion there may be problems
 # because tapply returns a list -- see svgAnimatePoints
 # for ideas for a possible solution (esp. the lpaste function)
-svgAnimateXYWH <- function(attrib, values, duration, rep, revert,
-                        id=NULL,
-                        svgdev=svgDevice()) {
+svgAnimateXYWH <- function(attrib, values, begin, duration, rep, revert,
+                           id=NULL,
+                           svgdev=svgDevice()) {
   svgAnimate(attrib,
-             paste(values, collapse=";"),
-             duration, rep, revert, id, svgdev)  
+             paste(round(values, 2), collapse=";"),
+             begin, duration, rep, revert, id, svgdev)  
 }
 
 # DON'T call this with a list of length < 2!
@@ -126,23 +127,23 @@ lpaste <- function(alist, collapse) {
   paste(result, collapse=collapse)
 }
 
-svgAnimatePoints <- function(xvalues, yvalues, pointsid, duration, rep, revert,
+svgAnimatePoints <- function(xvalues, yvalues, pointsid,
+                             begin, duration, rep, revert,
                              id=NULL,
                              svgdev=svgDevice()) {
   if (is.null(id))
     warning("Only one point to animate")
   else
     svgAnimate("points",
-               # The tapply splits the points into a list
-               # of successive x, y sets corresponding to the
-               # animation values for each point on the line
-               lpaste(tapply(paste(xvalues,
-                                   yvalues, sep=","),
-                             pointsid, paste), collapse=";"),
-               duration, rep, revert, id, svgdev)  
+                paste(lapply(split(paste(round(xvalues, 2),
+                                         round(yvalues, 2), sep=","),
+                                   pointsid),
+                             paste, collapse=" "),
+                      collapse=";"),
+               begin, duration, rep, revert, id, svgdev)  
 }
 
-svgAnimateTransform <- function(attrib, values, duration, rep, revert,
+svgAnimateTransform <- function(attrib, values, begin, duration, rep, revert,
                                 id=NULL,
                                 svgdev=svgDevice()) {
   n <- if (is.null(id)) 1 else length(unique(id))
@@ -150,6 +151,7 @@ svgAnimateTransform <- function(attrib, values, duration, rep, revert,
                'xlink:href="#', getid(id, svgdev, n), '" ',
                'attributeName="transform" ',
                'type="', attrib, '" ',
+               'begin="', begin, 's" ',
                'dur="', duration, 's" ',
                'values="', values, '" ',
                'repeatCount="',
@@ -162,14 +164,15 @@ svgAnimateTransform <- function(attrib, values, duration, rep, revert,
          svgdev)
 }
 
-svgAnimateTranslation <- function(xvalues, yvalues, duration, rep, revert,
+svgAnimateTranslation <- function(xvalues, yvalues,
+                                  begin, duration, rep, revert,
                                   id=NULL,
                                   svgdev=svgDevice()) {
   svgAnimateTransform("translate",
-                      paste(xvalues,
-                            yvalues,
+                      paste(round(xvalues, 2),
+                            round(yvalues, 2),
                             sep=",", collapse=';'),
-                      duration, rep, revert, id, svgdev)  
+                      begin, duration, rep, revert, id, svgdev)  
 }
 
 svgLines <- function(x, y, id=NULL, arrow = NULL,
@@ -188,8 +191,8 @@ svgLines <- function(x, y, id=NULL, arrow = NULL,
   catsvg(paste('<polyline ',
                'id="', id, '" ',
                'points="',
-               paste(x, ",",
-                     y, sep="",
+               paste(round(x, 2), ",",
+                     round(y, 2), sep="",
                      collapse=" "),
                '" ',
                lineMarkerTxt,
@@ -218,7 +221,8 @@ svgMarker <- function(x, y, type, ends, name,
                 function(subx, suby) {
                     openPath <- paste(c("M",
                                       rep("L", length(subx) - 1)),
-                                      subx, suby, collapse=" ")
+                                      round(subx, 2), round(suby, 2),
+                                      collapse=" ")
                     if (type == 2) # Closed arrow
                       paste(openPath, "Z")
                     else
@@ -231,12 +235,12 @@ svgMarker <- function(x, y, type, ends, name,
 
     markerDefs <- paste('<marker ',
                         'id="', markerName("both", name), '" ',
-                        'refX="', c(-width, width),
-                        '" refY="', c(-height / 2, height / 2), '" ',
+                        'refX="', round(c(-width, width), 2),
+                        '" refY="', round(c(-height / 2, height / 2), 2), '" ',
                         'overflow="visible" ',
                         'markerUnits="userSpaceOnUse" ',
-                        'markerWidth="', width, '" ',
-                        'markerHeight="', height, '" ',
+                        'markerWidth="', round(width, 2), '" ',
+                        'markerHeight="', round(height, 2), '" ',
                         'orient="auto">\n',
                         '<path ',
                         'd="', d, '" ',
@@ -393,15 +397,15 @@ svgText <- function(x, y, text, hjust="left", vjust="bottom", rot=0,
                    # Only draw a REALLY thin line for the text outline
                    'stroke-width=".1" ',
                    'transform="translate(',
-                   x, ', ',
-                   y, ') ',
+                   round(x, 2), ', ',
+                   round(y, 2), ') ',
                    '">\n',
                    '<g transform="scale(1, -1)">\n',
                    '<text x="0" y="0" ',
                    if (rot != 0) {
                        paste('transform="rotate(',
                              # Rotation in SVG goes clockwise from +ve x=axis
-                             -rot,
+                             round(-rot, 2),
                              ')" ', sep="")
                    } else "",
                    textAnchor(hjust), ' ',
@@ -436,7 +440,7 @@ svgTextSplitLines <- function(text, lineheight, charheight, vjust) {
     lineheight <- c(firstDelta, rep(lineheight, n - 1))
 
     svgText[[1]] <- paste('<tspan dy="',
-                          lineheight,
+                          round(lineheight, 2),
                           '" ',
                           'x="0"', # Needs to be pushed to the left
                           '>',
@@ -455,9 +459,9 @@ svgCircle <- function(x, y, r, id=NULL,
 
   circles <- paste('<circle ',
                    'id="', id, '" ',
-                   'cx="', x, '" ',
-                   'cy="', y, '" ',
-                   'r="', r, '" ',
+                   'cx="', round(x, 2), '" ',
+                   'cy="', round(y, 2), '" ',
+                   'r="', round(r, 2), '" ',
                    svgAttribTxt(attributes), ' ',
                    svgStyleCSS(style),
                    ' />\n',

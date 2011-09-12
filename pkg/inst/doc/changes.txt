@@ -1,4 +1,23 @@
 
+Changes from 0.7-0 to 0.7-1
+===========================
+
+1.  Started rounding all numeric values to 2 dp (in SVG output).
+
+2.  Added "animValue" and "animUnit" classes to somewhat formalise
+    the specification of animation values for attributes.
+
+    Coercion methods are defined so that animation values can be
+    specified as vectors, units, matrices, or lists (of units).
+
+3.  Removed 'id' argument from grid.animate().
+
+4.  Added 'begin' argument to grid.animate().
+
+5.  Added "animation" vignette, which describes how to specify
+    animation values for grid.animate().
+
+
 Changes from 0.6-0 to 0.7-0
 ===========================
 

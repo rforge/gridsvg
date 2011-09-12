@@ -11,7 +11,7 @@
 }
 \usage{
 garnishGrob(x, ...)
-grid.garnish(path, ..., grep=grep, redraw=TRUE)
+grid.garnish(path, ..., grep=FALSE, redraw=FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{

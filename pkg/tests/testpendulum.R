@@ -3,6 +3,7 @@ library(gridSVG)
 
 x11(width=6, height=6)
 
+grid.newpage()
 # Some default settings
 pushViewport(viewport(gp=gpar(col="black", fill=NA)))
 
@@ -28,10 +29,12 @@ grid.lines(name="chain",
            x=unit(c(0.5, x[1]), c("npc", "native")),
            y=unit(1, "npc") - unit(c(0, abs(y)[1]), c("npc", "native")))
 grid.animate("chain",
-             x=unit(c(rep(0.5, n), x), c(rep(c("npc", "native"), each=n))),
-             y=unit.c(unit(rep(1, n), "npc"),
-               unit(1, "npc") - unit(y, "native")),
-             id=rep(1:2, each=n),
+             x=animUnit(unit(c(rep(0.5, n), x),
+                             c(rep(c("npc", "native"), each=n))),
+                        timeid=rep(1:n, 2)),
+             y=animUnit(unit.c(unit(rep(1, n), "npc"),
+                        unit(1, "npc") - unit(y, "native")),
+                        timeid=rep(1:n, 2)),
              duration=5, rep=TRUE)
 grid.circle(name="weight",
             x=unit(x[1], "native"),
