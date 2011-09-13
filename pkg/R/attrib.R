@@ -6,7 +6,7 @@ garnishGrob <- function(x, ...) {
   # Should check that attributes are valid
   # Will need to be generic check with per-grob-type versions
   x$attributes <- list(...)
-  class(x) <- c("svg.grob", cl)
+  class(x) <- c("garnished.grob", cl)
   x
 }
 
@@ -15,6 +15,6 @@ grid.garnish <- function(path, ..., grep=FALSE, redraw=FALSE) {
            grep=grep, redraw=redraw)
 }
 
-devGrob.svg.grob <- function(x, dev) {
+devGrob.garnished.grob <- function(x, dev) {
   c(NextMethod(x), attributes=list(x$attributes))
 }

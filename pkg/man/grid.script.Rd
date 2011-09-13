@@ -10,17 +10,19 @@
   script elements.
 }
 \synopsis{
-scriptGrob(script=NULL, filename=NULL, type="text/ecmascript")
+scriptGrob(script=NULL, filename=NULL, type="text/ecmascript", inline=FALSE)
 grid.script(...)  
   }
 \usage{
-grid.script(script=NULL, filename=NULL, type="text/ecmascript")
+grid.script(script=NULL, filename=NULL, type="text/ecmascript", inline=FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{script}{ A character value specifying script code (no tags!). }
-  \item{filename}{ A file from which to read script code (no tags!). }
+  \item{script}{ A character value specifying script code. }
+  \item{filename}{ The name of a file that contains script code. }
   \item{type}{ The type of the script code. }
+  \item{inline}{ A logical specifying whether the script code from the
+    file should be included inline or just referenced. }
 }
 \value{
   A script object.

@@ -7,7 +7,7 @@
 gridToSVG <- function(name="Rplots.svg") {
   svgdev <- openSVGDev(name, width=par("din")[1], height=par("din")[2])
   # Create a gTree from the current page
-  gTree <- grid.grab()
+  gTree <- grid.grab(name="gridSVG")
   # Emptying the VP usage table
   vpUsageTable <- data.frame(vpname = character(0),
                              count = integer(0),

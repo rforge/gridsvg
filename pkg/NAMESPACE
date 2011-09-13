@@ -51,7 +51,7 @@ S3method("grobToDev", "gTree")
 S3method("grobToDev", "frame")
 S3method("grobToDev", "cellGrob")
 S3method("grobToDev", "linked.grob")
-S3method("grobToDev", "script")
+S3method("grobToDev", "script.grob")
 
 S3method("primToDev", "grob")
 S3method("primToDev", "lines")

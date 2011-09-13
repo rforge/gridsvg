@@ -470,14 +470,22 @@ svgCircle <- function(x, y, r, id=NULL,
   catsvg(circles, svgdev)
 }
 
-svgScript <- function(body, type="text/ecmascript",
+svgScript <- function(body, href, type="text/ecmascript",
                       id=NULL, svgdev=svgDevice()) {
   script <- paste('<script type="', type, '" ',
                   'id="', getid(id, svgdev, 1), '" ',
+                  if (nchar(href) > 0) 
+                      paste('xlink:href="', href, '" ' ,sep="")
+                  else
+                      '',
                   '>\n',
-                  '<![CDATA[\n',
-                  body, '\n',
-                  '  ]]>\n',
+                  if (nchar(body) > 0)
+                      paste('<![CDATA[\n',
+                            body, '\n',
+                            '  ]]>\n',
+                            sep="")
+                  else
+                      '',
                   '</script>\n',sep="");
   catsvg(script, svgdev)
 }

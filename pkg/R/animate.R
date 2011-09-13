@@ -677,7 +677,7 @@ animate.polyline <- function(x, animation, dev) {
            
 primToDev.animated.grob <- function(x, dev) {
   animations <- x$animations[!names(x$animations) %in%
-                             c("duration", "id", "rep", "revert")]
+                             c("begin", "duration", "id", "rep", "revert")]
   for (i in names(animations)) 
       animate(x, i, dev)
   NextMethod()
