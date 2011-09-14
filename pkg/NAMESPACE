@@ -44,6 +44,7 @@ export("grid.hyperlink",
        )
 
 # So other PACKAGES can write translation methods for new grobs
+export("grobToDev")
 export("primToDev")
 
 S3method("grobToDev", "grob")
