@@ -67,6 +67,7 @@ S3method("primToDev", "xaxis")
 S3method("primToDev", "yaxis")
 S3method("primToDev", "xspline")
 S3method("primToDev", "animated.grob")
+S3method("primToDev", "garnished.grob")
 
 S3method("as.animUnit", "animUnit")
 S3method("as.animUnit", "numeric")

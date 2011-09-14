@@ -1,6 +1,34 @@
 
 # Add arbitrary SVG attributes to a grob
 
+# This works by ...
+
+# 1.  Enhancing a normal "grob" to make a "garnished.grob"
+#     by adding an 'attributes' component
+
+# 2.  Intercepting primToDev() calls (special method for "garnished.grob"s)
+#     and setting an 'attrs' slot in the SVG device object.
+#     The vectors of attribute values are given names
+#     using the same name-generating function as is used in
+#     normal primToDev() methods, subGrobName().
+#     THEN the normal primToDev() method is called
+#     (which will create SVG code).
+
+# 3.  svg*() functions (like svgRect()) are sent the 'attrs' slot
+#     from the SVG device.
+#     These functions look in the attributes that they are given
+#     and pull out the values where the 'name' corrsponds to
+#     the 'id' of the element that they are drawing.
+
+# The idea is that, if only ONE attribute value is specified, then the
+# attribute value is given the name of the grob, so it will get picked
+# up by the devStartGroup() call and the attribute will be set on the
+# overall <g> element.
+# Otherwise, the attribute values
+# are named using subGrobName() so that they will get picked up by
+# calls like devRect() and each individual SVG element will get the
+# attribute (rather than the overall <g> element).
+
 garnishGrob <- function(x, ...) {
   cl <- class(x)
   # Should check that attributes are valid
@@ -15,6 +43,16 @@ grid.garnish <- function(path, ..., grep=FALSE, redraw=FALSE) {
            grep=grep, redraw=redraw)
 }
 
-devGrob.garnished.grob <- function(x, dev) {
-  c(NextMethod(x), attributes=list(x$attributes))
+primToDev.garnished.grob <- function(x, dev) {
+    dev@attrs <- lapply(x$attributes,
+                        function(attr, groupName) {
+                            n <- length(attr)
+                            if (n > 1) 
+                                names(attr) <- subGrobName(x$name, 1:n)
+                            else
+                                names(attr) <- groupName
+                            attr
+                        },
+                        x$name)
+    NextMethod()
 }

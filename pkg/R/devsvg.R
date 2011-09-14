@@ -293,6 +293,7 @@ devParToSVGStyle <- function(gp, dev) {
 setClass("svgDevice",
          representation("graphicsDevice",
                         res="numeric",
+                        attrs="list",
                         # Object created by svgDevice() in svg.R
                         # has no S4 class yet
                         dev="ANY"))
@@ -331,21 +332,21 @@ setMethod("devArrow", signature(device="svgDevice"),
 setMethod("devLines", signature(device="svgDevice"),
           function(lines, gp, device) {
             svgLines(lines$x, lines$y, lines$name, lines$arrow,
-                     listToSVGAttrib(lines$attributes),
+                     device@attrs,
                      devParToSVGStyle(gp, device), device@dev)
           })
 
 setMethod("devPolygon", signature(device="svgDevice"),
           function(polygon, gp, device) {
             svgPolygon(polygon$x, polygon$y, polygon$name,
-                       listToSVGAttrib(polygon$attributes),
+                       device@attrs,
                        devParToSVGStyle(gp, device), device@dev)
           })
 
 setMethod("devPath", signature(device="svgDevice"),
           function(path, gp, device) {
             svgPath(path$x, path$y, path$rule, path$name,
-                    listToSVGAttrib(path$attributes),
+                    device@attrs,
                     devParToSVGStyle(gp, device), device@dev)
           })
 
@@ -360,7 +361,7 @@ setMethod("devRaster", signature(device="svgDevice"),
 setMethod("devRect", signature(device="svgDevice"),
           function(rect, gp, device) {
             svgRect(rect$x, rect$y, rect$width, rect$height, rect$name,
-                    listToSVGAttrib(rect$attributes),
+                    device@attrs,
                     devParToSVGStyle(gp, device), device@dev)
           })
 
@@ -376,14 +377,14 @@ setMethod("devText", signature(device="svgDevice"),
             svgText(text$x, text$y, text$text,
                     text$hjust, text$vjust, text$rot,
                     text$lineheight, text$charheight, text$name,
-                    listToSVGAttrib(text$attributes),
+                    device@attrs,
                     devParToSVGStyle(gp, device), device@dev)
           })
 
 setMethod("devCircle", signature(device="svgDevice"),
           function(circle, gp, device) {
             svgCircle(circle$x, circle$y, circle$r, circle$name,
-                      listToSVGAttrib(circle$attributes),
+                      device@attrs,
                       devParToSVGStyle(gp, device), device@dev)
           })
 
@@ -399,7 +400,7 @@ setMethod("devStartGroup", signature(device="svgDevice"),
             }
 
             svgStartGroup(group$name, clip=clip,
-                          attributes=listToSVGAttrib(group$attributes),
+                          attributes=device@attrs,
                           style=devParToSVGStyle(gp, device),
                           svgdev=device@dev)
           })

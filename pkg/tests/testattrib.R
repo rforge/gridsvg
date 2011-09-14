@@ -18,3 +18,27 @@ gridToSVG()
 dev.off()
 
 
+# Single attribute value on single grob
+grid.newpage()
+grid.circle(r=.1, gp=gpar(fill="black"), name="c")
+grid.garnish("c", onmousedown="alert('ouch')")
+gridToSVG("testattrcircle.svg")
+
+# Multiple attribute values on single grob
+grid.newpage()
+pushViewport(viewport())
+grid.points(1:3/4, 1:3/4, pch=c(1, 10, 16), name="p")
+grid.garnish("p", 
+             onmousedown=c("alert('pch=1')",
+               "alert('pch=10')",
+               "alert('pch=16')"))
+gridToSVG("testattrpoints.svg")
+
+# Multiple attributes (one with single value, one with multiple values)
+grid.newpage()
+grid.circle(x=1:3/4, r=.1, gp=gpar(fill="black"), name="c")
+grid.garnish("c",
+             onmouseover=c("alert('c1')", "alert('c2')", "alert('c3')"),
+             onmousedown="alert('click me!')")
+gridToSVG("testmultattr.svg")
+             

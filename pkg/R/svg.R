@@ -54,7 +54,7 @@ svgStartGroup <- function(id=NULL, clip=FALSE,
   incindent(svgdev)
   catsvg(paste('<g ',
                'id="', getid(id, svgdev), '" ',
-               svgAttribTxt(attributes), ' ',
+               svgAttribTxt(attributes, id), ' ',
                svgClipAttr(id, clip),
                svgStyleCSS(style), 
                '>\n',
@@ -196,7 +196,7 @@ svgLines <- function(x, y, id=NULL, arrow = NULL,
                      collapse=" "),
                '" ',
                lineMarkerTxt,
-               svgAttribTxt(attributes), ' ',
+               svgAttribTxt(attributes, id), ' ',
                svgStyleCSS(style), 
                ' />\n', sep=""),
          svgdev)  
@@ -291,7 +291,7 @@ svgPolygon <- function(x, y, id=NULL,
                      y, sep="",
                      collapse=" "),
                '" ', 
-               svgAttribTxt(attributes), ' ',
+               svgAttribTxt(attributes, id), ' ',
                svgStyleCSS(style), 
                ' />\n', sep=""),
          svgdev)  
@@ -325,7 +325,7 @@ svgPath <- function(x, y, rule, id=NULL,
                  'd="', paste(unlist(d), collapse=" "), '" ', 
                  'fill-rule="',
                  switch(rule, winding="nonzero", "evenodd"), '" ',
-                 svgAttribTxt(attributes), ' ',
+                 svgAttribTxt(attributes, id), ' ',
                  svgStyleCSS(style), 
                  ' />\n', sep=""),
            svgdev)  
@@ -349,7 +349,7 @@ svgRaster <- function(x, y, width, height, name,
                    'xlink:href="', fileloc, '" ',
                    # Flipping image vertically to correct orientation
                    'transform="translate(0, ',  height + (2 * y), ') scale(1, -1)" ',
-                   svgAttribTxt(attributes), ' ',
+                   svgAttribTxt(attributes, id), ' ',
                    svgStyleCSS(style),
                    ' />\n',
                    sep="")
@@ -366,7 +366,7 @@ svgRect <- function(x, y, width, height, id=NULL,
                  'y="', y, '" ',
                  'width="', width, '" ',
                  'height="', height, '" ',
-                 svgAttribTxt(attributes), ' ',
+                 svgAttribTxt(attributes, id), ' ',
                  svgStyleCSS(style),
                  ' />\n',
                  sep="")
@@ -393,7 +393,7 @@ svgText <- function(x, y, text, hjust="left", vjust="bottom", rot=0,
     texts <- paste('<g ',
                    'id="', id, '" ',
                    # Attributes applied to group
-                   svgAttribTxt(attributes), ' ',
+                   svgAttribTxt(attributes, id), ' ',
                    # Only draw a REALLY thin line for the text outline
                    'stroke-width=".1" ',
                    'transform="translate(',
@@ -462,7 +462,7 @@ svgCircle <- function(x, y, r, id=NULL,
                    'cx="', round(x, 2), '" ',
                    'cy="', round(y, 2), '" ',
                    'r="', round(r, 2), '" ',
-                   svgAttribTxt(attributes), ' ',
+                   svgAttribTxt(attributes, id), ' ',
                    svgStyleCSS(style),
                    ' />\n',
                    sep="")
@@ -501,6 +501,7 @@ svgScript <- function(body, href, type="text/ecmascript",
 # x, y, width, and height;  this will allow viewports
 # to be defined within user coordinates (see svgPushViewport
 # and svgPopViewport)
+
 svgDevice <- function(file="", width=200, height=200) {
   dev <- new.env(FALSE, emptyenv())
   assign("file", file, env=dev)
@@ -602,11 +603,28 @@ emptyAttrib <- function(attributes) {
   length(attributes) == 0
 }
 
-svgAttribTxt <- function(attributes) {
-  if (emptyAttrib(attributes))
-    ""
-  else
-    paste(names(attributes), '="', attributes, '"', sep="", collapse=" ")
+# Only use the attributes that are for this 'id'
+svgAttribTxt <- function(attributes, id) {
+    if (emptyAttrib(attributes)) {
+        ""
+    } else {
+        attributes <- lapply(attributes,
+                             function(attr, id) {
+                                 kept <- attr[names(attr) == id]
+                                 if (length(kept) == 0)
+                                     NULL
+                                 else
+                                     kept
+                             },
+                             id)
+        # Drop NULL attributes
+        attributes <- attributes[!sapply(attributes, is.null)]
+        if (length(attributes) > 0)
+            paste(names(attributes), '="', attributes, '"', sep="",
+                  collapse=" ")
+        else
+            ""
+    }
 }
 
 # SVG styling
