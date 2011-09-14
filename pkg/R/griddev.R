@@ -954,9 +954,10 @@ primToDev.points <- function(x, dev) {
     for (i in 1:n) {
         pgp <- gparToDevPars(gp[i])
 
-        # Need to calculate the size of a char, which is affected by cex and fontsize
-        # A textGrob with an "M" will be a good approximation for the point size
-        # when size is a "char"
+        # Need to calculate the size of a char, which is affected by
+        # cex and fontsize
+        # A textGrob with an "M" will be a good approximation for the
+        # point size when size is a "char"
         if (attr(sizes[i], "unit") == "char")
             pointSize <- convertHeight(grobHeight(textGrob("M", gp = pgp)),
                                        "inches")
