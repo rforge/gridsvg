@@ -26,6 +26,15 @@ Changes from 0.7-0 to 0.8-0
     SVG elements, rather than being applied to the parent <g>.
     (Single attribute values are still applied to the parent <g>.)
 
+9.  Changed conversion of graphical parameters.  
+
+    Instead of creating a single 'style' attribute in each element,
+    now create individual SVG presentation attributes, like 'fill'
+    and 'fill-opacity'.
+
+    Also, ONLY record explicit 'gp' settings, rather than ALWAYS
+    recording ALL current settings for ALL elements.
+
 
 Changes from 0.6-0 to 0.7-0
 ===========================

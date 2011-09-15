@@ -5,17 +5,22 @@
 
 # User function
 gridToSVG <- function(name="Rplots.svg") {
-  svgdev <- openSVGDev(name, width=par("din")[1], height=par("din")[2])
-  # Create a gTree from the current page
-  gTree <- grid.grab(name="gridSVG")
-  # Emptying the VP usage table
-  vpUsageTable <- data.frame(vpname = character(0),
-                             count = integer(0),
-                             stringsAsFactors=FALSE)
-  assign("vpUsageTable", vpUsageTable, env = .gridSVGEnv)
-  # Convert gTree to SVG
-  gridToDev(gTree, svgdev)
-  devClose(svgdev)
+    # Ensure we're at the top level
+    upViewport(0)
+    rootgp <- get.gpar()
+    svgdev <- openSVGDev(name, width=par("din")[1], height=par("din")[2])
+    # Create a gTree from the current page
+    # NOTE that set the 'gp' slot on this top-level gTree
+    # based on ROOT vp 
+    gTree <- grid.grab(name="gridSVG", gp=rootgp)
+    # Emptying the VP usage table
+    vpUsageTable <- data.frame(vpname = character(0),
+                               count = integer(0),
+                               stringsAsFactors=FALSE)
+    assign("vpUsageTable", vpUsageTable, env = .gridSVGEnv)
+    # Convert gTree to SVG
+    gridToDev(gTree, svgdev)
+    devClose(svgdev)
 }
 
 old.gridToSVG <- function(name="Rplots.svg") {

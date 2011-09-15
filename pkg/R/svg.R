@@ -56,7 +56,7 @@ svgStartGroup <- function(id=NULL, clip=FALSE,
                'id="', getid(id, svgdev), '" ',
                svgAttribTxt(attributes, id), ' ',
                svgClipAttr(id, clip),
-               svgStyleCSS(style), 
+               svgStyleAttributes(style), 
                '>\n',
                sep=""), svgdev)
   incID(svgdev)
@@ -197,7 +197,7 @@ svgLines <- function(x, y, id=NULL, arrow = NULL,
                '" ',
                lineMarkerTxt,
                svgAttribTxt(attributes, id), ' ',
-               svgStyleCSS(style), 
+               svgStyleAttributes(style), 
                ' />\n', sep=""),
          svgdev)  
 }
@@ -245,7 +245,7 @@ svgMarker <- function(x, y, type, ends, name,
                         '<path ',
                         'd="', d, '" ',
                         c('transform="rotate(180)" ', ''),
-                        svgStyleCSS(style), 
+                        svgStyleAttributes(style), 
                         ' />\n',
                         '</marker>\n', sep="", collapse="")
     catsvg(paste('<defs>\n',
@@ -292,7 +292,7 @@ svgPolygon <- function(x, y, id=NULL,
                      collapse=" "),
                '" ', 
                svgAttribTxt(attributes, id), ' ',
-               svgStyleCSS(style), 
+               svgStyleAttributes(style), 
                ' />\n', sep=""),
          svgdev)  
 }
@@ -326,7 +326,7 @@ svgPath <- function(x, y, rule, id=NULL,
                  'fill-rule="',
                  switch(rule, winding="nonzero", "evenodd"), '" ',
                  svgAttribTxt(attributes, id), ' ',
-                 svgStyleCSS(style), 
+                 svgStyleAttributes(style), 
                  ' />\n', sep=""),
            svgdev)  
 }
@@ -350,7 +350,7 @@ svgRaster <- function(x, y, width, height, name,
                    # Flipping image vertically to correct orientation
                    'transform="translate(0, ',  height + (2 * y), ') scale(1, -1)" ',
                    svgAttribTxt(attributes, id), ' ',
-                   svgStyleCSS(style),
+                   svgStyleAttributes(style),
                    ' />\n',
                    sep="")
 
@@ -367,7 +367,7 @@ svgRect <- function(x, y, width, height, id=NULL,
                  'width="', width, '" ',
                  'height="', height, '" ',
                  svgAttribTxt(attributes, id), ' ',
-                 svgStyleCSS(style),
+                 svgStyleAttributes(style),
                  ' />\n',
                  sep="")
   catsvg(rects, svgdev)
@@ -409,7 +409,7 @@ svgText <- function(x, y, text, hjust="left", vjust="bottom", rot=0,
                              ')" ', sep="")
                    } else "",
                    textAnchor(hjust), ' ',
-                   svgStyleCSS(style),
+                   svgStyleAttributes(style),
                    ' >\n',
                    svgTextSplitLines(text, lineheight, charheight, vjust),
                    '</text>\n',
@@ -463,7 +463,7 @@ svgCircle <- function(x, y, r, id=NULL,
                    'cy="', round(y, 2), '" ',
                    'r="', round(r, 2), '" ',
                    svgAttribTxt(attributes, id), ' ',
-                   svgStyleCSS(style),
+                   svgStyleAttributes(style),
                    ' />\n',
                    sep="")
 
@@ -655,6 +655,16 @@ svgStyleCSS <- function(svgstyle) {
     #                        paste(svgstyle), sep="", collapse="; "),
     #       '"', sep="")
   }
+}
+
+svgStyleAttributes <- function(svgstyle) {
+    if (emptyStyle(svgstyle)) {
+        ""
+    } else {
+        if (any(sapply(svgstyle, length) > 1))
+            stop("All SVG style attribute values must have length 1")
+        paste(names(svgstyle), "=\"", svgstyle, "\"", sep="", collapse=" ")
+    }    
 }
 
 # Specifying text justification

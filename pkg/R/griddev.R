@@ -50,9 +50,17 @@ baseGrobName <- function(subGrobName, separator = ".") {
 
 # Convert a gpar object to an device-neutral graphical parameter list
 gparToDevPars <- function(gp) {
-    devpar <- get.gpar()
-    devpar[names(gp)] <- gp
-    devpar
+    # Split up col into col plus colAlpha
+    if (!is.null(gp$col)) {
+        rgba <- col2rgb(gp$col, alpha=TRUE)
+        gp$colAlpha <- rgba[4]
+    }
+    # Ditto fill
+    if (!is.null(gp$fill)) {
+        rgba <- col2rgb(gp$fill, alpha=TRUE)
+        gp$fillAlpha <- rgba[4]
+    }
+    gp
 }
 
 # Repeats all elements in a gpar() so that it is fully defined for n values
@@ -200,10 +208,11 @@ grobToDev.grob <- function(x, dev) {
   if (!is.null(x$vp)) {
     if (!inherits(x$vp, "vpPath")) {
       pushViewport(x$vp)
-      devStartGroup(devGrob(x$vp, dev), gparToDevPars(get.gpar()), dev)
+      devStartGroup(devGrob(x$vp, dev), gparToDevPars(x$vp$gp), dev)
     } else {
       depth <- downViewport(x$vp)
-      devStartGroup(devGrob(x$vp, dev), gparToDevPars(get.gpar()), dev)
+      devStartGroup(devGrob(x$vp, dev),
+                    gparToDevPars(current.viewport()$gp), dev)
     }
   }
   primToDev(x, dev)
@@ -312,7 +321,7 @@ devGrob.rect <- function(x, dev) {
 
 devGrob.text <- function(x, dev) {
   loc <- locToInches(x$x, x$y, dev)
-  gp <- gparToDevPars(x$gp)
+  gp <- get.gpar()
   charHeight <- grobHeight(textGrob("M", gp = x$gp))
   # The R graphics engine does some crazy-ass calculations to
   # determine line height.  This does WAAAAY back so we just
@@ -877,6 +886,7 @@ primToDev.text <- function(x, dev) {
     textLabel <- rep(x$label, length.out = n)
   }
 
+  
   # Expand the gp such that it fully defines all sub-grobs
   gp <- expandGpar(x$gp, n)
 
@@ -952,7 +962,7 @@ primToDev.points <- function(x, dev) {
     sizes <- rep(x$size, length.out = n)
 
     for (i in 1:n) {
-        pgp <- gparToDevPars(gp[i])
+        pgp <- gp[i]
 
         # Need to calculate the size of a char, which is affected by
         # cex and fontsize
@@ -1542,20 +1552,22 @@ grobToDev.frame <- function(x, dev) {
   if (!is.null(x$vp)) {
     if (!inherits(x$vp, "vpPath")) {
       pushViewport(x$vp)
-      devStartGroup(devGrob(x$vp, dev), gparToDevPars(get.gpar()), dev)
+      devStartGroup(devGrob(x$vp, dev), gparToDevPars(x$vp$gp), dev)
     } else {
       depth <- downViewport(x$vp)
-      devStartGroup(devGrob(x$vp, dev), gparToDevPars(get.gpar()), dev)
+      devStartGroup(devGrob(x$vp, dev), current.viewport()$gp, dev)
     }
   }
 
   if (!is.null(x$framevp)) {
     pushViewport(x$framevp, recording = FALSE)
-    devStartGroup(devGrob(x, dev), gparToDevPars(x$gp), dev)
+    devStartGroup(devGrob(x$framevp, dev), gparToDevPars(x$framevp$gp), dev)
   }
 
+  devStartGroup(devGrob(x, dev), gparToDevPars(x$gp), dev)
   lapply(x$children, grobToDev, dev)
-
+  devEndGroup(dev)
+  
   if (!is.null(x$framevp)) {
     devEndGroup(dev)
     upViewport(recording = FALSE)
@@ -1579,20 +1591,22 @@ grobToDev.cellGrob <- function(x, dev) {
   if (!is.null(x$vp)) {
     if (!inherits(x$vp, "vpPath")) {
       pushViewport(x$vp)
-      devStartGroup(devGrob(x$vp, dev), gparToDevPars(get.gpar()), dev)
+      devStartGroup(devGrob(x$vp, dev), gparToDevPars(x$vp$gp), dev)
     } else {
       depth <- downViewport(x$vp)
-      devStartGroup(devGrob(x$vp, dev), gparToDevPars(get.gpar()), dev)
+      devStartGroup(devGrob(x$vp, dev), current.viewport()$gp, dev)
     }
   }
 
   if (!is.null(x$cellvp)) {
     pushViewport(x$cellvp, recording = FALSE)
-    devStartGroup(devGrob(x, dev), gparToDevPars(x$gp), dev)
+    devStartGroup(devGrob(x$cellvp, dev), gparToDevPars(x$cellvp$gp), dev)
   }
 
+  devStartGroup(devGrob(x, dev), gparToDevPars(x$gp), dev)
   lapply(x$children, grobToDev, dev)
-
+  devEndGroup(dev)
+  
   if (!is.null(x$cellvp)) {
     devEndGroup(dev)
     upViewport(grid:::depth(x$cellvp), recording = FALSE)
@@ -1616,10 +1630,10 @@ grobToDev.gTree <- function(x, dev) {
   if (!is.null(x$vp)) {
     if (!inherits(x$vp, "vpPath")) {
       pushViewport(x$vp)
-      devStartGroup(devGrob(x$vp, dev), gparToDevPars(get.gpar()), dev)
+      devStartGroup(devGrob(x$vp, dev), gparToDevPars(x$vp$gp), dev)
     } else {
       depth <- downViewport(x$vp)
-      devStartGroup(devGrob(x$vp, dev), gparToDevPars(get.gpar()), dev)
+      devStartGroup(devGrob(x$vp, dev), current.viewport()$gp, dev)
     }
   }
   if (!is.null(x$childrenvp)) {

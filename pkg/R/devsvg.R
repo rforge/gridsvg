@@ -22,10 +22,12 @@
 devParNameToSVGStyleName <- function(name) {
   switch(name,
          col="stroke",
+         colAlpha="stroke-opacity",
          fill="fill",
-         font="font-weight",
+         fillAlpha="fill-opacity",
+         fontweight="font-weight",
          fontfamily="font-family",
-         fontface="font-weight",
+         fontstyle="font-style",
          fontsize="font-size",
          alpha="opacity",
          lty="stroke-dasharray",
@@ -71,27 +73,14 @@ devColToSVG <- function(col) {
   if (col == "transparent")
       "none"
   else {
-      rgbaCol <- col2rgb(col, alpha = TRUE)
-      strokeOpacity <- rgbaCol[4] / 255 # Scaling from [0,255] to [0,1]
-      rgbCol <- rgbaCol[-4]
-      paste("rgb(", paste(rgbCol, collapse=","), "); ",
-            "stroke-opacity: ", strokeOpacity, sep="")
+      rgbaCol <- col2rgb(col)
+      rgbCol <- rgbaCol
+      paste("rgb(", paste(rgbCol, collapse=","), ")", sep="")
   }
 }
 
-devFillToSVG <- function(col) {
-  if (length(col) > 1)
-    warning("Only first colour used")
-  # Handle "transparent" as a special case
-  if (col == "transparent")
-      "none"
-  else {
-      rgbaCol <- col2rgb(col, alpha = TRUE)
-      fillOpacity <- rgbaCol[4] / 255 # Scaling from [0,255] to [0,1]
-      rgbCol <- rgbaCol[-4]
-      paste("rgb(", paste(rgbCol, collapse=","), "); ",
-            "fill-opacity: ", fillOpacity, sep="")
-  }
+devColAlphaToSVG <- function(colAlpha) {
+    round(colAlpha/255, 2)
 }
 
 devFontSizeToSVG <- function(fontsize, dev) {
@@ -106,7 +95,7 @@ devLineJoinToSVG <- function(linejoin, dev) {
         linejoin
 }
 
-devFontFaceToSVG <- function(fontface, dev) {
+devFontFaceToSVG <- function(fontface) {
     # CSS uses two different properties to configure the appearance of a font
     # Setting defaults to CSS defaults
     fontWeightCSS <- "normal"
@@ -165,10 +154,8 @@ devFontFaceToSVG <- function(fontface, dev) {
         }
     }
 
-    # We assume that the following is going to be prefixed by a "font-weight: "
-    fontstyle <- paste(fontWeightCSS, "; font-style: ", fontStyleCSS, sep="")
-
-    fontstyle
+    list(fontweight=fontWeightCSS,
+         fontstyle=fontStyleCSS)
 }
 
 getSVGFonts <- function() {
@@ -245,10 +232,10 @@ devParToSVGPar <- function(name, par, dev) {
              "none",
              switch(name,
                     col=devColToSVG(par),
-                    fill=devFillToSVG(par),
+                    colAlpha=devColAlphaToSVG(par),
+                    fill=devColToSVG(par),
+                    fillAlpha=devColAlphaToSVG(par),
                     fontsize=devFontSizeToSVG(par, dev),
-                    font=devFontFaceToSVG(par, dev),
-                    fontface=devFontFaceToSVG(par, dev),
                     fontfamily=devFontFamilyToSVG(par, dev),
                     lwd=devLwdToSVG(par, dev),
                     linejoin=devLineJoinToSVG(par, dev),
@@ -277,6 +264,13 @@ devParToSVGStyle <- function(gp, dev) {
             } else {
                 gp$lty <- devLtyToSVG(gp$lty, 1, dev)
             }
+        }
+        # Split fontface into fontweight and fontstyle
+        if ("fontface" %in% names(gp)) {
+            svgFont <- devFontFaceToSVG(gp$fontface)
+            gp$fontweight <- svgFont$fontweight
+            gp$fontstyle <- svgFont$fontstyle
+            gp$fontface <- NULL
         }
         for (i in names(gp))
             if (!is.na(devParNameToSVGStyleName(i)))
@@ -367,12 +361,14 @@ setMethod("devRect", signature(device="svgDevice"),
 
 setMethod("devText", signature(device="svgDevice"),
           function(text, gp, device) {
-            # Draw SVG text with no border and fill = col
-            if (is.null(gp$col))
+            # Draw SVG text with fill = col
+            if (is.null(gp$col)) {
               gp$fill <- "black"
-            else
+              gp$fillAlpha <- 255
+            } else {
               gp$fill <- gp$col
-            gp$col <- NA
+              gp$fillAlpha <- gp$colAlpha
+            }
 
             svgText(text$x, text$y, text$text,
                     text$hjust, text$vjust, text$rot,
