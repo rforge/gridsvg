@@ -47,6 +47,7 @@ export("grid.hyperlink",
 export("grobToDev")
 export("primToDev")
 export("animate")
+export("garnish")
 
 S3method("grobToDev", "grob")
 S3method("grobToDev", "gTree")
