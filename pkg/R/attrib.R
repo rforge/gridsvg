@@ -29,30 +29,59 @@
 # calls like devRect() and each individual SVG element will get the
 # attribute (rather than the overall <g> element).
 
-garnishGrob <- function(x, ...) {
-  cl <- class(x)
-  # Should check that attributes are valid
-  # Will need to be generic check with per-grob-type versions
-  x$attributes <- list(...)
-  class(x) <- c("garnished.grob", cl)
-  x
+garnishGrob <- function(x, ..., group=TRUE) {
+    cl <- class(x)
+    # Should check that attributes are valid
+    # Will need to be generic check with per-grob-type versions
+    if (group) {
+        x$groupAttributes <- c(x$groupAttributes, list(...))
+    } else {
+        x$attributes <- c(x$attributes, list(...))
+    }
+    class(x) <- unique(c("garnished.grob", cl))
+    x
 }
 
 grid.garnish <- function(path, ..., grep=FALSE, redraw=FALSE) {
-  grid.set(path, garnishGrob(grid.get(path, grep=grep), ...),
-           grep=grep, redraw=redraw)
+    grid.set(path, garnishGrob(grid.get(path, grep=grep), ...),
+             grep=grep, redraw=redraw)
 }
 
-primToDev.garnished.grob <- function(x, dev) {
-    dev@attrs <- lapply(x$attributes,
-                        function(attr, groupName) {
-                            n <- length(attr)
-                            if (n > 1) 
-                                names(attr) <- subGrobName(x$name, 1:n)
-                            else
-                                names(attr) <- groupName
-                            attr
-                        },
-                        x$name)
+garnish <- function(x, attributes, groupAttributes) {
+    UseMethod("garnish")
+}
+
+# This is intended to handle all basic graphical primitives
+garnish.grob <- function(x, attributes, groupAttributes) {
+    c(lapply(x$attributes,
+             function(attr) {
+                 n <- length(attr)
+                 names(attr) <- subGrobName(x$name, 1:n)
+                 attr
+             }),
+      lapply(x$groupAttributes,
+             function(attr, groupName) {
+                 names(attr) <- x$name
+                 attr
+             }))
+}
+
+# A hopefully useful default for gTrees
+garnish.gTree <- function(x, attributes, groupAttributes) {
+    c(lapply(x$attributes,
+             function(attr) {
+                 n <- length(attr)
+                 names(attr) <- (x$childrenOrder)[1:n]
+                 attr
+             }),
+      lapply(x$groupAttributes,
+             function(attr, groupName) {
+                 names(attr) <- x$name
+                 attr
+             }))                          
+}
+
+grobToDev.garnished.grob <- function(x, dev) {
+    dev@attrs <- garnish(x, x$attributes, x$groupAttributes)
     NextMethod()
 }

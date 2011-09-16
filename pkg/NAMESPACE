@@ -46,6 +46,7 @@ export("grid.hyperlink",
 # So other PACKAGES can write translation methods for new grobs
 export("grobToDev")
 export("primToDev")
+export("animate")
 
 S3method("grobToDev", "grob")
 S3method("grobToDev", "gTree")
@@ -53,6 +54,7 @@ S3method("grobToDev", "frame")
 S3method("grobToDev", "cellGrob")
 S3method("grobToDev", "linked.grob")
 S3method("grobToDev", "script.grob")
+S3method("grobToDev", "garnished.grob")
 
 S3method("primToDev", "grob")
 S3method("primToDev", "lines")
@@ -68,7 +70,6 @@ S3method("primToDev", "xaxis")
 S3method("primToDev", "yaxis")
 S3method("primToDev", "xspline")
 S3method("primToDev", "animated.grob")
-S3method("primToDev", "garnished.grob")
 
 S3method("as.animUnit", "animUnit")
 S3method("as.animUnit", "numeric")

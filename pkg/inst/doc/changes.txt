@@ -21,10 +21,9 @@ Changes from 0.7-0 to 0.8-0
 
 7.  Added 'inline' argument to grid.script().
 
-8.  Modified behaviour of grid.garnish() so that, if several 
-    attributes are specified, they are applied to the individual
-    SVG elements, rather than being applied to the parent <g>.
-    (Single attribute values are still applied to the parent <g>.)
+8.  Added 'group' argument to grid.garnish() so that attributes
+    can be applied EITHER to the parent <g> (the default) 
+    OR to the individual child elements.
 
 9.  Changed conversion of graphical parameters.  
 
@@ -34,6 +33,10 @@ Changes from 0.7-0 to 0.8-0
 
     Also, ONLY record explicit 'gp' settings, rather than ALWAYS
     recording ALL current settings for ALL elements.
+
+10. Modify grid.garnish() code so that can garnish same grob multiple   
+    times (without overwriting previous garnish).
+
 
 
 Changes from 0.6-0 to 0.7-0
