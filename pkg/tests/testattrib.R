@@ -31,14 +31,17 @@ grid.points(1:3/4, 1:3/4, pch=c(1, 10, 16), name="p")
 grid.garnish("p", 
              onmousedown=c("alert('pch=1')",
                "alert('pch=10')",
-               "alert('pch=16')"))
+               "alert('pch=16')"),
+             group=FALSE)
 gridToSVG("testattrpoints.svg")
 
-# Multiple attributes (one with single value, one with multiple values)
+# Multiple garnishes (one with single value, one with multiple values)
 grid.newpage()
 grid.circle(x=1:3/4, r=.1, gp=gpar(fill="black"), name="c")
 grid.garnish("c",
              onmouseover=c("alert('c1')", "alert('c2')", "alert('c3')"),
+             group=FALSE)
+grid.garnish("c",
              onmousedown="alert('click me!')")
 gridToSVG("testmultattr.svg")
              

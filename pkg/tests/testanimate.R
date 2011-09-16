@@ -225,4 +225,15 @@ grid.animate("polyline",
              duration=10)
 gridToSVG("anim-polyline-complex.svg")
 
-
+# Multiple animations on same grob
+grid.newpage()
+grid.rect(x=.1, y=.1, width=.1, height=.1, name="r")
+grid.animate("r", x=c(.1, .9))
+grid.animate("r", x=c(.9, .1), begin=3)
+gridToSVG("anim-rect-multi.svg")
+ 
+# Animate group
+grid.newpage()
+grid.rect(x=.1, y=.1, width=.1, height=.1, name="r")
+grid.animate("r", visibility=c("visible", "hidden"), group=TRUE)
+gridToSVG("anim-group.svg")

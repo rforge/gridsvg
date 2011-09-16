@@ -34,9 +34,15 @@ Changes from 0.7-0 to 0.8-0
     Also, ONLY record explicit 'gp' settings, rather than ALWAYS
     recording ALL current settings for ALL elements.
 
-10. Modify grid.garnish() code so that can garnish same grob multiple   
+10. Modified grid.garnish() so that can garnish same grob multiple   
     times (without overwriting previous garnish).
 
+11. Modified grid.animate() so that can animate same grob multiple
+    times (without overwriting previous animation).
+
+12. Added 'group' argument to grid.animate() so that animation
+    can apply EITHER to the individual child elements (the default)
+    OR to the parent <g>.
 
 
 Changes from 0.6-0 to 0.7-0
