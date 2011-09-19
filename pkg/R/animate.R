@@ -739,6 +739,16 @@ applyAnimation.polyline <- function(x, animSet, animation, group, dev) {
 
 # FIXME:  segments, polygons, xsplines, ...
 
+applyAnimation.gTree <- function(x, animSet, animation, group, dev) {
+    if (group) {
+        svgAnimate(animation,
+                   paste(ithValue(animSet$animations[[animation]], 1),
+                         collapse=";"),
+                   animSet$begin, animSet$dur, animSet$rep, animSet$rev,
+                   x$name, dev@dev)
+    } 
+}
+
 applyAnimationSet <- function(x, animationSet, group, dev) {
     animations <- animationSet$animations
     for (i in names(animations)) 

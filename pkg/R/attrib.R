@@ -56,7 +56,8 @@ garnish.grob <- function(x, attributes, groupAttributes) {
     c(lapply(x$attributes,
              function(attr) {
                  n <- length(attr)
-                 names(attr) <- subGrobName(x$name, 1:n)
+                 if (is.null(names(attr)))
+                     names(attr) <- subGrobName(x$name, 1:n)
                  attr
              }),
       lapply(x$groupAttributes,
@@ -71,7 +72,8 @@ garnish.gTree <- function(x, attributes, groupAttributes) {
     c(lapply(x$attributes,
              function(attr) {
                  n <- length(attr)
-                 names(attr) <- (x$childrenOrder)[1:n]
+                 if (is.null(names(attr)))
+                     names(attr) <- (x$childrenOrder)[1:n]
                  attr
              }),
       lapply(x$groupAttributes,

@@ -59,6 +59,7 @@ S3method("grobToDev", "animated.grob")
 S3method("grobToDev", "garnished.grob")
 
 S3method("primToDev", "grob")
+S3method("primToDev", "gTree")
 S3method("primToDev", "lines")
 S3method("primToDev", "rastergrob")
 S3method("primToDev", "rect")

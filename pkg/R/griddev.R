@@ -1641,9 +1641,6 @@ grobToDev.gTree <- function(x, dev) {
     upViewport(grid:::depth(x$childrenvp))
   }
   primToDev(x, dev)
-  devStartGroup(devGrob(x, dev), gparToDevPars(x$gp), dev)
-  lapply(x$children, grobToDev, dev)
-  devEndGroup(dev)
   if (!is.null(x$vp)) {
     if (!inherits(x$vp, "vpPath")) {
       devEndGroup(dev)
@@ -1655,6 +1652,12 @@ grobToDev.gTree <- function(x, dev) {
       }
     }
   }
+}
+
+primToDev.gTree <- function(x, dev) {
+    devStartGroup(devGrob(x, dev), gparToDevPars(x$gp), dev)
+    lapply(x$children, grobToDev, dev)
+    devEndGroup(dev)
 }
 
 # grid to SVG
