@@ -47,12 +47,12 @@ grid.garnish <- function(path, ..., grep=FALSE, redraw=FALSE) {
              grep=grep, redraw=redraw)
 }
 
-garnish <- function(x, attributes, groupAttributes) {
+garnish <- function(x, ...) {
     UseMethod("garnish")
 }
 
 # This is intended to handle all basic graphical primitives
-garnish.grob <- function(x, attributes, groupAttributes) {
+garnish.grob <- function(x, ...) {
     c(lapply(x$attributes,
              function(attr) {
                  n <- length(attr)
@@ -68,7 +68,7 @@ garnish.grob <- function(x, attributes, groupAttributes) {
 }
 
 # A hopefully useful default for gTrees
-garnish.gTree <- function(x, attributes, groupAttributes) {
+garnish.gTree <- function(x, ...) {
     c(lapply(x$attributes,
              function(attr) {
                  n <- length(attr)
@@ -84,6 +84,6 @@ garnish.gTree <- function(x, attributes, groupAttributes) {
 }
 
 grobToDev.garnished.grob <- function(x, dev) {
-    dev@attrs <- garnish(x, x$attributes, x$groupAttributes)
+    dev@attrs <- garnish(x)
     NextMethod()
 }

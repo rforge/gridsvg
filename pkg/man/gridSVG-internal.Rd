@@ -3,6 +3,7 @@
 \alias{svgClose}
 \alias{svgStartGroup}
 \alias{svgEndGroup}
+\alias{svgRaster}
 \alias{svgRect}
 \alias{svgLines}
 \alias{svgPath}
