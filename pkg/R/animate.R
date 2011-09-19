@@ -758,7 +758,6 @@ animate.grob <- function(x, dev) {
            function(as) {
                applyAnimationSet(x, as, TRUE, dev)
            })
-    x
 }
 
 animate.gTree <- function(x, dev) {
@@ -769,10 +768,9 @@ animate.gTree <- function(x, dev) {
     # If you want to do something with the 'animationSets'
     # for your gTree then you have to write your own
     # animate() method
-    x
 }
 
 grobToDev.animated.grob <- function(x, dev) {
-    x <- animate(x, dev)
+    animate(x, dev)
     NextMethod()    
 }
