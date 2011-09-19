@@ -10,11 +10,13 @@
   script elements.
 }
 \synopsis{
-scriptGrob(script=NULL, filename=NULL, type="text/ecmascript", inline=FALSE)
+scriptGrob(script=NULL, filename=NULL, type="text/ecmascript",
+           inline=FALSE, name=NULL)
 grid.script(...)  
   }
 \usage{
-grid.script(script=NULL, filename=NULL, type="text/ecmascript", inline=FALSE)
+grid.script(script=NULL, filename=NULL, type="text/ecmascript",
+            inline=FALSE, name=NULL)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -23,9 +25,10 @@ grid.script(script=NULL, filename=NULL, type="text/ecmascript", inline=FALSE)
   \item{type}{ The type of the script code. }
   \item{inline}{ A logical specifying whether the script code from the
     file should be included inline or just referenced. }
+  \item{name}{ A character value giving a name for the grob. }
 }
 \value{
-  A script object.
+  A script.grob object.
 }
 \author{ Paul Murrell }
 \seealso{ \code{\link{gridToSVG}} }                           
