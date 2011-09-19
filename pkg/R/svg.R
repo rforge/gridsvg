@@ -316,9 +316,10 @@ svgPath <- function(x, y, rule, id=NULL,
                 function(subx, suby) {
                     paste(paste(c("M",
                                   rep("L", length(subx) - 1)),
-                                subx, suby, collapse=" "),
+                                round(subx, 2), round(suby, 2),
+                                collapse=" "),
                           "Z")
-                }, round(x, 2), round(y, 2))
+                }, x, y)
 
     catsvg(paste('<path ',
                  'id="', id, '" ',
@@ -331,17 +332,17 @@ svgPath <- function(x, y, rule, id=NULL,
            svgdev)  
 }
 
-svgRaster <- function(x, y, width, height, name,
+svgRaster <- function(x, y, width, height, id=NULL,
                       just, vjust, hjust,
                       attributes=svgAttrib(), 
                       style=svgStyle(), svgdev=svgDevice()) {
 
   # Need to extract the original grob name in order to link to the image
-  grobname <- baseGrobName(name)
+  grobname <- baseGrobName(id)
   fileloc <- paste(grobname, ".png", sep = "")
 
   rasters <- paste('<image ',
-                   'id="', name, '" ',
+                   'id="', id, '" ',
                    'x="', round(x, 2), '" ',
                    'y="', round(y, 2), '" ',
                    'width="', round(width, 2), '" ',
@@ -374,7 +375,8 @@ svgRect <- function(x, y, width, height, id=NULL,
 }
 
 svgText <- function(x, y, text, hjust="left", vjust="bottom", rot=0,
-                    lineheight, charheight, id=NULL, attributes=svgAttrib(), 
+                    lineheight=1, charheight=.8,
+                    id=NULL, attributes=svgAttrib(), 
                     style=svgStyle(), svgdev=svgDevice()) {
     # Avoid XML specials in text
     text <-
