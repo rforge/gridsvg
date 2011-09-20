@@ -13,14 +13,14 @@
 animateGrob(grob, ...,
             duration=1, 
             rep=FALSE, revert=FALSE,
-            begin=0, group=FALSE) 
+            begin=0, interpolate="linear", group=FALSE) 
 grid.animate(path, ...) 
   }
 \usage{
 grid.animate(path, ...,
              duration=1, 
              rep=FALSE, revert=FALSE,
-             begin=0, group=FALSE) 
+             begin=0, interpolate="linear", group=FALSE) 
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -33,6 +33,8 @@ grid.animate(path, ...,
     \code{TRUE} means revert to the first animated value,
     \code{FALSE} means finish on the last animated value. }
   \item{begin}{ When the animation should begin (seconds). }
+  \item{interpolate}{ A character value describing how animation values are
+    interpreted. One of \code{linear} or \code{discrete}. }
   \item{group}{ A logical indicating whether the animation values
     should be applied to the overall group element in SVG or
     to individual SVG elements.}

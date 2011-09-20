@@ -201,21 +201,25 @@ autoid <- function(id) {
         FALSE
 }
 
-animationSet <- function(..., duration=1, rep=FALSE, revert=FALSE, begin=0) {
+animationSet <- function(...,
+                         duration=1, rep=FALSE, revert=FALSE,
+                         begin=0, interp="linear") {
     animations <- list(...)
     if (is.null(animations[[1]]))
         stop("need argument to animate")
     list(animations=animations,
-         begin=begin, duration=duration, rep=rep, revert=revert)
+         begin=begin, interp=interp, duration=duration, rep=rep, revert=revert)
 }
 
 animateGrob <- function(grob, ...,
                         duration=1, 
                         rep=FALSE, revert=FALSE,
                         begin=0, interpolate="linear", group=FALSE) {
+    if (!interpolate %in% c("linear", "discrete"))
+        stop("Invalid interpolation method")
     as <- animationSet(...,
                        duration=duration, rep=rep, revert=revert,
-                       begin=begin, interpolate=interpolate)
+                       begin=begin, interp=interpolate)
     cl <- class(grob)
     if (group) {
         grob$groupAnimationSets <- c(grob$groupAnimationSets, list(as))
@@ -301,7 +305,7 @@ applyAnimation.rect <- function(x, animSet, animation, group, dev) {
         svgAnimate(animation,
                    paste(ithValue(animSet$animations[[animation]], 1),
                          collapse=";"),
-                   animSet$begin, animSet$dur, animSet$rep, animSet$rev,
+                   animSet$begin, animSet$interp, animSet$dur, animSet$rep, animSet$rev,
                    x$name, dev@dev)
     } else {
   # We may be dealing with multiple rects that need animating
@@ -316,7 +320,7 @@ applyAnimation.rect <- function(x, animSet, animation, group, dev) {
   # Repeating animation parameters so that each element can have
   # distinct values
   begin <- rep(animSet$begin, length.out = n)
-  interp <- rep(animSet$interpolate, length.out = n)
+  interp <- rep(animSet$interp, length.out = n)
   dur <- rep(animSet$duration, length.out = n)
   rep <- rep(animSet$rep, length.out = n)
   rev <- rep(animSet$revert, length.out = n)
@@ -401,7 +405,7 @@ applyAnimation.circle <- function(x, animSet, animation, group, dev) {
         svgAnimate(animation,
                    paste(ithValue(animSet$animations[[animation]], 1),
                          collapse=";"),
-                   animSet$begin, animSet$dur, animSet$rep, animSet$rev,
+                   animSet$begin, animSet$interp, animSet$dur, animSet$rep, animSet$rev,
                    x$name, dev@dev)
     } else {
   # We may be dealing with multiple circles that need animating
@@ -415,7 +419,7 @@ applyAnimation.circle <- function(x, animSet, animation, group, dev) {
   # Repeating animation parameters so that each element can have
   # distinct values
   begin <- rep(animSet$begin, length.out = n)
-  interp <- rep(animSet$interpolate, length.out = n)
+  interp <- rep(animSet$interp, length.out = n)
   dur <- rep(animSet$duration, length.out = n)
   rep <- rep(animSet$rep, length.out = n)
   rev <- rep(animSet$revert, length.out = n)
@@ -475,7 +479,7 @@ applyAnimation.points <- function(x, animSet, animation, group, dev) {
         svgAnimate(animation,
                    paste(ithValue(animSet$animations[[animation]], 1),
                          collapse=";"),
-                   animSet$begin, animSet$dur, animSet$rep, animSet$rev,
+                   animSet$begin, animSet$interp, animSet$dur, animSet$rep, animSet$rev,
                    x$name, dev@dev)
     } else {
   # We may be dealing with multiple points that need animating
@@ -490,7 +494,7 @@ applyAnimation.points <- function(x, animSet, animation, group, dev) {
   # Repeating animation parameters so that each element can have
   # distinct values
   begin <- rep(animSet$begin, length.out = n)
-  interp <- rep(animSet$interpolate, length.out = n)
+  interp <- rep(animSet$interp, length.out = n)
   dur <- rep(animSet$duration, length.out = n)
   rep <- rep(animSet$rep, length.out = n)
   rev <- rep(animSet$revert, length.out = n)
@@ -562,7 +566,7 @@ applyAnimation.text <- function(x, animSet, animation, group, dev) {
         svgAnimate(animation,
                    paste(ithValue(animSet$animations[[animation]], 1),
                          collapse=";"),
-                   animSet$begin, animSet$dur, animSet$rep, animSet$rev,
+                   animSet$begin, animSet$interp, animSet$dur, animSet$rep, animSet$rev,
                    x$name, dev@dev)
     } else {
     # We may be dealing with multiple points that need animating
@@ -575,7 +579,7 @@ applyAnimation.text <- function(x, animSet, animation, group, dev) {
     # Repeating animation parameters so that each element can have
     # distinct values
     begin <- rep(animSet$begin, length.out = n)
-    interp <- rep(animSet$interpolate, length.out = n)
+    interp <- rep(animSet$interp, length.out = n)
     dur <- rep(animSet$duration, length.out = n)
     rep <- rep(animSet$rep, length.out = n)
     rev <- rep(animSet$revert, length.out = n)
@@ -632,7 +636,7 @@ applyAnimation.lines <- function(x, animSet, animation, group, dev) {
         svgAnimate(animation,
                    paste(ithValue(animSet$animations[[animation]], 1),
                          collapse=";"),
-                   animSet$begin, animSet$dur, animSet$rep, animSet$rev,
+                   animSet$begin, animSet$interp, animSet$dur, animSet$rep, animSet$rev,
                    x$name, dev@dev)
     } else {
     if (doNotAnimate(animSet, animation))
@@ -640,7 +644,7 @@ applyAnimation.lines <- function(x, animSet, animation, group, dev) {
     
     # NOTE:  only ever drawing ONE line
     begin <- animSet$begin
-    interp <- rep(animSet$interpolate, length.out = n)
+    interp <- rep(animSet$interp, length.out = n)
     dur <- animSet$duration
     rep <- animSet$rep
     rev <- animSet$revert
@@ -682,7 +686,7 @@ applyAnimation.polyline <- function(x, animSet, animation, group, dev) {
         svgAnimate(animation,
                    paste(ithValue(animSet$animations[[animation]], 1),
                          collapse=";"),
-                   animSet$begin, animSet$dur, animSet$rep, animSet$rev,
+                   animSet$begin, animSet$interp, animSet$dur, animSet$rep, animSet$rev,
                    x$name, dev@dev)
     } else {
     if (doNotAnimate(animSet, animation))
@@ -705,7 +709,7 @@ applyAnimation.polyline <- function(x, animSet, animation, group, dev) {
   # Repeating animation parameters so that each element can have
   # distinct values
     begin <- rep(animSet$begin, length.out = n)
-    interp <- rep(animSet$interpolate, length.out = n)
+    interp <- rep(animSet$interp, length.out = n)
     dur <- rep(animSet$duration, length.out = n)
     rep <- rep(animSet$rep, length.out = n)
     rev <- rep(animSet$revert, length.out = n)
@@ -749,7 +753,7 @@ applyAnimation.segments <- function(x, animSet, animation, group, dev) {
         svgAnimate(animation,
                    paste(ithValue(animSet$animations[[animation]], 1),
                          collapse=";"),
-                   animSet$begin, animSet$dur, animSet$rep, animSet$rev,
+                   animSet$begin, animSet$interp, animSet$dur, animSet$rep, animSet$rev,
                    x$name, dev@dev)
     } else {
 
@@ -765,7 +769,7 @@ applyAnimation.gTree <- function(x, animSet, animation, group, dev) {
         svgAnimate(animation,
                    paste(ithValue(animSet$animations[[animation]], 1),
                          collapse=";"),
-                   animSet$begin, animSet$dur, animSet$rep, animSet$rev,
+                   animSet$begin, animSet$interp, animSet$dur, animSet$rep, animSet$rev,
                    x$name, dev@dev)
     } 
 }

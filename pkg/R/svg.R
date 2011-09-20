@@ -78,13 +78,15 @@ svgEndLink <- function(svgdev=svgDevice()) {
   decindent(svgdev)
 }
 
-svgAnimate <- function(attrib, values, begin, duration, rep, revert, id=NULL, 
+svgAnimate <- function(attrib, values,
+                       begin, interp, duration, rep, revert, id=NULL, 
                        svgdev=svgDevice()) {
   n <- if (is.null(id)) 1 else length(unique(id))
   catsvg(paste('<animate ',
                'xlink:href="#', getid(id, svgdev, n), '" ',
                'attributeName="', attrib, '" ',
                'begin="', begin, 's" ',
+               'calcMode="', interp, '" ',
                'dur="', duration, 's" ',
                'values="', values, '" ',
                'repeatCount="',
@@ -101,12 +103,13 @@ svgAnimate <- function(attrib, values, begin, duration, rep, revert, id=NULL,
 # and I have a strong suspicion there may be problems
 # because tapply returns a list -- see svgAnimatePoints
 # for ideas for a possible solution (esp. the lpaste function)
-svgAnimateXYWH <- function(attrib, values, begin, duration, rep, revert,
+svgAnimateXYWH <- function(attrib, values,
+                           begin, interp, duration, rep, revert,
                            id=NULL,
                            svgdev=svgDevice()) {
   svgAnimate(attrib,
              paste(round(values, 2), collapse=";"),
-             begin, duration, rep, revert, id, svgdev)  
+             begin, interp, duration, rep, revert, id, svgdev)  
 }
 
 # DON'T call this with a list of length < 2!
@@ -128,7 +131,7 @@ lpaste <- function(alist, collapse) {
 }
 
 svgAnimatePoints <- function(xvalues, yvalues, pointsid,
-                             begin, duration, rep, revert,
+                             begin, interp, duration, rep, revert,
                              id=NULL,
                              svgdev=svgDevice()) {
   if (is.null(id))
@@ -140,10 +143,11 @@ svgAnimatePoints <- function(xvalues, yvalues, pointsid,
                                    pointsid),
                              paste, collapse=" "),
                       collapse=";"),
-               begin, duration, rep, revert, id, svgdev)  
+               begin, interp, duration, rep, revert, id, svgdev)  
 }
 
-svgAnimateTransform <- function(attrib, values, begin, duration, rep, revert,
+svgAnimateTransform <- function(attrib, values,
+                                begin, interp, duration, rep, revert,
                                 id=NULL,
                                 svgdev=svgDevice()) {
   n <- if (is.null(id)) 1 else length(unique(id))
@@ -152,6 +156,7 @@ svgAnimateTransform <- function(attrib, values, begin, duration, rep, revert,
                'attributeName="transform" ',
                'type="', attrib, '" ',
                'begin="', begin, 's" ',
+               'calcMode="', interp, '" ',
                'dur="', duration, 's" ',
                'values="', values, '" ',
                'repeatCount="',
@@ -165,14 +170,14 @@ svgAnimateTransform <- function(attrib, values, begin, duration, rep, revert,
 }
 
 svgAnimateTranslation <- function(xvalues, yvalues,
-                                  begin, duration, rep, revert,
+                                  begin, interp, duration, rep, revert,
                                   id=NULL,
                                   svgdev=svgDevice()) {
   svgAnimateTransform("translate",
                       paste(round(xvalues, 2),
                             round(yvalues, 2),
                             sep=",", collapse=';'),
-                      begin, duration, rep, revert, id, svgdev)  
+                      begin, interp, duration, rep, revert, id, svgdev)  
 }
 
 svgLines <- function(x, y, id=NULL, arrow = NULL,
