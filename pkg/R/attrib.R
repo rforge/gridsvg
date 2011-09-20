@@ -83,7 +83,7 @@ garnish.gTree <- function(x, ...) {
              }))                          
 }
 
-grobToDev.garnished.grob <- function(x, dev) {
+primToDev.garnished.grob <- function(x, dev) {
     dev@attrs <- garnish(x)
     NextMethod()
 }

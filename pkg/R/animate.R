@@ -212,9 +212,10 @@ animationSet <- function(..., duration=1, rep=FALSE, revert=FALSE, begin=0) {
 animateGrob <- function(grob, ...,
                         duration=1, 
                         rep=FALSE, revert=FALSE,
-                        begin=0, group=FALSE) {
+                        begin=0, interpolate="linear", group=FALSE) {
     as <- animationSet(...,
-                       duration=duration, rep=rep, revert=revert, begin=begin)
+                       duration=duration, rep=rep, revert=revert,
+                       begin=begin, interpolate=interpolate)
     cl <- class(grob)
     if (group) {
         grob$groupAnimationSets <- c(grob$groupAnimationSets, list(as))
@@ -315,6 +316,7 @@ applyAnimation.rect <- function(x, animSet, animation, group, dev) {
   # Repeating animation parameters so that each element can have
   # distinct values
   begin <- rep(animSet$begin, length.out = n)
+  interp <- rep(animSet$interpolate, length.out = n)
   dur <- rep(animSet$duration, length.out = n)
   rep <- rep(animSet$rep, length.out = n)
   rev <- rep(animSet$revert, length.out = n)
@@ -346,32 +348,32 @@ applyAnimation.rect <- function(x, animSet, animation, group, dev) {
     switch(animation,
            x={
                svgAnimateXYWH("x", cx(lb$x, dev),
-                              begin[i], dur[i], rep[i], rev[i],
+                              begin[i], interp[i], dur[i], rep[i], rev[i],
                               subName, dev@dev)
            },
            y={
                svgAnimateXYWH("y", cy(lb$y, dev),
-                              begin[i], dur[i], rep[i], rev[i],
+                              begin[i], interp[i], dur[i], rep[i], rev[i],
                               subName, dev@dev)
            },
            width={
                # If x is also animated, this has already been handled above
                if (!("x" %in% names(animSet$animations))) {
                    svgAnimateXYWH("x", cx(lb$x, dev),
-                                  begin[i], dur[i], rep[i], rev[i],
+                                  begin[i], interp[i], dur[i], rep[i], rev[i],
                                   subName, dev@dev)
                } 
                dim <- dimToInches(ithUnit(animSet$animations$width,
                                           x$width, i),
                                   x$height[i], dev)
                svgAnimateXYWH("width", cw(dim$w, dev),
-                              begin[i], dur[i], rep[i], rev[i],
+                              begin[i], interp[i], dur[i], rep[i], rev[i],
                               subName, dev@dev)
            },
            height={
                if (!("y" %in% names(animSet$animations))) {
                    svgAnimateXYWH("y", cy(lb$y, dev),
-                                  begin[i], dur[i], rep[i], rev[i],
+                                  begin[i], interp[i], dur[i], rep[i], rev[i],
                                   subName, dev@dev)
                } 
                dim <- dimToInches(x$width[i],
@@ -379,7 +381,7 @@ applyAnimation.rect <- function(x, animSet, animation, group, dev) {
                                           x$height, i),
                                   dev)
                svgAnimateXYWH("height", ch(dim$h, dev),
-                              begin[i], dur[i], rep[i], rev[i],
+                              begin[i], interp[i], dur[i], rep[i], rev[i],
                               subName, dev@dev)
            },
            # Any other attribute
@@ -387,7 +389,7 @@ applyAnimation.rect <- function(x, animSet, animation, group, dev) {
                svgAnimate(animation,
                           paste(ithValue(animSet$animations[[animation]], i),
                                 collapse=";"),
-                          begin[i], dur[i], rep[i], rev[i], subName, dev@dev)
+                          begin[i], interp[i], dur[i], rep[i], rev[i], subName, dev@dev)
            })
   }
     }
@@ -413,6 +415,7 @@ applyAnimation.circle <- function(x, animSet, animation, group, dev) {
   # Repeating animation parameters so that each element can have
   # distinct values
   begin <- rep(animSet$begin, length.out = n)
+  interp <- rep(animSet$interpolate, length.out = n)
   dur <- rep(animSet$duration, length.out = n)
   rep <- rep(animSet$rep, length.out = n)
   rev <- rep(animSet$revert, length.out = n)
@@ -442,23 +445,23 @@ applyAnimation.circle <- function(x, animSet, animation, group, dev) {
            x={
                loc <- locToInches(xi, yi, dev)
                svgAnimateXYWH("cx", cx(loc$x, dev),
-                              begin[i], dur[i], rep[i], rev[i], subName, dev@dev)
+                              begin[i], interp[i], dur[i], rep[i], rev[i], subName, dev@dev)
            },
            y={
                loc <- locToInches(xi, yi, dev)
                svgAnimateXYWH("cy", cy(loc$y, dev),
-                              begin[i], dur[i], rep[i], rev[i], subName, dev@dev)
+                              begin[i], interp[i], dur[i], rep[i], rev[i], subName, dev@dev)
            },
            r={
                svgAnimateXYWH("r", cd(ithUnit(animSet$animations$r, x$r, i), dev),
-                              begin[i], dur[i], rep[i], rev[i], subName, dev@dev)
+                              begin[i], interp[i], dur[i], rep[i], rev[i], subName, dev@dev)
            },
            # Any other attribute
            {
                svgAnimate(animation,
                           paste(ithValue(animSet$animations[[animation]], i),
                                 collapse=";"),
-                          begin[i], dur[i], rep[i], rev[i], subName, dev@dev)
+                          begin[i], interp[i], dur[i], rep[i], rev[i], subName, dev@dev)
            })
   }
      }
@@ -487,6 +490,7 @@ applyAnimation.points <- function(x, animSet, animation, group, dev) {
   # Repeating animation parameters so that each element can have
   # distinct values
   begin <- rep(animSet$begin, length.out = n)
+  interp <- rep(animSet$interpolate, length.out = n)
   dur <- rep(animSet$duration, length.out = n)
   rep <- rep(animSet$rep, length.out = n)
   rev <- rep(animSet$revert, length.out = n)
@@ -515,7 +519,7 @@ applyAnimation.points <- function(x, animSet, animation, group, dev) {
                  else
                      animattr <- "x"
                  svgAnimateXYWH(animattr, cx(loc$x, dev),
-                                begin[i], dur[i], rep[i], rev[i], subName, dev@dev)
+                                begin[i], interp[i], dur[i], rep[i], rev[i], subName, dev@dev)
              },
              y={
                  loc <- locToInches(xi, yi, dev)
@@ -524,19 +528,19 @@ applyAnimation.points <- function(x, animSet, animation, group, dev) {
                  else
                      animattr <- "y"
                  svgAnimateXYWH(animattr, cy(loc$y, dev),
-                                begin[i], dur[i], rep[i], rev[i], subName, dev@dev)
+                                begin[i], interp[i], dur[i], rep[i], rev[i], subName, dev@dev)
              },
              size={
                  pointsize <- cd(ithUnit(animSet$animations$size, x$size, i), dev)
                  if (x$pch[i] == 0) {
                      svgAnimateXYWH("width", pointsize,
-                                    begin[i], dur[i], rep[i], rev[i], subName, dev@dev)
+                                    begin[i], interp[i], dur[i], rep[i], rev[i], subName, dev@dev)
                      svgAnimateXYWH("height", pointsize,
-                                    begin[i], dur[i], rep[i], rev[i], subName, dev@dev)
+                                    begin[i], interp[i], dur[i], rep[i], rev[i], subName, dev@dev)
                  }
                  if (x$pch[i] == 1 || x$pch[i] == 16) {
                      svgAnimateXYWH("r", pointsize,
-                                    begin[i], dur[i], rep[i], rev[i], subName, dev@dev)
+                                    begin[i], interp[i], dur[i], rep[i], rev[i], subName, dev@dev)
                  }
              },
              # Any other attribute
@@ -544,7 +548,7 @@ applyAnimation.points <- function(x, animSet, animation, group, dev) {
                  svgAnimate(animation,
                             paste(ithValue(animSet$animations[[animation]], i),
                                   collapse=";"),
-                            begin[i], dur[i], rep[i], rev[i], subName, dev@dev)
+                            begin[i], interp[i], dur[i], rep[i], rev[i], subName, dev@dev)
              })
   }
     }
@@ -571,6 +575,7 @@ applyAnimation.text <- function(x, animSet, animation, group, dev) {
     # Repeating animation parameters so that each element can have
     # distinct values
     begin <- rep(animSet$begin, length.out = n)
+    interp <- rep(animSet$interpolate, length.out = n)
     dur <- rep(animSet$duration, length.out = n)
     rep <- rep(animSet$rep, length.out = n)
     rev <- rep(animSet$revert, length.out = n)
@@ -591,13 +596,13 @@ applyAnimation.text <- function(x, animSet, animation, group, dev) {
                x={
                    loc <- locToInches(xi, yi, dev)
                    svgAnimateTranslation(cx(loc$x, dev), cy(loc$y, dev),
-                                         begin[i], dur[i], rep[i], rev[i],
+                                         begin[i], interp[i], dur[i], rep[i], rev[i],
                                          subName, dev@dev)
                },
                y={
                    loc <- locToInches(xi, yi, dev)
                    svgAnimateTranslation(cx(loc$x, dev), cy(loc$y, dev),
-                                         begin[i], dur[i], rep[i], rev[i],
+                                         begin[i], interp[i], dur[i], rep[i], rev[i],
                                          subName, dev@dev)
                },
                # Any other attribute
@@ -605,7 +610,7 @@ applyAnimation.text <- function(x, animSet, animation, group, dev) {
                    svgAnimate(animation,
                               paste(ithValue(animSet$animations[[animation]], i),
                                     collapse=";"),
-                              begin[i], dur[i], rep[i], rev[i], subName, dev@dev)
+                              begin[i], interp[i], dur[i], rep[i], rev[i], subName, dev@dev)
                })
     }
     }
@@ -635,6 +640,7 @@ applyAnimation.lines <- function(x, animSet, animation, group, dev) {
     
     # NOTE:  only ever drawing ONE line
     begin <- animSet$begin
+    interp <- rep(animSet$interpolate, length.out = n)
     dur <- animSet$duration
     rep <- animSet$rep
     rev <- animSet$revert
@@ -699,6 +705,7 @@ applyAnimation.polyline <- function(x, animSet, animation, group, dev) {
   # Repeating animation parameters so that each element can have
   # distinct values
     begin <- rep(animSet$begin, length.out = n)
+    interp <- rep(animSet$interpolate, length.out = n)
     dur <- rep(animSet$duration, length.out = n)
     rep <- rep(animSet$rep, length.out = n)
     rev <- rep(animSet$revert, length.out = n)
@@ -724,20 +731,34 @@ applyAnimation.polyline <- function(x, animSet, animation, group, dev) {
         if (any(c("x", "y") %in% names(animSet$animations))) {
             loc <- locToInches(xx, yy, dev)
             svgAnimatePoints(cx(loc$x, dev), cy(loc$y, dev), timeid,
-                             begin[i], dur[i], rep[i], rev[i], subName, dev@dev)
+                             begin[i], interp[i], dur[i], rep[i], rev[i], subName, dev@dev)
         }
         # Any other attribute
         if (!(animation %in% c("x", "y"))) {
             svgAnimate(animation,
                        paste(ithValue(animSet$animations[[animation]], i),
                              collapse=";"),
-                       begin[i], dur[i], rep[i], rev[i], subName, dev@dev)
+                       begin[i], interp[i], dur[i], rep[i], rev[i], subName, dev@dev)
         }
     }
     }
 }
 
-# FIXME:  segments, polygons, xsplines, ...
+applyAnimation.segments <- function(x, animSet, animation, group, dev) {
+    if (group) {
+        svgAnimate(animation,
+                   paste(ithValue(animSet$animations[[animation]], 1),
+                         collapse=";"),
+                   animSet$begin, animSet$dur, animSet$rep, animSet$rev,
+                   x$name, dev@dev)
+    } else {
+
+        # FIXME:  needs a little fleshing out!
+        
+    }  
+}
+  
+# FIXME:  polygons, xsplines, ...
 
 applyAnimation.gTree <- function(x, animSet, animation, group, dev) {
     if (group) {
@@ -780,7 +801,7 @@ animate.gTree <- function(x, dev) {
     # animate() method
 }
 
-grobToDev.animated.grob <- function(x, dev) {
+primToDev.animated.grob <- function(x, dev) {
     animate(x, dev)
     NextMethod()    
 }
