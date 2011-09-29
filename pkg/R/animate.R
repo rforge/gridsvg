@@ -644,7 +644,7 @@ applyAnimation.lines <- function(x, animSet, animation, group, dev) {
     
     # NOTE:  only ever drawing ONE line
     begin <- animSet$begin
-    interp <- rep(animSet$interp, length.out = n)
+    interp <- animSet$interp
     dur <- animSet$duration
     rep <- animSet$rep
     rev <- animSet$revert
@@ -669,14 +669,14 @@ applyAnimation.lines <- function(x, animSet, animation, group, dev) {
     if (any(c("x", "y") %in% names(animSet$animations))) {
         loc <- locToInches(xx, yy, dev)
         svgAnimatePoints(cx(loc$x, dev), cy(loc$y, dev), timeid,
-                         begin, dur, rep, rev, subName, dev@dev)
+                         begin, interp, dur, rep, rev, subName, dev@dev)
     }
     # Any other attribute
     if (!(animation %in% c("x", "y"))) {
         svgAnimate(animation,
                    paste(ithValue(animSet$animations[[animation]], 1),
                          collapse=";"),
-                   begin, dur, rep, rev, subName, dev@dev)
+                   begin, interp, dur, rep, rev, subName, dev@dev)
     }
     }  
 }
