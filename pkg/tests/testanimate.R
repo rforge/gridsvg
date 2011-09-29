@@ -225,6 +225,35 @@ grid.animate("polyline",
              duration=10)
 gridToSVG("anim-polyline-complex.svg")
 
+# Animating segments
+
+# Simple case
+# (single segment, animation only has two values, only animate x0)
+grid.newpage()
+grid.text("45 degree line becomes vertical (on right)",
+          y=unit(1, "lines"))
+grid.rect()
+grid.segments(.1, .1, .9, .9, name="segments")
+grid.animate("segments",
+             x0=c(.1, .9),
+             duration=3)
+gridToSVG("anim-segments-simple.svg")
+
+# Complex case
+# (multiple segments, animation has three values, animate x0 and y0)
+grid.newpage()
+grid.text("crossed lines swing out to vertical then shorten",
+          y=unit(1, "lines"))
+grid.rect()
+grid.segments(c(.1, .9), .1, c(.9, .1), .9, name="segments")
+grid.animate("segments",
+             x0=cbind(c(.1, .9, .9), c(.9, .1, .1)),
+             y0=c(.1, .1, .5),
+             duration=3)
+gridToSVG("anim-segments-complex.svg")
+
+############################################
+
 # Multiple animations on same grob
 grid.newpage()
 grid.rect(x=.1, y=.1, width=.1, height=.1, name="r")
@@ -237,3 +266,4 @@ grid.newpage()
 grid.rect(x=.1, y=.1, width=.1, height=.1, name="r")
 grid.animate("r", visibility=c("visible", "hidden"), group=TRUE)
 gridToSVG("anim-group.svg")
+

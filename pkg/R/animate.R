@@ -622,10 +622,14 @@ applyAnimation.text <- function(x, animSet, animation, group, dev) {
 
 doNotAnimate <- function(animSet, animation) {
     # Avoid doing BOTH x and y if BOTH animated
-    if (all(c("x", "y") %in% animSet$animations) &&
-        animation %in% c("x", "y") &&
-        match(animation, animSet$animations) == max(match(c("x", "y"),
-               animSet$animations)))
+    if ((all(c("x", "y") %in% animSet$animations) &&
+         animation %in% c("x", "y") &&
+         match(animation, animSet$animations) ==
+         max(match(c("x", "y"), animSet$animations))) ||
+        (sum(c("x0", "y0", "x1", "y1") %in% animSet$animations) > 1 &&
+         animation %in% c("x0", "y0", "x1", "y1") &&
+         match(animation, animSet$animations) >
+         min(match(c("x0", "y0", "x1", "y1"), animSet$animations))))
         TRUE
     else
         FALSE
@@ -748,6 +752,7 @@ applyAnimation.polyline <- function(x, animSet, animation, group, dev) {
     }
 }
 
+# Possibly multiple line segments, each of which become <polyline> elements
 applyAnimation.segments <- function(x, animSet, animation, group, dev) {
     if (group) {
         svgAnimate(animation,
@@ -757,9 +762,74 @@ applyAnimation.segments <- function(x, animSet, animation, group, dev) {
                    x$name, dev@dev)
     } else {
 
-        # FIXME:  needs a little fleshing out!
+        if (doNotAnimate(animSet, animation))
+            return()
         
-    }  
+        # We may be dealing with multiple rects that need animating
+        n <- max(length(x$x0), length(x$y0),
+                 length(x$x1), length(x$y1))
+
+        # Rep the original x/y/width/height out to be the same length
+        x$x0 <- rep(x$x0, length.out=n)
+        x$y0 <- rep(x$y0, length.out=n)
+        x$x1 <- rep(x$x1, length.out=n)
+        x$y1 <- rep(x$y1, length.out=n)
+  
+        # Repeating animation parameters so that each element can have
+        # distinct values
+        begin <- rep(animSet$begin, length.out = n)
+        interp <- rep(animSet$interp, length.out = n)
+        dur <- rep(animSet$duration, length.out = n)
+        rep <- rep(animSet$rep, length.out = n)
+        rev <- rep(animSet$revert, length.out = n)
+        
+        for (i in 1:n) {
+            subName <- subGrobName(x$name, i)
+
+            if ("x0" %in% names(animSet$animations))
+                x0i <- ithUnit(animSet$animations$x0, x$x0, i)
+            else
+                x0i <- x$x0[i]
+            if ("y0" %in% names(animSet$animations))
+                y0i <- ithUnit(animSet$animations$y0, x$y0, i)
+            else
+                y0i <- x$y0[i]
+            if ("x1" %in% names(animSet$animations))
+                x1i <- ithUnit(animSet$animations$x1, x$x1, i)
+            else
+                x1i <- x$x1[i]
+            if ("y1" %in% names(animSet$animations))
+                y1i <- ithUnit(animSet$animations$y1, x$y1, i)
+            else
+                y1i <- x$y1[i]
+    
+            if (any(c("x0", "y0", "x1", "y1") %in%
+                    names(animSet$animations))) {
+                nvals <- max(length(x0i), length(y0i),
+                             length(x1i), length(y1i))
+                loc0 <- locToInches(x0i, y0i, dev)
+                loc1 <- locToInches(x1i, y1i, dev)
+                xx <- rbind(convertX(loc0$x, "inches", valueOnly=TRUE),
+                            convertX(loc1$x, "inches", valueOnly=TRUE))
+                yy <- rbind(convertY(loc0$y, "inches", valueOnly=TRUE),
+                            convertY(loc1$y, "inches", valueOnly=TRUE))
+                svgAnimatePoints(cx(unit(xx, "inches"), dev),
+                                 cy(unit(yy, "inches"), dev),
+                                 rep(1:nvals, each=2), # timeid
+                                 begin[i], interp[i], dur[i],
+                                 rep[i], rev[i], subName, dev@dev)
+            }
+            # Any other attribute
+            if (!(animation %in% c("x", "y"))) {
+                svgAnimate(animation,
+                           paste(ithValue(animSet$animations[[animation]], i),
+                                 collapse=";"),
+                           begin[i], interp[i], dur[i],
+                           rep[i], rev[i], subName, dev@dev)
+            }
+            
+        }
+    }
 }
   
 # FIXME:  polygons, xsplines, ...
