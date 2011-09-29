@@ -832,7 +832,12 @@ applyAnimation.segments <- function(x, animSet, animation, group, dev) {
     }
 }
   
-# FIXME:  polygons, xsplines, ...
+# FIXME:  polygons, xsplines, pathgrob, rastergrob
+applyAnimation.grob <- function(x, ...) {
+    # If we got here, then we've hit something that is not yet implemented
+    stop(paste("Animation of ", class(x)[1], " objects is not yet implemented",
+               sep=""))
+}
 
 applyAnimation.gTree <- function(x, animSet, animation, group, dev) {
     if (group) {
