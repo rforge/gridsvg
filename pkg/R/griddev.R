@@ -194,6 +194,12 @@ justTovjust <- function(just) {
   }
 }
 
+changedGPar <- function(startGP, endGP) {
+    diffGP <- mapply(function(x, y) !isTRUE(all.equal(x, y)),
+                     endGP, startGP)
+    do.call("gpar", unclass(endGP)[diffGP])
+}
+
 # Grob to SVG
 grobToDev <- function(x, dev) {
   UseMethod("grobToDev", x)
@@ -210,9 +216,12 @@ grobToDev.grob <- function(x, dev) {
       pushViewport(x$vp)
       devStartGroup(devGrob(x$vp, dev), gparToDevPars(x$vp$gp), dev)
     } else {
-      depth <- downViewport(x$vp)
-      devStartGroup(devGrob(x$vp, dev),
-                    gparToDevPars(current.viewport()$gp), dev)
+        startGP <- get.gpar()
+        depth <- downViewport(x$vp)
+        endGP <- get.gpar()
+        gpSettings <- changedGPar(startGP, endGP)
+        devStartGroup(devGrob(x$vp, dev),
+                      gparToDevPars(gpSettings), dev)
     }
   }
   primToDev(x, dev)
@@ -1554,8 +1563,12 @@ grobToDev.frame <- function(x, dev) {
       pushViewport(x$vp)
       devStartGroup(devGrob(x$vp, dev), gparToDevPars(x$vp$gp), dev)
     } else {
-      depth <- downViewport(x$vp)
-      devStartGroup(devGrob(x$vp, dev), current.viewport()$gp, dev)
+        startGP <- get.gpar()
+        depth <- downViewport(x$vp)
+        endGP <- get.gpar()
+        gpSettings <- changedGPar(startGP, endGP)
+        devStartGroup(devGrob(x$vp, dev),
+                      gparToDevPars(gpSettings), dev)
     }
   }
 
@@ -1593,8 +1606,12 @@ grobToDev.cellGrob <- function(x, dev) {
       pushViewport(x$vp)
       devStartGroup(devGrob(x$vp, dev), gparToDevPars(x$vp$gp), dev)
     } else {
-      depth <- downViewport(x$vp)
-      devStartGroup(devGrob(x$vp, dev), current.viewport()$gp, dev)
+        startGP <- get.gpar()
+        depth <- downViewport(x$vp)
+        endGP <- get.gpar()
+        gpSettings <- changedGPar(startGP, endGP)
+        devStartGroup(devGrob(x$vp, dev),
+                      gparToDevPars(gpSettings), dev)
     }
   }
 
@@ -1632,8 +1649,12 @@ grobToDev.gTree <- function(x, dev) {
       pushViewport(x$vp)
       devStartGroup(devGrob(x$vp, dev), gparToDevPars(x$vp$gp), dev)
     } else {
-      depth <- downViewport(x$vp)
-      devStartGroup(devGrob(x$vp, dev), current.viewport()$gp, dev)
+        startGP <- get.gpar()
+        depth <- downViewport(x$vp)
+        endGP <- get.gpar()
+        gpSettings <- changedGPar(startGP, endGP)
+        devStartGroup(devGrob(x$vp, dev),
+                      gparToDevPars(gpSettings), dev)
     }
   }
   if (!is.null(x$childrenvp)) {
