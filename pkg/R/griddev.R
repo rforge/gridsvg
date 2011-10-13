@@ -200,6 +200,45 @@ changedGPar <- function(startGP, endGP) {
     do.call("gpar", unclass(endGP)[diffGP])
 }
 
+# Enforce a 'vp' setting
+# This could be a viewport (or vpTree or vpList or vpStack) OR a vpPath
+# The general idea is to push or down the 'vp' slot
+# THEN check how far down we have come
+# IF we have come more than one level down then start a group for
+# the appropriate number of parent viewports as well as the current viewport
+# AND then do the corresponding number of end groups afterwards
+startGroup <- function(vp, depth, dev) {
+    if (depth > 1)
+        startGroup(vp$parent, depth - 1, dev)
+    devStartGroup(devGrob(vp, dev), gparToDevPars(vp$gp), dev)
+}
+enforceVP <- function(vp, dev) {
+    depth <- 0
+    if (!is.null(vp)) {
+        if (!inherits(vp, "vpPath")) {
+            pushViewport(vp)
+            depth <- grid:::depth(vp)
+        } else {
+            depth <- downViewport(vp)
+        }
+        startGroup(grid:::grid.Call("L_currentViewport"), depth, dev)
+    }
+    depth
+}
+unwindVP <- function(vp, depth, dev) {
+    if (depth > 0) {
+        for (i in 1:depth)
+            devEndGroup(dev)
+        if (is.null(vp)) { # recorded pops or ups
+            upViewport(depth)
+        } else if (!inherits(vp, "vpPath")) {
+            popViewport(depth)
+        } else {
+            upViewport(depth)
+        }
+    }
+}
+
 # Grob to SVG
 grobToDev <- function(x, dev) {
   UseMethod("grobToDev", x)
@@ -210,32 +249,9 @@ grobToDev.default <- function(x, dev) {
 }
 
 grobToDev.grob <- function(x, dev) {
-  depth <- 0
-  if (!is.null(x$vp)) {
-    if (!inherits(x$vp, "vpPath")) {
-      pushViewport(x$vp)
-      devStartGroup(devGrob(x$vp, dev), gparToDevPars(x$vp$gp), dev)
-    } else {
-        startGP <- get.gpar()
-        depth <- downViewport(x$vp)
-        endGP <- get.gpar()
-        gpSettings <- changedGPar(startGP, endGP)
-        devStartGroup(devGrob(x$vp, dev),
-                      gparToDevPars(gpSettings), dev)
-    }
-  }
+  depth <- enforceVP(x$vp, dev)
   primToDev(x, dev)
-  if (!is.null(x$vp)) {
-    if (!inherits(x$vp, "vpPath")) {
-      devEndGroup(dev)
-      popViewport(grid:::depth(x$vp))
-    } else {
-      if (depth > 0) {
-        upViewport(depth)
-        devEndGroup(dev)
-      }
-    }
-  }
+  unwindVP(x$vp, depth, dev)
 }
 
 # grob to device grob
@@ -1591,122 +1607,49 @@ primToDev.yaxis <- function(x, dev) {
 }
 
 grobToDev.frame <- function(x, dev) {
-  depth <- 0
-  if (!is.null(x$vp)) {
-    if (!inherits(x$vp, "vpPath")) {
-      pushViewport(x$vp)
-      devStartGroup(devGrob(x$vp, dev), gparToDevPars(x$vp$gp), dev)
-    } else {
-        startGP <- get.gpar()
-        depth <- downViewport(x$vp)
-        endGP <- get.gpar()
-        gpSettings <- changedGPar(startGP, endGP)
-        devStartGroup(devGrob(x$vp, dev),
-                      gparToDevPars(gpSettings), dev)
-    }
-  }
+    depth <- enforceVP(x$vp, dev)
 
-  if (!is.null(x$framevp)) {
-    pushViewport(x$framevp, recording = FALSE)
-    devStartGroup(devGrob(x$framevp, dev), gparToDevPars(x$framevp$gp), dev)
-  }
-
-  devStartGroup(devGrob(x, dev), gparToDevPars(x$gp), dev)
-  lapply(x$children, grobToDev, dev)
-  devEndGroup(dev)
-  
-  if (!is.null(x$framevp)) {
+    if (!is.null(x$framevp)) {
+        frameDepth <- enforceVP(x$framevp, dev)
+    } 
+    
+    devStartGroup(devGrob(x, dev), gparToDevPars(x$gp), dev)
+    lapply(x$children, grobToDev, dev)
     devEndGroup(dev)
-    upViewport(recording = FALSE)
-  }
-
-  if (!is.null(x$vp)) {
-    if (!inherits(x$vp, "vpPath")) {
-      devEndGroup(dev)
-      popViewport(grid:::depth(x$vp))
-    } else {
-      if (depth > 0) {
-        upViewport(depth)
-        devEndGroup(dev)
-      }
+    
+    if (!is.null(x$framevp)) {
+        unwindVP(x$framevp, frameDepth, dev)
     }
-  }
+    
+    unwindVP(x$vp, depth, dev)
 }
 
 grobToDev.cellGrob <- function(x, dev) {
-  depth <- 0
-  if (!is.null(x$vp)) {
-    if (!inherits(x$vp, "vpPath")) {
-      pushViewport(x$vp)
-      devStartGroup(devGrob(x$vp, dev), gparToDevPars(x$vp$gp), dev)
-    } else {
-        startGP <- get.gpar()
-        depth <- downViewport(x$vp)
-        endGP <- get.gpar()
-        gpSettings <- changedGPar(startGP, endGP)
-        devStartGroup(devGrob(x$vp, dev),
-                      gparToDevPars(gpSettings), dev)
+    depth <- enforceVP(x$vp, dev)
+
+    if (!is.null(x$cellvp)) {
+        cellDepth <- enforceVP(x$cellvp, dev)
     }
-  }
 
-  if (!is.null(x$cellvp)) {
-    pushViewport(x$cellvp, recording = FALSE)
-    devStartGroup(devGrob(x$cellvp, dev), gparToDevPars(x$cellvp$gp), dev)
-  }
-
-  devStartGroup(devGrob(x, dev), gparToDevPars(x$gp), dev)
-  lapply(x$children, grobToDev, dev)
-  devEndGroup(dev)
-  
-  if (!is.null(x$cellvp)) {
+    devStartGroup(devGrob(x, dev), gparToDevPars(x$gp), dev)
+    lapply(x$children, grobToDev, dev)
     devEndGroup(dev)
-    upViewport(grid:::depth(x$cellvp), recording = FALSE)
-  }
-
-  if (!is.null(x$vp)) {
-    if (!inherits(x$vp, "vpPath")) {
-      devEndGroup(dev)
-      popViewport(grid:::depth(x$vp))
-    } else {
-      if (depth > 0) {
-        upViewport(depth)
-        devEndGroup(dev)
-      }
+  
+    if (!is.null(x$cellvp)) {
+        unwindVP(x$cellvp, cellDepth, dev)
     }
-  }
+
+    unwindVP(x$vp, depth, dev)
 }
 
 grobToDev.gTree <- function(x, dev) {
-  depth <- 0
-  if (!is.null(x$vp)) {
-    if (!inherits(x$vp, "vpPath")) {
-      pushViewport(x$vp)
-      devStartGroup(devGrob(x$vp, dev), gparToDevPars(x$vp$gp), dev)
-    } else {
-        startGP <- get.gpar()
-        depth <- downViewport(x$vp)
-        endGP <- get.gpar()
-        gpSettings <- changedGPar(startGP, endGP)
-        devStartGroup(devGrob(x$vp, dev),
-                      gparToDevPars(gpSettings), dev)
-    }
-  }
+  depth <- enforceVP(x$vp, dev)
   if (!is.null(x$childrenvp)) {
     pushViewport(x$childrenvp)
     upViewport(grid:::depth(x$childrenvp))
   }
   primToDev(x, dev)
-  if (!is.null(x$vp)) {
-    if (!inherits(x$vp, "vpPath")) {
-      devEndGroup(dev)
-      popViewport(grid:::depth(x$vp))
-    } else {
-      if (depth > 0) {
-        upViewport(depth)
-        devEndGroup(dev)
-      }
-    }
-  }
+  unwindVP(x$vp, depth, dev)
 }
 
 primToDev.gTree <- function(x, dev) {
@@ -1720,18 +1663,11 @@ primToDev.gTree <- function(x, dev) {
 grobToDev.recordedGrob <- function(x, dev) {
     x <- x$list
     if (!is.null(x$vp)) { # recorded pushViewport
-        pushViewport(x$vp)
-        devStartGroup(devGrob(x$vp, dev), gparToDevPars(x$vp$gp), dev)
+        enforceVP(x$vp, dev)
     } else if (!is.null(x$path)) { # recorded downViewport
-        startGP <- get.gpar()
-        downViewport(x$path)
-        endGP <- get.gpar()
-        gpSettings <- changedGPar(startGP, endGP)
-        devStartGroup(devGrob(x$path, dev),
-                      gparToDevPars(gpSettings), dev)
+        enforceVP(x$path, dev)
     } else if (!is.null(x$n)) { # recorded up or pop
-        upViewport(x$n)
-        devEndGroup(dev)
+        unwindVP(NULL, x$n, dev)
     }
 }
 
