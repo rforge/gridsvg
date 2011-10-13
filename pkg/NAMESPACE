@@ -53,6 +53,7 @@ S3method("grobToDev", "grob")
 S3method("grobToDev", "gTree")
 S3method("grobToDev", "frame")
 S3method("grobToDev", "cellGrob")
+S3method("grobToDev", "recordedGrob")
 S3method("grobToDev", "linked.grob")
 S3method("grobToDev", "script.grob")
 

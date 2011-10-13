@@ -11,8 +11,9 @@ gridToSVG <- function(name="Rplots.svg") {
     svgdev <- openSVGDev(name, width=par("din")[1], height=par("din")[2])
     # Create a gTree from the current page
     # NOTE that set the 'gp' slot on this top-level gTree
-    # based on ROOT vp 
-    gTree <- grid.grab(name="gridSVG", gp=rootgp)
+    # based on ROOT vp
+    # Use 'wrap=TRUE' to ensure correct capture of all types of 'grid' output
+    gTree <- grid.grab(name="gridSVG", wrap=TRUE, gp=rootgp)
     # Emptying the VP usage table
     vpUsageTable <- data.frame(vpname = character(0),
                                count = integer(0),

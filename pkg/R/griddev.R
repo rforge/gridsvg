@@ -408,27 +408,61 @@ getvpID <- function(vpname) {
   vpID
 }
 
+devGrob.viewport <- function(x, dev) {
+  vp <- x
+  tm <- current.transform()
+  if (is.null(vp$clip)) {
+      clip <- FALSE
+      list(name=getvpID(vp$name), clip=clip)
+  } else if (is.na(vp$clip)) {
+      # Clipping has been turned OFF
+      # FIXME:  CANNOT do this in SVG (enlarge the clip path)
+      clip <- FALSE
+      list(name=getvpID(vp$name), clip=clip)
+  } else if (! vp$clip) {
+      clip <- FALSE
+      list(name=getvpID(vp$name), clip=clip)
+  } else {
+      clip <- TRUE
+
+      transloc <- c(0, 0, 1) %*% tm
+      loc <- (transloc / transloc[3])[-3]
+      
+      list(vpx=cx(unit(loc[1], "inches"), dev),
+           vpy=cy(unit(loc[2], "inches"), dev),
+           vpw=cw(unit(1, "npc"), dev),
+           vph=ch(unit(1, "npc"), dev),
+           name=getvpID(vp$name),
+           clip=clip)
+  }  
+}
+
 devGrob.vpPath <- function(x, dev) {
   vp <- current.viewport()
   tm <- current.transform()
   if (is.null(vp$clip)) {
-    clip <- FALSE
-    list(name=getvpID(vp$name), clip=clip)
-  } else if (is.na(vp$clip) | ! vp$clip) {
-    clip <- FALSE
-    list(name=getvpID(vp$name), clip=clip)
+      clip <- FALSE
+      list(name=getvpID(vp$name), clip=clip)
+  } else if (is.na(vp$clip)) {
+      # Clipping has been turned OFF
+      # FIXME:  CANNOT do this in SVG (enlarge the clip path)
+      clip <- FALSE
+      list(name=getvpID(vp$name), clip=clip)
+  } else if (! vp$clip) {
+      clip <- FALSE
+      list(name=getvpID(vp$name), clip=clip)
   } else {
-    clip <- TRUE
+      clip <- TRUE
 
-    transloc <- c(0, 0, 1) %*% tm
-    loc <- (transloc / transloc[3])[-3]
-
-    list(vpx=cx(unit(loc[1], "inches"), dev),
-         vpy=cy(unit(loc[2], "inches"), dev),
-         vpw=cw(unit(1, "npc"), dev),
-         vph=ch(unit(1, "npc"), dev),
-         name=getvpID(vp$name),
-         clip=clip)
+      transloc <- c(0, 0, 1) %*% tm
+      loc <- (transloc / transloc[3])[-3]
+      
+      list(vpx=cx(unit(loc[1], "inches"), dev),
+           vpy=cy(unit(loc[2], "inches"), dev),
+           vpw=cw(unit(1, "npc"), dev),
+           vph=ch(unit(1, "npc"), dev),
+           name=getvpID(vp$name),
+           clip=clip)
   }  
 }
 
@@ -1679,6 +1713,26 @@ primToDev.gTree <- function(x, dev) {
     devStartGroup(devGrob(x, dev), gparToDevPars(x$gp), dev)
     lapply(x$children, grobToDev, dev)
     devEndGroup(dev)
+}
+
+# Viewports (and vpPaths and downs and ups)
+# on the display list get recorded as wrapped grobs
+grobToDev.recordedGrob <- function(x, dev) {
+    x <- x$list
+    if (!is.null(x$vp)) { # recorded pushViewport
+        pushViewport(x$vp)
+        devStartGroup(devGrob(x$vp, dev), gparToDevPars(x$vp$gp), dev)
+    } else if (!is.null(x$path)) { # recorded downViewport
+        startGP <- get.gpar()
+        downViewport(x$path)
+        endGP <- get.gpar()
+        gpSettings <- changedGPar(startGP, endGP)
+        devStartGroup(devGrob(x$path, dev),
+                      gparToDevPars(gpSettings), dev)
+    } else if (!is.null(x$n)) { # recorded up or pop
+        upViewport(x$n)
+        devEndGroup(dev)
+    }
 }
 
 # grid to SVG
