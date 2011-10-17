@@ -240,6 +240,8 @@ unwindVP <- function(vp, depth, dev) {
 }
 
 # Grob to SVG
+# This mimics grid.draw()
+# Push/down any viewports and then call primToDev() to produce SVG
 grobToDev <- function(x, dev) {
   UseMethod("grobToDev", x)
 }
@@ -255,6 +257,8 @@ grobToDev.grob <- function(x, dev) {
 }
 
 # grob to device grob
+# This just converts a grid grob into a generic (bland) device grob
+# (which is just a list of values)
 devGrob <- function(x, dev) {
   UseMethod("devGrob")
 }
@@ -531,6 +535,12 @@ devGrob.cellGrob <- function(x, dev) {
 }
 
 # Prim to Dev
+# This generates SVG from the grob to reproduce the grob in SVG code
+# General form:
+#   startGroup
+#   for i=1:n
+#     dev&(devGrob(i))
+#   endGroup
 primToDev <- function(x, dev) {
   UseMethod("primToDev")
 }

@@ -83,6 +83,9 @@ garnish.gTree <- function(x, ...) {
              }))                          
 }
 
+# NOTE that this has to be a primToDev() method
+# NOT a grobToDev() method
+# OTHERWISE, viewports will not be set up correctly
 primToDev.garnished.grob <- function(x, dev) {
     dev@attrs <- garnish(x)
     NextMethod()

@@ -664,6 +664,15 @@ svgStyleCSS <- function(svgstyle) {
   }
 }
 
+# NOTE using SVG presentation attributes
+# RATHER THAN CSS style attribute
+# BECAUSE ...
+# - can modify single presentation attribute without affecting
+#   other presentation attributes (if CSS style then have to
+#   reset the entire thing) and can do this from JavaScript.
+# - presentation attributes have lower priority than CSS style
+#   SO this allows overriding by specifying CSS style later.
+#   Can also override with general style sheet later.
 svgStyleAttributes <- function(svgstyle) {
     if (emptyStyle(svgstyle)) {
         ""

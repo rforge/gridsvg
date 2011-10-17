@@ -880,6 +880,9 @@ animate.gTree <- function(x, dev) {
     # animate() method
 }
 
+# NOTE that this has to be a primToDev() method
+# NOT a grobToDev() method
+# OTHERWISE, viewports will not be set up correctly
 primToDev.animated.grob <- function(x, dev) {
     animate(x, dev)
     NextMethod()    
