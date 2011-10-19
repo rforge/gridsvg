@@ -1,4 +1,12 @@
 
+Changes from 0.8-0 to 0.8-1
+===========================
+
+1.  Added dependency on R >= 2.13.0
+
+    (grid.grab(wrap=TRUE) only works with bug fix in r54813).
+
+
 Changes from 0.7-0 to 0.8-0
 ===========================
 
