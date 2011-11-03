@@ -394,14 +394,14 @@ devGrob.circle <- function(x, dev) {
 vpUsageTable <- data.frame(vpname = character(0),
                            count = integer(0),
                            stringsAsFactors=FALSE)
-assign("vpUsageTable", vpUsageTable, env = .gridSVGEnv)
+assign("vpUsageTable", vpUsageTable, envir = .gridSVGEnv)
 
 # Because viewports can be pushed into many times, and each
 # time we push we start a group, we need a *unique* id for that
 # group, otherwise clipping paths don't work correctly
 getvpID <- function(vpname) {
   # Finding out how many times a VP has been pushed to so fara
-  vput <- get("vpUsageTable", env = .gridSVGEnv)
+  vput <- get("vpUsageTable", envir = .gridSVGEnv)
   vpcount <- vput[vput$vpname == vpname, "count"]
 
   # If the VP name is not in the usage table, add it
@@ -411,14 +411,14 @@ getvpID <- function(vpname) {
                                  data.frame(vpname = vpname,
                                             count = vpcount,
                                             stringsAsFactors = FALSE)),
-           env = .gridSVGEnv)
-    vput <- get("vpUsageTable", env = .gridSVGEnv)
+           envir = .gridSVGEnv)
+    vput <- get("vpUsageTable", envir = .gridSVGEnv)
   }
 
   # Incrementing the vp appearance counter and storing it
   vpcount <- vpcount + 1
   vput[vput$vpname == vpname, "count"] <- vpcount
-  assign("vpUsageTable", vput, env = .gridSVGEnv)
+  assign("vpUsageTable", vput, envir = .gridSVGEnv)
 
   vpID <- paste(vpname,
                 vpcount,

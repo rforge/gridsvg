@@ -1,3 +1,8 @@
+Changes from 0.8-1
+==================
+
+1.  Replaced partially matching arguments with full argument names. (Simon)
+
 
 Changes from 0.8-0 to 0.8-1
 ===========================

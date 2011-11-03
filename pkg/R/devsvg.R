@@ -159,7 +159,7 @@ devFontFaceToSVG <- function(fontface) {
 }
 
 getSVGFonts <- function() {
-    get("gridSVG.fonts", env = .gridSVGEnv)
+    get("gridSVG.fonts", envir = .gridSVGEnv)
 }
 
 setSVGFonts <- function(fontStacks) {
@@ -190,7 +190,7 @@ setSVGFonts <- function(fontStacks) {
         fontStacks$mono <- c(cleanedMono, "monospace")
     }
 
-    assign("gridSVG.fonts", fontStacks, env = .gridSVGEnv)
+    assign("gridSVG.fonts", fontStacks, envir = .gridSVGEnv)
 }
 
 # Setting default font stacks
