@@ -379,54 +379,6 @@ svgRect <- function(x, y, width, height, id=NULL,
   catsvg(rects, svgdev)
 }
 
-svgText <- function(x, y, text, hjust="left", vjust="bottom", rot=0,
-                    lineheight=1, charheight=.8,
-                    id=NULL, attributes=svgAttrib(), 
-                    style=svgStyle(), svgdev=svgDevice()) {
-    # Avoid XML specials in text
-    text <-
-        gsub("<", "&lt;",
-             gsub(">", "&gt;",
-                  gsub("'", "&apos;",
-                       gsub("\"", "&quot;",
-                            # DO & FIRST !!!!
-                            gsub("&", "&amp;",
-                                      text)))))
-
-    # Flip the y-direction again so that text is drawn "upright"
-    # Do the flip in a separate <g> so that can animate the
-    # translation easily
-    # Use a tspan to do the vertical alignment
-    texts <- paste('<g ',
-                   'id="', id, '" ',
-                   # Attributes applied to group
-                   svgAttribTxt(attributes, id), ' ',
-                   # Only draw a REALLY thin line for the text outline
-                   'stroke-width=".1" ',
-                   'transform="translate(',
-                   round(x, 2), ', ',
-                   round(y, 2), ') ',
-                   '">\n',
-                   '<g transform="scale(1, -1)">\n',
-                   '<text x="0" y="0" ',
-                   if (rot != 0) {
-                       paste('transform="rotate(',
-                             # Rotation in SVG goes clockwise from +ve x=axis
-                             round(-rot, 2),
-                             ')" ', sep="")
-                   } else "",
-                   textAnchor(hjust), ' ',
-                   svgStyleAttributes(style),
-                   ' >\n',
-                   svgTextSplitLines(text, lineheight, charheight, vjust),
-                   '</text>\n',
-                   '</g>\n',
-                   '</g>\n',
-                   sep="")
-
-    catsvg(texts, svgdev)
-}
-
 svgTextSplitLines <- function(text, lineheight, charheight, vjust) {
     # Splitting based on linebreaks
     splitText <- strsplit(text, "\n")
@@ -458,6 +410,124 @@ svgTextSplitLines <- function(text, lineheight, charheight, vjust) {
     svgText <- paste(unlist(svgText), collapse="\n")
 
     svgText
+}
+
+svgTextElement <- function(text, rot, hjust, vjust,
+                           lineheight, charheight, style) {
+    paste('<text x="0" y="0" ',
+          if (rot != 0) {
+              paste('transform="rotate(',
+                    # Rotation in SVG goes clockwise from +ve x=axis
+                    round(-rot, 2),
+                    ')" ', sep="")
+          } else "",
+          textAnchor(hjust), ' ',
+          svgStyleAttributes(style),
+          ' >\n',
+          svgTextSplitLines(text, lineheight, charheight, vjust),
+          '</text>\n',
+          sep="")
+}
+
+# NOTE that the precise placement of math is even less likely to work
+# than normal text.  Besides the problem of the browser using a
+# different font (which is more likely because a math expression
+# typically uses multiple fonts), the web browser will be using
+# a different formula layout engine compared to R so things like
+# the spacing between operators will be different.
+# One particular problem is that R justifies math formulas
+# relative to the bounding box of the formula, whereas it
+# appears that Firefox at least justifies relative to the formula
+# baseline (just from observation).
+# The code below tries to do something rational by making use
+# of finer detail metric information for the formula
+# to mimic R's vertical justification.  
+svgMathElement <- function(text, rot, hjust, vjust,
+                           width, height, ascent, descent,
+                           lineheight, charheight, fontheight,
+                           fontfamily, style) {
+    # Determine x/y based on width/height and hjust/vjust
+    if (hjust %in% c("centre", "center"))
+        x <- -width/2
+    if (hjust == "left")
+        x <- 0
+    if (hjust == "right")
+        x <- -width
+    if (vjust %in% c("centre", "center"))
+        y <- -(max(ascent, fontheight) + descent)/2
+    if (vjust == "bottom")
+        y <- -(max(ascent, fontheight) + descent)
+    if (vjust == "top") {
+        if (fontheight > ascent)
+            y <- -(fontheight - ascent)
+        else
+            y <- (ascent - fontheight)
+    }
+    # Adjust exact width/height up by fudge factor to allow for
+    # larger fonts in viewer
+    paste('<foreignObject x="', round(x, 2),
+                       '" y="', round(y, 2),
+                       '" width="', round(1.5*width, 2),
+                       '" height="', round(1.5*height, 2), '" ',
+          if (rot != 0) {
+              paste('transform="rotate(',
+                    # Rotation in SVG goes clockwise from +ve x=axis
+                    round(-rot, 2),
+                    ')" ', sep="")
+          } else "",
+          svgStyleAttributes(style),
+          ' >\n',
+          expr2mml(text, fontfamily),
+          '</foreignObject>\n',
+          sep="")
+}
+
+svgText <- function(x, y, text, hjust="left", vjust="bottom", rot=0,
+                    width=1, height=1, ascent=1, descent=0,
+                    lineheight=1, charheight=.8, fontheight=1,
+                    fontfamily="sans",
+                    id=NULL, attributes=svgAttrib(), 
+                    style=svgStyle(), svgdev=svgDevice()) {
+    # Avoid XML specials in text
+    if (!is.language(text))
+        text <-
+            gsub("<", "&lt;",
+                 gsub(">", "&gt;",
+                      gsub("'", "&apos;",
+                           gsub("\"", "&quot;",
+                                # DO & FIRST !!!!
+                                gsub("&", "&amp;",
+                                     text)))))
+
+    # Flip the y-direction again so that text is drawn "upright"
+    # Do the flip in a separate <g> so that can animate the
+    # translation easily
+    # Use a tspan to do the vertical alignment
+    texts <- paste('<g ',
+                   'id="', id, '" ',
+                   # Attributes applied to group
+                   svgAttribTxt(attributes, id), ' ',
+                   # Only draw a REALLY thin line for the text outline
+                   'stroke-width=".1" ',
+                   'transform="translate(',
+                   round(x, 2), ', ',
+                   round(y, 2), ') ',
+                   '">\n',
+                   '<g transform="scale(1, -1)">\n',
+                   if (is.language(text)) {
+                       svgMathElement(text, rot, hjust, vjust,
+                                      width, height, ascent, descent,
+                                      lineheight, charheight, fontheight,
+                                      fontfamily, style)
+                   } else {
+                       svgTextElement(text, rot, hjust, vjust,
+                                      lineheight, charheight, style)
+                   },
+                   '</g>\n',
+                   '</g>\n',
+                   sep="")
+
+    catsvg(texts, svgdev)
 }
 
 svgCircle <- function(x, y, r, id=NULL,

@@ -84,7 +84,7 @@ devColAlphaToSVG <- function(colAlpha) {
 }
 
 devFontSizeToSVG <- function(fontsize, dev) {
-    paste(fontsize/72*dev@res, "px", sep="")
+    paste(round(fontsize/72*dev@res, 2), "px", sep="")
 }
 
 devLineJoinToSVG <- function(linejoin, dev) {
@@ -203,20 +203,31 @@ setSVGFonts(list(sans = sansFontStack,
                  serif = serifFontStack,
                  mono = monoFontStack))
 
+fontStackFromFontFamily <- function(fontfamily, currentFonts) {
+    if (fontfamily %in% c(currentFonts$sans, "sans"))
+        "sans"
+    else if (fontfamily %in% currentFonts$serif)
+        "serif"
+    else if (fontfamily %in% c(currentFonts$mono, "mono"))
+        "mono"
+    else 
+        "unknown"
+}
+
 devFontFamilyToSVG <- function(fontfamily, dev) {
     currentFonts <- getSVGFonts()
+    stackname <- fontStackFromFontFamily(fontfamily, currentFonts)
 
-    if (fontfamily %in% c(currentFonts$sans, "sans"))
-        fontstack <- currentFonts$sans
-    else if (fontfamily %in% currentFonts$serif)
-        fontstack <- currentFonts$serif
-    else if (fontfamily %in% c(currentFonts$mono, "mono"))
-        fontstack <- currentFonts$mono
-    else if (nchar(fontfamily) > 0)
-        fontstack <- c(fontfamily, currentFonts$sans) # Assume font exists, but also assume sans-serif fallback
-    else
-        fontstack <- currentFonts$sans # Assuming a sans-serif font
-
+    if (stackname == "unknown") {
+        if (nchar(fontfamily) > 0)
+            # Assume font exists, but also assume sans-serif fallback
+            fontstack <- c(fontfamily, currentFonts$sans)
+        else 
+            fontstack <- currentFonts$sans # Assuming a sans-serif font
+    } else {
+        fontstack <- currentFonts[[stackname]]
+    }
+    
     # Formatting the font stack for CSS
     fontStackCSS <- paste(fontstack, collapse=', ')
 
@@ -255,7 +266,7 @@ devParToSVGStyle <- function(gp, dev) {
             if ("fontsize" %in% names(gp))
                 gp$fontsize <- (gp$fontsize * gp$cex)
             else
-                gp$fontsize <- (12 * gp$cex)
+                gp$fontsize <- (get.gpar("fontsize")[[1]] * gp$cex)
         }
         # Scale lty by lwd
         if ("lty" %in% names(gp)) {
@@ -372,7 +383,9 @@ setMethod("devText", signature(device="svgDevice"),
 
             svgText(text$x, text$y, text$text,
                     text$hjust, text$vjust, text$rot,
-                    text$lineheight, text$charheight, text$name,
+                    text$width, text$height, text$ascent, text$descent,
+                    text$lineheight, text$charheight, text$fontheight,
+                    text$fontfamily, text$name,
                     device@attrs,
                     devParToSVGStyle(gp, device), device@dev)
           })

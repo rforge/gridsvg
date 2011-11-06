@@ -1,15 +1,14 @@
-Changes from 0.8-1
-==================
 
-1.  Replaced partially matching arguments with full argument names. (Simon)
-
-
-Changes from 0.8-0 to 0.8-1
+Changes from 0.8-0 to 0.9-0
 ===========================
 
 1.  Added dependency on R >= 2.13.0
 
     (grid.grab(wrap=TRUE) only works with bug fix in r54813).
+
+2.  Replaced partially matching arguments with full argument names. (Simon)
+
+3.  Started to add plotmath support (outputs MathML).
 
 
 Changes from 0.7-0 to 0.8-0

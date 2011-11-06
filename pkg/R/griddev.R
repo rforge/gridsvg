@@ -359,7 +359,23 @@ devGrob.text <- function(x, dev) {
   textLineHeight <- ch(unit(gp$lineheight * gp$cex *
                             graphics::par("cin")[2], "inches"), dev)
   charHeight <- ch(charHeight, dev)
+  
+  # height of current font
+  # This corresponds to lineheight in SVG terms,
+  # which is defined to be font size
+  # see http://www.w3.org/TR/SVG/propidx.html
+  #   comment in row for 'baseline-shift' in the 'percentages' column
+  # This is needed for positioning plotmath expressions
+  # to anything close to the right place
+  xcex <- if (is.null(x$gp$cex)) 1 else x$gp$cex
+  fontHeight <- ch(unit(gp$fontsize * gp$cex * xcex/ 72, "inches"), dev)
 
+  # Width of the text/expression
+  width <- cw(grobWidth(x), dev)
+  height <- ch(grobHeight(x), dev)
+  ascent <- ch(grobAscent(x), dev)
+  descent <- ch(grobDescent(x), dev)
+  
   # Checking whether to use just or [h/v]just
   # Will convert numerics to strings in justTo_just function
   just <- rep(x$just, length.out = 2)
@@ -378,8 +394,14 @@ devGrob.text <- function(x, dev) {
        hjust=hjust,
        vjust=vjust,
        rot=x$rot,
+       width=width,
+       height=height,
+       ascent=ascent,
+       descent=descent,
        lineheight=textLineHeight,
+       fontheight=fontHeight,
        charheight=charHeight,
+       fontfamily=gp$fontfamily,
        name=x$name)  
 }
 
@@ -946,12 +968,14 @@ primToDev.text <- function(x, dev) {
     textLabel <- rep(textLabel, length.out = n)
   } else {
     # Checking that no element of label vector is empty
-    textLabel <- sapply(x$label, function(t) {
-      if (nchar(t) == 0 | length(t) == 0)
-        " "
-      else
-        t
-    })
+    if (!is.language(x$label)) {
+        textLabel <- sapply(x$label, function(t) {
+            if (nchar(t) == 0 | length(t) == 0)
+                " "
+            else
+                t
+        })
+    }
     textLabel <- rep(x$label, length.out = n)
   }
 

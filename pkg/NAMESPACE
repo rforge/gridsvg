@@ -94,3 +94,9 @@ S3method("as.animValue", "list")
 
 S3method("print", "animValue")
 S3method("print", "animUnit")
+
+S3method("toMML", "numeric")
+S3method("toMML", "character")
+S3method("toMML", "name")
+S3method("toMML", "(")
+S3method("toMML", "call")
