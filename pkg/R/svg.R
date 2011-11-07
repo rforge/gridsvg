@@ -3,7 +3,14 @@ svgOpen <- function(filename="Rplots.svg", width=200, height=200) {
   # For viewing using Adobe SVG Viewer in IE
   # OR in Firefox 3 (native support)
   # create a "wrapper" html file
+    # NOTE that for including plotmath output (as MathML), may
+    # need to use the right sort of headers.
+    # See ~/Research/Rstuff/SVG/PlotMath/README for notes from some
+    # experiments AND email from David Scott that contains an
+    # example from org-babel output 2011-11-01
   htmlfile <- file(paste(filename, ".html", sep=""), "w")
+  # NOTE that different browsers prefer different approaches
+  # See email from David Scott 2011-11-03 for some sample code
   cat(paste('<object data="', filename, '" type="image/svg+xml"',
             ' width="', ceiling(width), 'px" height="', ceiling(height), 'px"> </object>\n',
             sep=''), file=htmlfile)
