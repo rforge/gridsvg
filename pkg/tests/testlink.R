@@ -3,7 +3,7 @@ library(grid)
 library(gridSVG)
 
 # A very simple test
-x11(width=6, height=6)
+dev.new(width=6, height=6)
 # Some default settings
 pushViewport(viewport(gp=gpar(col="black", fill=NA)))
 grid.text("Click me", name="txtgrob")
@@ -20,7 +20,7 @@ dev.off()
 data(iris)
 
 # A scatterplot of x vs y
-x11(width=6, height=6)
+dev.new(width=6, height=6)
 # Some default settings
 pushViewport(viewport(gp=gpar(col="black", fill=NA)))
 pushViewport(plotViewport(c(5, 5, 4, 2)))
@@ -46,7 +46,7 @@ gridToSVG("linkscatter.svg")
 dev.off()
 
 # A dot plot of x
-x11(width=6, height=3)
+dev.new(width=6, height=3)
 # Some default settings
 pushViewport(viewport(gp=gpar(col="black", fill=NA)))
 pushViewport(plotViewport(c(5, 2, 4, 2)))
@@ -76,7 +76,7 @@ gridToSVG("linkdotx.svg")
 dev.off()
 
 # A dot plot of y
-x11(width=6, height=3)
+dev.new(width=6, height=3)
 # Some default settings
 pushViewport(viewport(gp=gpar(col="black", fill=NA)))
 pushViewport(plotViewport(c(5, 2, 4, 2)))
