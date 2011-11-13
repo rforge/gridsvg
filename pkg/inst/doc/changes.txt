@@ -12,6 +12,8 @@ Changes from 0.8-0 to 0.9-0
 
 4.  Changed x11() to dev.new() in tests/*.R code.
 
+5.  Added animation support for polygon grobs and path grobs.
+
 
 Changes from 0.7-0 to 0.8-0
 ===========================

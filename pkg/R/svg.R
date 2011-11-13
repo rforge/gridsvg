@@ -137,7 +137,7 @@ lpaste <- function(alist, collapse) {
   paste(result, collapse=collapse)
 }
 
-svgAnimatePoints <- function(xvalues, yvalues, pointsid,
+svgAnimatePoints <- function(xvalues, yvalues, timeid,
                              begin, interp, duration, rep, revert,
                              id=NULL,
                              svgdev=svgDevice()) {
@@ -147,10 +147,39 @@ svgAnimatePoints <- function(xvalues, yvalues, pointsid,
     svgAnimate("points",
                 paste(lapply(split(paste(round(xvalues, 2),
                                          round(yvalues, 2), sep=","),
-                                   pointsid),
+                                   timeid),
                              paste, collapse=" "),
                       collapse=";"),
                begin, interp, duration, rep, revert, id, svgdev)  
+}
+
+svgAnimatePath <- function(xvalues, yvalues, pathid, timeid,
+                           begin, interp, duration, rep, revert,
+                           id=NULL,
+                           svgdev=svgDevice()) {
+  if (is.null(id))
+    warning("Not sure what this animation means?")
+  else {
+      # Split into time segments
+      x <- split(xvalues, timeid)
+      y <- split(yvalues, timeid)
+      pid <- split(pathid, timeid)
+      d <- mapply(function(xtime, ytime, pid) {
+                      # Split into path components
+                      xx <- split(xtime, pid)
+                      yy <- split(ytime, pid)
+                      txt <- mapply(function(x, y) {
+                                        paste(paste(c("M",
+                                                      rep("L", length(x) - 1)),
+                                                    round(x, 2), round(y, 2),
+                                                    collapse=" "),
+                                              "Z")
+                                    }, xx, yy)
+                      paste(unlist(txt), collapse=" ")
+                  }, x, y, pid)
+      svgAnimate("d", paste(d, collapse=";"),
+                 begin, interp, duration, rep, revert, id, svgdev)      
+  }
 }
 
 svgAnimateTransform <- function(attrib, values,
@@ -324,8 +353,7 @@ svgPath <- function(x, y, rule, id=NULL,
         }
     }
     n <- length(x)
-    d <- mapply(
-                function(subx, suby) {
+    d <- mapply(function(subx, suby) {
                     paste(paste(c("M",
                                   rep("L", length(subx) - 1)),
                                 round(subx, 2), round(suby, 2),
