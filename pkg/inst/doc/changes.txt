@@ -14,6 +14,14 @@ Changes from 0.8-0 to 0.9-0
 
 5.  Added animation support for polygon grobs and path grobs.
 
+6.  Changed translation of rastergrob grobs to SVG.
+    They are now an <image> wrapped in two <g>s.
+    The outer <g> provides a translation;  the inner <g> provides
+    a scaling;  and the image is at (0, 0) and size (1, 1).
+    This allows for ...
+
+7.  Added animation support for rastergrob grobs.
+
 
 Changes from 0.7-0 to 0.8-0
 ===========================

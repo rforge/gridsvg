@@ -366,6 +366,36 @@ grid.animate("path",
              duration=3)
 gridToSVG("anim-path-complex.svg")
 
+# Simple case
+# (single raster, anim only x, anim values are just numeric)
+grid.newpage()
+grid.text("One raster moves across",
+          y=unit(1, "lines"))
+grid.rect()
+grid.raster(1:10/11, x=.2, y=.2, width=.1, height=.1, name="raster")
+grid.animate("raster", x=c(.2, .8), duration=3)
+gridToSVG("anim-raster-simple.svg")
+
+# Complex case
+# (multiple rasters, anim x/y/width/height, anim values are matrices and lists)
+grid.newpage()
+grid.text("Three rasters: one goes up, one goes across, and
+one goes diagonal and gets smaller",
+          y=unit(1, "lines"))
+grid.rect()
+grid.raster(1:10/11, x=rep(.2, 3), y=.2, width=.1, height=.1, name="raster")
+grid.animate("raster",
+             x=cbind(c(.2, .8), c(.2, .8), .2),
+             y=cbind(.2, c(.2, .8), c(.2, .8)),
+             width=list(unit(.1, "npc"),
+               unit(c(.1, 1), c("npc", "cm")),
+               unit(.1, "npc")),
+             height=list(unit(.1, "npc"),
+               unit(c(.1, 1), c("npc", "cm")),
+               unit(.1, "npc")),             
+             duration=3)
+gridToSVG("anim-raster-complex.svg")
+
 ############################################
 
 # Multiple animations on same grob

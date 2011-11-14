@@ -216,6 +216,17 @@ svgAnimateTranslation <- function(xvalues, yvalues,
                       begin, interp, duration, rep, revert, id, svgdev)  
 }
 
+svgAnimateScale <- function(xvalues, yvalues,
+                            begin, interp, duration, rep, revert,
+                            id=NULL,
+                            svgdev=svgDevice()) {
+  svgAnimateTransform("scale",
+                      paste(round(xvalues, 2),
+                            round(yvalues, 2),
+                            sep=",", collapse=';'),
+                      begin, interp, duration, rep, revert, id, svgdev)  
+}
+
 svgLines <- function(x, y, id=NULL, arrow = NULL,
                      attributes=svgAttrib(),
                      style=svgStyle(), svgdev=svgDevice()) {
@@ -381,20 +392,30 @@ svgRaster <- function(x, y, width, height, id=NULL,
   grobname <- baseGrobName(id)
   fileloc <- paste(grobname, ".png", sep = "")
 
-  rasters <- paste('<image ',
+  rasters <- paste('<g ',
                    'id="', id, '" ',
-                   'x="', round(x, 2), '" ',
-                   'y="', round(y, 2), '" ',
-                   'width="', round(width, 2), '" ',
-                   'height="', round(height, 2), '" ',
-                   'xlink:href="', fileloc, '" ',
-                   # Flipping image vertically to correct orientation
-                   'transform="translate(0, ',  round(height + (2 * y), 2), ') scale(1, -1)" ',
+                   # Attributes applied to group
                    svgAttribTxt(attributes, id), ' ',
-                   svgStyleAttributes(style),
+                   svgStyleAttributes(style), ' ',
+                   # Flip image vertically to correct orientation
+                   'transform="translate(',
+                   round(x, 2), ', ',
+                   round(height + y, 2), ') ',
+                   '">\n',
+                   '<g ',
+                   'id="', paste(id, "scale", sep="."), '" ',
+                   'transform="scale(',
+                   round(width, 2), ', ',
+                   round(-height, 2), ')',
+                   '">\n',
+                   '<image ',
+                   'x="0" y="0" width="1" height="1" ', 
+                   'xlink:href="', fileloc, '" ',
                    ' />\n',
+                   '</g>\n',
+                   '</g>\n',
                    sep="")
-
+  
   catsvg(rasters, svgdev)
 }
 

@@ -1008,8 +1008,132 @@ applyAnimation.pathgrob <- function(x, animSet, animation, group, dev) {
     }  
 }
 
+applyAnimation.rastergrob <- function(x, animSet, animation, group, dev) {
 
-# FIXME:  xsplines, pathgrob, rastergrob
+    if (group) {
+        svgAnimate(animation,
+                   paste(ithValue(animSet$animations[[animation]], 1),
+                         collapse=";"),
+                   animSet$begin, animSet$interp, animSet$dur,
+                   animSet$rep, animSet$rev,
+                   x$name, dev@dev)
+    } else {
+
+        # We may be dealing with multiple rasters that need animating
+        n <- max(length(x$x), length(x$y), length(x$width), length(x$height))
+
+        # Rep the original x/y/width/height out to be the same length
+        x$x <- rep(x$x, length.out=n)
+        x$y <- rep(x$y, length.out=n)
+        x$width <- rep(x$width, length.out=n)
+        x$height <- rep(x$height, length.out=n)
+  
+        # Repeating animation parameters so that each element can have
+        # distinct values
+        begin <- rep(animSet$begin, length.out = n)
+        interp <- rep(animSet$interp, length.out = n)
+        dur <- rep(animSet$duration, length.out = n)
+        rep <- rep(animSet$rep, length.out = n)
+        rev <- rep(animSet$revert, length.out = n)
+
+        for (i in 1:n) {
+            subName <- subGrobName(x$name, i)
+
+            # If x AND y change, need to transform together
+            # If width/height changes, have to animate x/y as well
+            # because SVG <rect> does not have justification
+            if ("x" %in% names(animSet$animations))
+                xi <- ithUnit(animSet$animations$x, x$x, i)
+            else
+                xi <- x$x[i]
+            if ("y" %in% names(animSet$animations))
+                yi <- ithUnit(animSet$animations$y, x$y, i)
+            else
+                yi <- x$y[i]
+            if ("width" %in% names(animSet$animations))
+                widthi <- ithUnit(animSet$animations$width, x$width, i)
+            else
+                widthi <- x$width[i]
+            if ("height" %in% names(animSet$animations))
+                heighti <- ithUnit(animSet$animations$height, x$height, i)
+            else
+                heighti <- x$height[i]
+            lb <- leftbottom(xi, yi, widthi, heighti, x$just, dev)
+    
+            switch(animation,
+                   x={
+                       dim <- dimToInches(widthi, heighti, dev)
+                       svgAnimateTranslation(cx(lb$x, dev),
+                                             ch(dim$h, dev) + cy(lb$y, dev),
+                                             begin[i], interp[i], dur[i],
+                                             rep[i], rev[i],
+                                             subName, dev@dev)
+                   },
+                   y={
+                       # If we are also animating "x" then this has
+                       # already been done
+                       if (!"x" %in% names(animSet$animations)) {
+                           dim <- dimToInches(widthi, heighti, dev)
+                           svgAnimateTranslation(cx(lb$x, dev),
+                                                 ch(dim$h, dev) +
+                                                 cy(lb$y, dev),
+                                                 begin[i], interp[i], dur[i],
+                                                 rep[i], rev[i],
+                                                 subName, dev@dev)
+                       }
+                   },
+                   width={
+                       dim <- dimToInches(widthi, heighti, dev)
+                       # If x is also animated,
+                       # this has already been handled above
+                       if (!any(c("x", "y") %in% names(animSet$animations))) {
+                           svgAnimateTranslation(cx(lb$x, dev),
+                                                 ch(dim$h, dev) +
+                                                 cy(lb$y, dev),
+                                                 begin[i], interp[i], dur[i],
+                                                 rep[i], rev[i],
+                                                 subName, dev@dev)
+                       }
+                       svgAnimateScale(cw(dim$w, dev), -ch(dim$h, dev), 
+                                       begin[i], interp[i], dur[i],
+                                       rep[i], rev[i],
+                                       paste(subName, "scale", sep="."),
+                                       dev@dev)
+                   },
+                   height={
+                       # If "width" is also animated,
+                       # this has already been done
+                       if ("width" %in% names(animSet$animations)) {
+                           dim <- dimToInches(widthi, heighti, dev)
+                           if (!any(c("x", "y") %in%
+                                    names(animSet$animations))) {
+                               svgAnimateTranslation(cx(lb$x, dev),
+                                                     ch(dim$h, dev) +
+                                                     cy(lb$y, dev),
+                                                     begin[i], interp[i],
+                                                     dur[i], rep[i], rev[i],
+                                                     subName, dev@dev)
+                           }
+                           svgAnimateScale(cw(dim$w, dev), -ch(dim$h, dev), 
+                                           begin[i], interp[i], dur[i],
+                                           rep[i], rev[i],
+                                           paste(subName, "scale", sep="."),
+                                           dev@dev)
+                       }
+                   },
+                   # Any other attribute
+                   {
+                       svgAnimate(animation,
+                                  paste(ithValue(animSet$animations[[animation]], i),
+                                        collapse=";"),
+                                  begin[i], interp[i], dur[i],
+                                  rep[i], rev[i], subName, dev@dev)
+                   })
+        }
+    }
+}
+
+# FIXME:  xsplines, rastergrob
 
 applyAnimation.grob <- function(x, ...) {
     # If we got here, then we've hit something that is not yet implemented
