@@ -396,6 +396,99 @@ grid.animate("raster",
              duration=3)
 gridToSVG("anim-raster-complex.svg")
 
+# Simple case
+# (single xspline, anim only x, anim values are just numeric)
+grid.newpage()
+grid.text("Two xsplines move across",
+          y=unit(1, "lines"))
+grid.rect()
+grid.xspline(c(.3, .1, .5, .3),
+             c(.2, .5, .5, .2),
+             open=TRUE, shape=1,
+             name="xspline-1")
+grid.xspline(c(.3, .1, .5),
+             c(.6, .9, .9),
+             open=FALSE, shape=1,
+             gp=gpar(fill="grey"),
+             name="xspline-2")
+grid.animate("xspline-1",
+             x=animUnit(unit(c(.3, .1, .5, .3,
+                               .7, .5, .9, .7),
+                             "npc"),
+                        timeid=rep(1:2, each=4)),
+             duration=3)
+grid.animate("xspline-2",
+             x=cbind(c(.3, .1, .5),
+                     c(.7, .5, .9)),
+             duration=3)
+gridToSVG("anim-xspline-simple.svg")
+
+# Complex case
+# (four xsplines, animation has many points, animate x and y)
+grid.newpage()
+grid.text("Four xsplines shrink and grow (flipped) then revert",
+          y=unit(1, "lines"))
+grid.rect()
+grid.xspline(c(.3, .1, .5, .3,
+               .7, .5, .9, .7),
+             c(.2, .5, .5, .2,
+               .2, .5, .5, .2),
+             shape=1,
+             id=rep(1:2, each=4), name="xspline-open")
+grid.xspline(c(.3, .1, .5,
+               .7, .5, .9),
+             c(.6, .9, .9,
+               .6, .9, .9),
+             open=FALSE, shape=1,
+             gp=gpar(fill="grey"),
+             id=rep(1:2, each=3), name="xspline-closed")
+grid.animate("xspline-open",
+             x=animUnit(unit(c(.3, .1, .5, .3,
+                               .5, .3, .7, .5,
+                               .7, .5, .9, .7,
+
+                               .7, .5, .9, .7,
+                               .5, .3, .7, .5,
+                               .3, .1, .5, .3),
+                             "npc"),
+                        id=rep(1:2, each=12),
+                        timeid=rep(rep(1:3, each=4), 2)),
+             y=animUnit(unit(c(.2, .5, .5, .2,
+                               .5, .2, .2, .5,
+                               .2, .5, .5, .2,
+               
+                               .2, .5, .5, .2,
+                               .5, .2, .2, .5,
+                               .2, .5, .5, .2),
+                             "npc"),
+                        id=rep(1:2, each=12),
+                        timeid=rep(rep(1:3, each=4), 2)),
+             duration=5)
+grid.animate("xspline-closed",
+             x=animUnit(unit(c(.3, .1, .5,
+                               .5, .3, .7,
+                               .7, .5, .9,
+
+                               .7, .5, .9,
+                               .5, .3, .7,
+                               .3, .1, .5),
+                             "npc"),
+                        id=rep(1:2, each=9),
+                        timeid=rep(rep(1:3, each=3), 2)),
+             y=animUnit(unit(c(.6, .9, .9,
+                               .9, .6, .6,
+                               .6, .9, .9,
+
+                               .6, .9, .9,
+                               .9, .6, .6,
+                               .6, .9, .9),
+                             "npc"),
+                        id=rep(1:2, each=9),
+                        timeid=rep(rep(1:3, each=3), 2)),
+             duration=5)
+gridToSVG("anim-xspline-complex.svg")
+
+
 ############################################
 
 # Multiple animations on same grob

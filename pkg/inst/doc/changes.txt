@@ -22,6 +22,12 @@ Changes from 0.8-0 to 0.9-0
 
 7.  Added animation support for rastergrob grobs.
 
+8.  Added animation support for xspline grobs.
+
+    Note that closed xsplines are unlikely to animate smoothly
+    (because the result is an animated <path> with a variable 
+     number of operations).
+
 
 Changes from 0.7-0 to 0.8-0
 ===========================
