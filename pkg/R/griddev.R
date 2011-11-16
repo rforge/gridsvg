@@ -371,6 +371,14 @@ devGrob.text <- function(x, dev) {
   fontHeight <- ch(unit(gp$fontsize * gp$cex * xcex/ 72, "inches"), dev)
 
   # Width of the text/expression
+  
+  # MUST set x$vp to NULL before doing the following calculations
+  # because x$vp has already been asserted and the calculation may
+  # involve trying to assert it again!
+  # (which would mean hidden error because viewport pushed twice OR
+  #  visible error because try to "down" to viewport that does not exist)
+  x$vp <- NULL
+  
   width <- cw(grobWidth(x), dev)
   height <- ch(grobHeight(x), dev)
   ascent <- ch(grobAscent(x), dev)
