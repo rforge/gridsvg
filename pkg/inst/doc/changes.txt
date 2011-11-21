@@ -8,7 +8,12 @@ Changes from 0.8-0 to 0.9-0
 
 2.  Replaced partially matching arguments with full argument names. (Simon)
 
-3.  Started to add plotmath support (outputs MathML).
+3.  Added plotmath support (outputs MathML).
+
+    Note that positioning of MathML output is VERY unlikely to
+    be accurate because there is not only the problem of font
+    differences BUT ALSO the problem of a different math
+    formula layout engine!
 
 4.  Changed x11() to dev.new() in tests/*.R code.
 

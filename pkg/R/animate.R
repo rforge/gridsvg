@@ -1238,8 +1238,6 @@ applyAnimation.xspline <- function(x, animSet, animation, group, dev) {
 }
 
 
-# FIXME:  xsplines
-
 applyAnimation.grob <- function(x, ...) {
     # If we got here, then we've hit something that is not yet implemented
     stop(paste("Animation of ", paste(class(x), collapse=":"),

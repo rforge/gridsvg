@@ -501,7 +501,7 @@ svgTextElement <- function(text, rot, hjust, vjust,
 svgMathElement <- function(text, rot, hjust, vjust,
                            width, height, ascent, descent,
                            lineheight, charheight, fontheight,
-                           fontfamily, style) {
+                           fontfamily, fontface, style) {
     # Determine x/y based on width/height and hjust/vjust
     if (hjust %in% c("centre", "center"))
         x <- -width/2
@@ -533,7 +533,7 @@ svgMathElement <- function(text, rot, hjust, vjust,
           } else "",
           svgStyleAttributes(style),
           ' >\n',
-          expr2mml(text, fontfamily),
+          expr2mml(text, fontfamily, fontface),
           '</foreignObject>\n',
           sep="")
 }
@@ -541,7 +541,7 @@ svgMathElement <- function(text, rot, hjust, vjust,
 svgText <- function(x, y, text, hjust="left", vjust="bottom", rot=0,
                     width=1, height=1, ascent=1, descent=0,
                     lineheight=1, charheight=.8, fontheight=1,
-                    fontfamily="sans",
+                    fontfamily="sans", fontface="plain",
                     id=NULL, attributes=svgAttrib(), 
                     style=svgStyle(), svgdev=svgDevice()) {
     # Avoid XML specials in text
@@ -574,7 +574,7 @@ svgText <- function(x, y, text, hjust="left", vjust="bottom", rot=0,
                        svgMathElement(text, rot, hjust, vjust,
                                       width, height, ascent, descent,
                                       lineheight, charheight, fontheight,
-                                      fontfamily, style)
+                                      fontfamily, fontface, style)
                    } else {
                        svgTextElement(text, rot, hjust, vjust,
                                       lineheight, charheight, style)

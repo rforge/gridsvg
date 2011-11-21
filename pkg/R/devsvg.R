@@ -385,7 +385,7 @@ setMethod("devText", signature(device="svgDevice"),
                     text$hjust, text$vjust, text$rot,
                     text$width, text$height, text$ascent, text$descent,
                     text$lineheight, text$charheight, text$fontheight,
-                    text$fontfamily, text$name,
+                    text$fontfamily, text$fontface, text$name,
                     device@attrs,
                     devParToSVGStyle(gp, device), device@dev)
           })

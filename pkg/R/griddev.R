@@ -410,6 +410,8 @@ devGrob.text <- function(x, dev) {
        fontheight=fontHeight,
        charheight=charHeight,
        fontfamily=gp$fontfamily,
+       fontface=switch(gp$font,
+         "plain", "bold", "italic", "bold.italic"),
        name=x$name)  
 }
 
