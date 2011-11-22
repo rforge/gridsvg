@@ -503,7 +503,9 @@ toMML.call <- function(x, indent, fontfamily, fontface, ...) {
 expr2mml <- function(e, fontfamily, fontface) {
     bits <- lapply(e, toMML, indent="    ",
                    fontfamily=fontfamily, fontface=fontface)
-    paste('<math xmlns="http://www.w3.org/1998/Math/MathML" display="block">\n',
+    # Use display="inline" to have some hope of positioning the
+    # output somewhere near the right location
+    paste('<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">\n',
           paste(sapply(bits,
                        function(x) paste('  <mrow>\n', x, '  </mrow>\n',
                                          sep="")),

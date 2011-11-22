@@ -519,12 +519,13 @@ svgMathElement <- function(text, rot, hjust, vjust,
         else
             y <- (ascent - fontheight)
     }
-    # Adjust exact width/height up by fudge factor to allow for
-    # larger fonts in viewer
+    # Adjust exact width/height up by large fudge factor to allow for
+    # larger fonts and different layout in viewer
+    # Hopefully there are no downsides to that approach ...
     paste('<foreignObject x="', round(x, 2),
                        '" y="', round(y, 2),
-                       '" width="', round(1.5*width, 2),
-                       '" height="', round(1.5*height, 2), '" ',
+                       '" width="', round(2*width, 2),
+                       '" height="', round(2*height, 2), '" ',
           if (rot != 0) {
               paste('transform="rotate(',
                     # Rotation in SVG goes clockwise from +ve x=axis
