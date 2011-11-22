@@ -654,7 +654,7 @@ doNotAnimate <- function(animSet, animation) {
         (sum(c("x0", "y0", "x1", "y1") %in% animNames) > 1 &&
          animation %in% c("x0", "y0", "x1", "y1") &&
          match(animation, animNames) >
-         min(match(c("x0", "y0", "x1", "y1"), animNames))))
+         min(match(c("x0", "y0", "x1", "y1"), animNames), na.rm=TRUE)))
         TRUE
     else
         FALSE
@@ -1193,6 +1193,8 @@ applyAnimation.xspline <- function(x, animSet, animation, group, dev) {
                     tempSpline <- grob
                     tempSpline$x <- x
                     tempSpline$y <- y
+                    tempSpline$id <- NULL
+                    tempSpline$id.lengths <- NULL
                     xsplinePoints(tempSpline)                    
                 }
                 
