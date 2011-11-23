@@ -524,8 +524,8 @@ svgMathElement <- function(text, rot, hjust, vjust,
     # Hopefully there are no downsides to that approach ...
     paste('<foreignObject x="', round(x, 2),
                        '" y="', round(y, 2),
-                       '" width="', round(2*width, 2),
-                       '" height="', round(2*height, 2), '" ',
+                       '" width="', round(3*width, 2),
+                       '" height="', round(3*height, 2), '" ',
           if (rot != 0) {
               paste('transform="rotate(',
                     # Rotation in SVG goes clockwise from +ve x=axis
