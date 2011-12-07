@@ -56,21 +56,32 @@ svgClipAttr <- function(id, clip) {
 }
 
 svgStartGroup <- function(id=NULL, clip=FALSE,
-                          attributes=svgAttrib(),
+                          attributes=svgAttrib(), links=NULL,
                           style=svgStyle(), svgdev=svgDevice()) {
   incindent(svgdev)
+  if (!is.null(id)) {
+      link <- links[id]
+      if (!(is.null(link) || is.na(link)))
+          svgStartLink(link, svgdev)
+  }
   catsvg(paste('<g ',
                'id="', getid(id, svgdev), '" ',
                svgAttribTxt(attributes, id), ' ',
                svgClipAttr(id, clip),
                svgStyleAttributes(style), 
                '>\n',
-               sep=""), svgdev)
+               sep=""),
+         svgdev)
   incID(svgdev)
 }
 
-svgEndGroup <- function(svgdev=svgDevice()) {
+svgEndGroup <- function(id=NULL, links=NULL, svgdev=svgDevice()) {
   catsvg('</g>\n', svgdev)
+  if (!is.null(id)) {
+      link <- links[id]
+      if (!(is.null(link) || is.na(link)))
+          svgEndLink(svgdev)
+  }
   decindent(svgdev)
 }
 
@@ -228,7 +239,7 @@ svgAnimateScale <- function(xvalues, yvalues,
 }
 
 svgLines <- function(x, y, id=NULL, arrow = NULL,
-                     attributes=svgAttrib(),
+                     attributes=svgAttrib(), links=NULL,
                      style=svgStyle(), svgdev=svgDevice()) {
 
   # Grabbing arrow info for marker element references
@@ -251,7 +262,8 @@ svgLines <- function(x, y, id=NULL, arrow = NULL,
                svgAttribTxt(attributes, id), ' ',
                svgStyleAttributes(style), 
                ' />\n', sep=""),
-         svgdev)  
+         svgdev,
+         link=links[id])  
 }
 
 svgMarker <- function(x, y, type, ends, name,
@@ -331,7 +343,7 @@ markerName <- function(ends, name) {
 }
 
 svgPolygon <- function(x, y, id=NULL,
-                       attributes=svgAttrib(),
+                       attributes=svgAttrib(), links=NULL,
                        style=svgStyle(), svgdev=svgDevice()) {
   if (length(x) != length(y))
     stop("x and y must be same length")
@@ -346,12 +358,12 @@ svgPolygon <- function(x, y, id=NULL,
                svgAttribTxt(attributes, id), ' ',
                svgStyleAttributes(style), 
                ' />\n', sep=""),
-         svgdev)  
+         svgdev, link=links[id])  
 }
 
 # Differs from polygon because it can have sub-paths
 svgPath <- function(x, y, rule, id=NULL,
-                    attributes=svgAttrib(),
+                    attributes=svgAttrib(), links=NULL,
                     style=svgStyle(), svgdev=svgDevice()) {
     if (length(x) != length(y))
         stop("x and y must be same length")
@@ -380,12 +392,12 @@ svgPath <- function(x, y, rule, id=NULL,
                  svgAttribTxt(attributes, id), ' ',
                  svgStyleAttributes(style), 
                  ' />\n', sep=""),
-           svgdev)  
+           svgdev, link=links[id])  
 }
 
 svgRaster <- function(x, y, width, height, id=NULL,
                       just, vjust, hjust,
-                      attributes=svgAttrib(), 
+                      attributes=svgAttrib(), links=NULL,
                       style=svgStyle(), svgdev=svgDevice()) {
 
   # Need to extract the original grob name in order to link to the image
@@ -416,11 +428,11 @@ svgRaster <- function(x, y, width, height, id=NULL,
                    '</g>\n',
                    sep="")
   
-  catsvg(rasters, svgdev)
+  catsvg(rasters, svgdev, link=links[id])
 }
 
 svgRect <- function(x, y, width, height, id=NULL,
-                    attributes=svgAttrib(), 
+                    attributes=svgAttrib(), links=NULL,
                     style=svgStyle(), svgdev=svgDevice()) {
   rects <- paste('<rect ',
                  'id="', id, '" ',
@@ -432,7 +444,7 @@ svgRect <- function(x, y, width, height, id=NULL,
                  svgStyleAttributes(style),
                  ' />\n',
                  sep="")
-  catsvg(rects, svgdev)
+  catsvg(rects, svgdev, link=links[id])
 }
 
 svgTextSplitLines <- function(text, lineheight, charheight, vjust) {
@@ -543,7 +555,7 @@ svgText <- function(x, y, text, hjust="left", vjust="bottom", rot=0,
                     width=1, height=1, ascent=1, descent=0,
                     lineheight=1, charheight=.8, fontheight=1,
                     fontfamily="sans", fontface="plain",
-                    id=NULL, attributes=svgAttrib(), 
+                    id=NULL, attributes=svgAttrib(), links=NULL,
                     style=svgStyle(), svgdev=svgDevice()) {
     # Avoid XML specials in text
     if (!is.language(text))
@@ -584,11 +596,11 @@ svgText <- function(x, y, text, hjust="left", vjust="bottom", rot=0,
                    '</g>\n',
                    sep="")
 
-    catsvg(texts, svgdev)
+    catsvg(texts, svgdev, link=links[id])
 }
 
 svgCircle <- function(x, y, r, id=NULL,
-                      attributes=svgAttrib(), 
+                      attributes=svgAttrib(), links=NULL,
                       style=svgStyle(), svgdev=svgDevice()) {
 
   circles <- paste('<circle ',
@@ -601,7 +613,7 @@ svgCircle <- function(x, y, r, id=NULL,
                    ' />\n',
                    sep="")
 
-  catsvg(circles, svgdev)
+  catsvg(circles, svgdev, link=links[id])
 }
 
 svgScript <- function(body, href, type="text/ecmascript",
@@ -674,9 +686,17 @@ svgID <- function(svgdev) {
 }
 
 # SVG output
-catsvg <- function(text, svgdev) {
-  cat(paste(get("indent", env=svgdev), text, sep=""),
-      file=svgDevFile(svgdev))
+# This guy can optionally add an <a> element around the output
+catsvg <- function(text, svgdev, link=NULL) {
+    hasLink <- !(is.null(link) || is.na(link))
+    if (hasLink) {
+        svgStartLink(link, svgdev)
+    }
+    cat(paste(get("indent", env=svgdev), text, sep=""),
+        file=svgDevFile(svgdev))
+    if (hasLink) {
+        svgEndLink(svgdev)
+    }
 }
 
 decindent <- function(svgdev) {

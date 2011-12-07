@@ -28,8 +28,8 @@ pushViewport(dataViewport(iris$Sepal.Length, iris$Sepal.Width))
 grid.rect()
 grid.xaxis(name="xaxis")
 grid.yaxis(name="yaxis")
-grid.hyperlink("xaxis", "dotx.html")
-grid.hyperlink("yaxis", "doty.html")
+grid.hyperlink("xaxis", "linkdotx.svg.html")
+grid.hyperlink("yaxis", "linkdoty.svg.html")
 grid.points(iris$Sepal.Length[iris$Species == "setosa"],
             iris$Sepal.Width[iris$Species == "setosa"],
             gp=gpar(col="red"))
@@ -70,7 +70,7 @@ grid.text(name="returnlink",
           "Return to Scatterplot",
           y=unit(1, "npc") + unit(1, "lines"),
           gp=gpar(col="grey"))
-grid.hyperlink("returnlink", "slide17.html")
+grid.hyperlink("returnlink", "linkscatter.svg.html")
 popViewport(3)
 gridToSVG("linkdotx.svg")
 dev.off()
@@ -100,9 +100,42 @@ grid.text(name="returnlink",
           "Return to Scatterplot",
           y=unit(1, "npc") + unit(1, "lines"),
           gp=gpar(col="grey"))
-grid.hyperlink("returnlink", "slide17.html")
+grid.hyperlink("returnlink", "linkscatter.svg.html")
 popViewport(3)
 gridToSVG("linkdoty.svg")
 dev.off()
 
 
+# Check link to overall grob works
+
+grid.newpage()
+grid.draw(hyperlinkGrob(linesGrob(gp=gpar(lwd=20)),
+                        href="http://www.stat.auckland.ac.nz"))
+gridToSVG("testGroupOfOneHyperlink.svg")
+
+grid.newpage()
+grid.draw(hyperlinkGrob(segmentsGrob(1:3/4, gp=gpar(lwd=20)),
+                        href="http://www.stat.auckland.ac.nz"))
+gridToSVG("testGroupOfManyHyperlink.svg")
+
+# Test *individual* hrefs
+
+grid.newpage()
+grid.draw(hyperlinkGrob(linesGrob(gp=gpar(lwd=20)),
+                        href="http://www.stat.auckland.ac.nz",
+                        group=FALSE))
+gridToSVG("testIndividualOneHyperlink.svg")
+
+grid.newpage()
+grid.draw(hyperlinkGrob(segmentsGrob(1:3/4, gp=gpar(lwd=20)),
+                        href="http://www.stat.auckland.ac.nz",
+                        group=FALSE))
+gridToSVG("testIndividualManyHyperlink.svg")
+
+grid.newpage()
+grid.draw(hyperlinkGrob(segmentsGrob(1:3/4, gp=gpar(lwd=20)),
+                        href=c("http://www.stat.auckland.ac.nz",
+                          "http://slashdot.org",
+                          "http://soccernet.com"),
+                        group=FALSE))
+gridToSVG("testIndividualManyHyperlinks.svg")

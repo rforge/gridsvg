@@ -228,7 +228,7 @@ enforceVP <- function(vp, dev) {
 unwindVP <- function(vp, depth, dev) {
     if (depth > 0) {
         for (i in 1:depth)
-            devEndGroup(dev)
+            devEndGroup("", dev)
         if (is.null(vp)) { # recorded pops or ups
             upViewport(depth)
         } else if (!inherits(vp, "vpPath")) {
@@ -595,6 +595,7 @@ primToDev.lines <- function(x, dev) {
   # This is a bit of a special case where we know there is only one
   # actual graphical object that is being created, so we are simply
   # going to modify it's name in place.
+  oldname <- x$name
   x$name <- subGrobName(x$name, 1)
 
   if (! is.null(x$arrow))
@@ -602,7 +603,8 @@ primToDev.lines <- function(x, dev) {
   devLines(devGrob(x, dev), gparToDevPars(x$gp), dev)
 
   # Ending the group
-  devEndGroup(dev)
+  x$name <- oldname
+  devEndGroup(x$name, dev)
 }
 
 primToDev.polyline <- function(x, dev) {
@@ -646,7 +648,7 @@ primToDev.polyline <- function(x, dev) {
   }
 
   # Ending the group
-  devEndGroup(dev)
+  devEndGroup(x$name, dev)
 }
 
 # Any more efficient way of doing this?
@@ -680,7 +682,7 @@ primToDev.segments <- function(x, dev) {
   }
 
   # Ending the group
-  devEndGroup(dev)
+  devEndGroup(x$name, dev)
 }
 
 primToDev.polygon <- function(x, dev) {
@@ -720,7 +722,7 @@ primToDev.polygon <- function(x, dev) {
   }
 
   # Ending the group
-  devEndGroup(dev)
+  devEndGroup(x$name, dev)
 }
 
 primToDev.xspline <- function(x, dev) {
@@ -806,7 +808,7 @@ primToDev.xspline <- function(x, dev) {
   }
 
   # Ending the group
-  devEndGroup(dev)
+  devEndGroup(x$name, dev)
 }
 
 primToDev.pathgrob <- function(x, dev) {
@@ -816,12 +818,14 @@ primToDev.pathgrob <- function(x, dev) {
   # This is a bit of a special case where we know there is only one
   # actual graphical object that is being created, so we are simply
   # going to modify it's name in place.
+  oldname <- x$name
   x$name <- subGrobName(x$name, 1)
 
   devPath(devGrob(x, dev), gparToDevPars(x$gp), dev)
 
   # Ending the group
-  devEndGroup(dev)
+  x$name <- oldname
+  devEndGroup(x$name, dev)
 }
 
 primToDev.rastergrob <- function(x, dev) {
@@ -928,7 +932,7 @@ primToDev.rastergrob <- function(x, dev) {
   }
 
   # Ending the group
-  devEndGroup(dev)
+  devEndGroup(x$name, dev)
 }
 
 primToDev.rect <- function(x, dev) {
@@ -961,7 +965,7 @@ primToDev.rect <- function(x, dev) {
   }
 
   # Ending the group
-  devEndGroup(dev)
+  devEndGroup(x$name, dev)
 }
 
 primToDev.text <- function(x, dev) {
@@ -1011,7 +1015,7 @@ primToDev.text <- function(x, dev) {
   }
 
   # Ending the group
-  devEndGroup(dev)
+  devEndGroup(x$name, dev)
 }
 
 primToDev.circle <- function(x, dev) {
@@ -1039,7 +1043,7 @@ primToDev.circle <- function(x, dev) {
   }
 
   # Ending the group
-  devEndGroup(dev)
+  devEndGroup(x$name, dev)
 }
 
 # Quick fix for now
@@ -1140,7 +1144,7 @@ primToDev.points <- function(x, dev) {
                      gparToDevPars(pgp), dev)
 
             # Ending the group
-            devEndGroup(dev) 
+            devEndGroup(x$name, dev) 
         }
 
         if (pchs[i] == 4) { 
@@ -1166,7 +1170,7 @@ primToDev.points <- function(x, dev) {
                      gparToDevPars(pgp), dev)
 
             # Ending the group
-            devEndGroup(dev) 
+            devEndGroup(x$name, dev) 
         }
 
         if (pchs[i] == 5) { 
@@ -1228,7 +1232,7 @@ primToDev.points <- function(x, dev) {
                       gparToDevPars(pgp), dev)
 
             # Ending the group
-            devEndGroup(dev) 
+            devEndGroup(x$name, dev) 
         }
 
         if (pchs[i] == 8) {
@@ -1268,7 +1272,7 @@ primToDev.points <- function(x, dev) {
                      gparToDevPars(pgp), dev)
 
             # Ending the group
-            devEndGroup(dev) 
+            devEndGroup(x$name, dev) 
         }
 
         if (pchs[i] == 9) {
@@ -1304,7 +1308,7 @@ primToDev.points <- function(x, dev) {
                      gparToDevPars(pgp), dev)
 
             # Ending the group
-            devEndGroup(dev) 
+            devEndGroup(x$name, dev) 
         }
 
         if (pchs[i] == 10) {
@@ -1342,7 +1346,7 @@ primToDev.points <- function(x, dev) {
                       gparToDevPars(pgp), dev)
 
             # Ending the group
-            devEndGroup(dev)
+            devEndGroup(x$name, dev)
         }
 
         if (pchs[i] == 11) {
@@ -1375,7 +1379,7 @@ primToDev.points <- function(x, dev) {
                      gparToDevPars(pgp), dev)
 
             # Ending the group
-            devEndGroup(dev)
+            devEndGroup(x$name, dev)
         }
 
         if (pchs[i] == 12) {
@@ -1411,7 +1415,7 @@ primToDev.points <- function(x, dev) {
                      gparToDevPars(pgp), dev)
 
             # Ending the group
-            devEndGroup(dev)
+            devEndGroup(x$name, dev)
         }
 
         if (pchs[i] == 13) {
@@ -1447,7 +1451,7 @@ primToDev.points <- function(x, dev) {
                      gparToDevPars(pgp), dev)
 
             # Ending the group
-            devEndGroup(dev)
+            devEndGroup(x$name, dev)
         }
 
         if (pchs[i] == 14) {
@@ -1477,7 +1481,7 @@ primToDev.points <- function(x, dev) {
                      gparToDevPars(pgp), dev)
 
             # Ending the group
-            devEndGroup(dev)
+            devEndGroup(x$name, dev)
         }
 
         if (pchs[i] == 15) {
@@ -1623,10 +1627,11 @@ primToDev.points <- function(x, dev) {
     }
 
     # Ending the group
-    devEndGroup(dev) 
+    devEndGroup(x$name, dev) 
 }
   
 primToDev.xaxis <- function(x, dev) {
+    devStartGroup(devGrob(x, dev), gparToDevPars(x$gp), dev)
   # If the at is NULL then the axis will have no
   # children;  need to be calculated on-the-fly
   if (is.null(x$at)) {
@@ -1636,9 +1641,11 @@ primToDev.xaxis <- function(x, dev) {
     if (x$label)
       grobToDev(grid:::make.xaxis.labels(at, x$label, x$main), dev)
   } 
+    devEndGroup(x$name, dev)
 }
 
 primToDev.yaxis <- function(x, dev) {
+    devStartGroup(devGrob(x, dev), gparToDevPars(x$gp), dev)
   # If the at is NULL then the axis will have no
   # children;  need to be calculated on-the-fly
   if (is.null(x$at)) {
@@ -1648,6 +1655,7 @@ primToDev.yaxis <- function(x, dev) {
     if (x$label)
       grobToDev(grid:::make.yaxis.labels(at, x$label, x$main), dev)
   } 
+    devEndGroup(x$name, dev)
 }
 
 grobToDev.frame <- function(x, dev) {
@@ -1659,7 +1667,7 @@ grobToDev.frame <- function(x, dev) {
     
     devStartGroup(devGrob(x, dev), gparToDevPars(x$gp), dev)
     lapply(x$children, grobToDev, dev)
-    devEndGroup(dev)
+    devEndGroup(x$name, dev)
     
     if (!is.null(x$framevp)) {
         unwindVP(x$framevp, frameDepth, dev)
@@ -1677,7 +1685,7 @@ grobToDev.cellGrob <- function(x, dev) {
 
     devStartGroup(devGrob(x, dev), gparToDevPars(x$gp), dev)
     lapply(x$children, grobToDev, dev)
-    devEndGroup(dev)
+    devEndGroup(x$name, dev)
   
     if (!is.null(x$cellvp)) {
         unwindVP(x$cellvp, cellDepth, dev)
@@ -1699,7 +1707,7 @@ grobToDev.gTree <- function(x, dev) {
 primToDev.gTree <- function(x, dev) {
     devStartGroup(devGrob(x, dev), gparToDevPars(x$gp), dev)
     lapply(x$children, grobToDev, dev)
-    devEndGroup(dev)
+    devEndGroup(x$name, dev)
 }
 
 # Viewports (and vpPaths and downs and ups)
