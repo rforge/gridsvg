@@ -1,9 +1,9 @@
 Package: gridSVG
 Title: Export grid graphics as SVG
-Version: 0.9-0
+Version: 0.9-1
 Author: Paul Murrell
 Description: Export grid graphics as SVG
 Maintainer: Paul Murrell <paul@stat.auckland.ac.nz>
-Depends: R (>= 2.13.0), methods, grid
+Depends: R (>= 2.15.0), methods, grid
 Suggests: lattice, XML
 License: GPL
