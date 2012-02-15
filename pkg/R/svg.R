@@ -450,6 +450,9 @@ svgRect <- function(x, y, width, height, id=NULL,
 svgTextSplitLines <- function(text, lineheight, charheight, vjust) {
     # Splitting based on linebreaks
     splitText <- strsplit(text, "\n")
+    # If text is "", produces character(0), so fix that
+    if (length(splitText[[1]]) == 0)
+        splitText[[1]] <- ""
 
     svgText <- list()
     n <- length(splitText[[1]])
@@ -650,24 +653,24 @@ svgScript <- function(body, href, type="text/ecmascript",
 
 svgDevice <- function(file="", width=200, height=200) {
   dev <- new.env(FALSE, emptyenv())
-  assign("file", file, env=dev)
-  assign("width", width, env=dev)
-  assign("height", height, env=dev)
-  assign("indent", "", env=dev)
-  assign("id", 1, env=dev)
+  assign("file", file, envir=dev)
+  assign("width", width, envir=dev)
+  assign("height", height, envir=dev)
+  assign("indent", "", envir=dev)
+  assign("id", 1, envir=dev)
   return(dev)
 }
 
 svgDevFile <- function(svgdev) {
-  get("file", env=svgdev)
+  get("file", envir=svgdev)
 }
 
 svgDevWidth <- function(svgdev) {
-  get("width", env=svgdev)
+  get("width", envir=svgdev)
 }
 
 svgDevHeight <- function(svgdev) {
-  get("height", env=svgdev)
+  get("height", envir=svgdev)
 }
 
 getid <- function(id, svgdev, n=1) {
@@ -682,7 +685,7 @@ getid <- function(id, svgdev, n=1) {
 }
 
 svgID <- function(svgdev) {
-  get("id", env=svgdev)
+  get("id", envir=svgdev)
 }
 
 # SVG output
@@ -692,7 +695,7 @@ catsvg <- function(text, svgdev, link=NULL) {
     if (hasLink) {
         svgStartLink(link, svgdev)
     }
-    cat(paste(get("indent", env=svgdev), text, sep=""),
+    cat(paste(get("indent", envir=svgdev), text, sep=""),
         file=svgDevFile(svgdev))
     if (hasLink) {
         svgEndLink(svgdev)
@@ -700,18 +703,18 @@ catsvg <- function(text, svgdev, link=NULL) {
 }
 
 decindent <- function(svgdev) {
-  indent <- get("indent", env=svgdev)
+  indent <- get("indent", envir=svgdev)
   assign("indent", substr(indent, 1, nchar(indent) - 2),
-         env=svgdev)
+         envir=svgdev)
 }
 
 incindent <- function(svgdev) {
-  assign("indent", paste(get("indent", env=svgdev), "  ", sep=""),
-         env=svgdev)
+  assign("indent", paste(get("indent", envir=svgdev), "  ", sep=""),
+         envir=svgdev)
 }
 
 incID <- function(svgdev, n=1) {
-  assign("id", get("id", env=svgdev) + n, env=svgdev)
+  assign("id", get("id", envir=svgdev) + n, envir=svgdev)
 }
 
 svgHeader <- function(width, height, svgdev=svgDevice()) {

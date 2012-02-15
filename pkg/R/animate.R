@@ -258,7 +258,8 @@ ithValue <- function(animValues, i) {
 # RETURN a UNIT
 ithUnit <- function(animValues, origValue, i) {
     au <- as.animUnit(animValues,
-                      unit=attr(origValue, "unit"))
+                      # Only take the first "unit" value
+                      unit=attr(origValue, "unit")[1])
     if (!is.null(au$timeid))
         stop("Expecting only one value per time point")
     if (is.null(au$id))
@@ -288,7 +289,8 @@ ithAnimValue <- function(animValues, i) {
 # RETURN an ANIMUNIT
 ithAnimUnit <- function(animValues, origValue, i) {
     au <- as.animUnit(animValues,
-                      unit=attr(origValue, "unit"),
+                      # Only take the first "unit" value
+                      unit=attr(origValue, "unit")[1],
                       multVal=TRUE)
     if (is.null(au$timeid))
         stop("Expecting multiple values per time point")
@@ -321,6 +323,13 @@ ithAnimUnit <- function(animValues, origValue, i) {
 #         animate sets of values
 #         animate anything else
 
+######################
+
+######################
+# FIXME:
+# When animating some cobination x/y/width/height/size AT THE SAME TIME
+# the code below only makes sense if the number of time periods
+# is the same for all of x/y/width/height/size (that are being animated)
 ######################
 
 applyAnimation.rect <- function(x, animSet, animation, group, dev) {
@@ -371,7 +380,7 @@ applyAnimation.rect <- function(x, animSet, animation, group, dev) {
         heighti <- ithUnit(animSet$animations$height, x$height, i)
     else
         heighti <- x$height[i]
-    lb <- leftbottom(xi, yi, widthi, heighti, x$just, dev)
+    lb <- leftbottom(xi, yi, widthi, heighti, x$just, x$hjust, x$vjust, dev)
     
     switch(animation,
            x={
@@ -538,37 +547,141 @@ applyAnimation.points <- function(x, animSet, animation, group, dev) {
           yi <- ithUnit(animSet$animations$y, x$y, i)
       else
           yi <- x$y[i]
+      if ("size" %in% names(animSet$animations))
+          pointsize <- ithUnit(animSet$animations$size, x$size, i)
+      else
+          pointsize <- x$size[i]
+      lb <- leftbottom(xi, yi, pointsize, pointsize,
+                       "center", NULL, NULL, dev)
+      dim <- dimToInches(pointsize, pointsize, dev)
+
+      circles <- c(1, 16, 19, 20, 21)
+      rects <- c(0, 15, 22)
+      triangles <- c(2, 6, 17, 24, 25)
+      uptri <- c(2, 17, 24)
+      diamonds <- c(5, 18, 23)
+
+      animTri <- function(lb, dim, pch) {
+          tx <- unit.c(lb$x, lb$x + 0.5*dim$w, lb$x + dim$w, lb$x)
+          if (pch %in% uptri) {
+              ty <- unit.c(lb$y, lb$y + dim$h, lb$y, lb$y)
+          } else {
+              ty <- unit.c(lb$y + dim$h, lb$y, lb$y + dim$h, lb$y + dim$h)
+          }
+          nt <- max(length(lb$x), length(dim$w))
+          svgAnimatePoints(cx(tx, dev), cy(ty, dev),
+                           rep(1:nt, 4), # timeid
+                           begin[i], interp[i], dur[i],
+                           rep[i], rev[i], subName, dev@dev)
+      }
+      
+      animDiamond <- function(lb, dim) {
+          tx <- unit.c(lb$x, lb$x + 0.5*dim$w, lb$x + dim$w,
+                       lb$x + 0.5*dim$w, lb$x)
+          ty <- unit.c(lb$y + 0.5*dim$h, lb$y + dim$h, lb$y + 0.5*dim$h,
+                       lb$y, lb$y + 0.5*dim$h)
+          nt <- max(length(lb$x), length(dim$w))
+          svgAnimatePoints(cx(tx, dev), cy(ty, dev),
+                           rep(1:nt, 5), # timeid
+                           begin[i], interp[i], dur[i],
+                           rep[i], rev[i], subName, dev@dev)
+      }
       
       switch(animation,
              x={
-                 loc <- locToInches(xi, yi, dev)
-                 if (x$pch[i] == 1 || x$pch[i] == 16)
-                     animattr <- "cx"
-                 else
-                     animattr <- "x"
-                 svgAnimateXYWH(animattr, cx(loc$x, dev),
-                                begin[i], interp[i], dur[i], rep[i], rev[i], subName, dev@dev)
+                 if (x$pch[i] %in% triangles) {
+                     if (doNotAnimate(animSet, animation))
+                         return()
+                     else {
+                         animTri(lb, dim, x$pch[i])
+                     }
+                 } else if (x$pch[i] %in% diamonds) {
+                     if (doNotAnimate(animSet, animation))
+                         return()
+                     else {
+                         animDiamond(lb, dim)
+                     }
+                 } else {
+                     loc <- locToInches(xi, yi, dev)
+                     if (x$pch[i] %in% circles) 
+                         animattr <- "cx"
+                     else
+                         animattr <- "x"
+                     if (x$pch[i] %in% rects) {
+                         loc <- lb
+                     }
+                     svgAnimateXYWH(animattr, cx(loc$x, dev),
+                                    begin[i], interp[i], dur[i],
+                                    rep[i], rev[i], subName, dev@dev)
+                 }
              },
              y={
-                 loc <- locToInches(xi, yi, dev)
-                 if (x$pch[i] == 1 || x$pch[i] == 16)
-                     animattr <- "cy"
-                 else
-                     animattr <- "y"
-                 svgAnimateXYWH(animattr, cy(loc$y, dev),
-                                begin[i], interp[i], dur[i], rep[i], rev[i], subName, dev@dev)
+                 if (x$pch[i] %in% triangles) {
+                     if (doNotAnimate(animSet, animation))
+                         return()
+                     else {
+                         animTri(lb, dim, x$pch[i])
+                     }
+                 } else if (x$pch[i] %in% diamonds) {
+                     if (doNotAnimate(animSet, animation))
+                         return()
+                     else {
+                         animDiamond(lb, dim)
+                     }
+                 } else {
+                     loc <- locToInches(xi, yi, dev)
+                     if (x$pch[i] %in% circles) 
+                         animattr <- "cy"
+                     else
+                         animattr <- "y"
+                     if (x$pch[i] %in% rects) {
+                         loc <- lb
+                     }
+                     svgAnimateXYWH(animattr, cy(loc$y, dev),
+                                    begin[i], interp[i], dur[i],
+                                    rep[i], rev[i], subName, dev@dev)
+                 }
              },
              size={
-                 pointsize <- cd(ithUnit(animSet$animations$size, x$size, i), dev)
-                 if (x$pch[i] == 0) {
-                     svgAnimateXYWH("width", pointsize,
-                                    begin[i], interp[i], dur[i], rep[i], rev[i], subName, dev@dev)
-                     svgAnimateXYWH("height", pointsize,
-                                    begin[i], interp[i], dur[i], rep[i], rev[i], subName, dev@dev)
+                 if (x$pch[i] %in% triangles) {
+                     if (any(c("x", "y") %in% animSet$animations))
+                         return()
+                     else
+                         animTri(lb, dim, x$pch[i])                         
                  }
-                 if (x$pch[i] == 1 || x$pch[i] == 16) {
-                     svgAnimateXYWH("r", pointsize,
-                                    begin[i], interp[i], dur[i], rep[i], rev[i], subName, dev@dev)
+                 if (x$pch[i] %in% diamonds) {
+                     if (doNotAnimate(animSet, animation))
+                         return()
+                     else {
+                         animDiamond(lb, dim)
+                     }
+                 } 
+                 if (x$pch[i] %in% rects) {
+                     # If x is also animated, this has already been
+                     # handled above
+                     if (!("x" %in% names(animSet$animations))) {
+                         svgAnimateXYWH("x", cx(lb$x, dev),
+                                        begin[i], interp[i], dur[i],
+                                        rep[i], rev[i],
+                                        subName, dev@dev)
+                     }
+                     if (!("y" %in% names(animSet$animations))) {
+                         svgAnimateXYWH("y", cy(lb$y, dev),
+                                        begin[i], interp[i], dur[i],
+                                        rep[i], rev[i],
+                                        subName, dev@dev)
+                     }
+                     svgAnimateXYWH("width", cd(pointsize, dev),
+                                begin[i], interp[i], dur[i],
+                                    rep[i], rev[i], subName, dev@dev)
+                     svgAnimateXYWH("height", cd(pointsize, dev),
+                                    begin[i], interp[i], dur[i],
+                                    rep[i], rev[i], subName, dev@dev)
+                 }
+                 if (x$pch[i] %in% circles) {
+                     svgAnimateXYWH("r", 0.5 * cd(pointsize, dev),
+                                    begin[i], interp[i], dur[i],
+                                    rep[i], rev[i], subName, dev@dev)
                  }
              },
              # Any other attribute
@@ -1059,7 +1172,8 @@ applyAnimation.rastergrob <- function(x, animSet, animation, group, dev) {
                 heighti <- ithUnit(animSet$animations$height, x$height, i)
             else
                 heighti <- x$height[i]
-            lb <- leftbottom(xi, yi, widthi, heighti, x$just, dev)
+            lb <- leftbottom(xi, yi, widthi, heighti,
+                             x$just, x$hjust, x$vjust, dev)
     
             switch(animation,
                    x={

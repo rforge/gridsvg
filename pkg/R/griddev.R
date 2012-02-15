@@ -119,40 +119,17 @@ dToInches <- function(d, dev) {
 }
 
 # Generate (left, bottom) from (x, y), (width, height), and justification
-leftbottom <- function(x, y, width, height, just, dev) {
-  left <- switch(just[1],
-                 left=x,
-                 center=unit(convertX(x, "inches", valueOnly=TRUE) -
-                   convertWidth(0.5*width, "inches", valueOnly=TRUE),
-                   "inches"),
-                 centre=unit(convertX(x, "inches", valueOnly=TRUE) -
-                   convertWidth(0.5*width, "inches", valueOnly=TRUE),
-                   "inches"),
-                 right=unit(convertX(x, "inches", valueOnly=TRUE) -
-                   convertWidth(width, "inches", valueOnly=TRUE),
-                   "inches"),
-                 # If it's "bottom" or "top" just use "centre" for
-                 # horizontal align
-                 unit(convertX(x, "inches", valueOnly=TRUE) -
-                   convertWidth(0.5*width, "inches", valueOnly=TRUE),
-                   "inches"))
-  bottom <- switch(if (length(just) > 1) just[2] else just[1],
-                   bottom=y,
-                   center=unit(convertY(y, "inches", valueOnly=TRUE) -
-                     convertHeight(0.5*height, "inches", valueOnly=TRUE),
-                     "inches"),
-                   centre=unit(convertY(y, "inches", valueOnly=TRUE) -
-                     convertHeight(0.5*height, "inches", valueOnly=TRUE),
-                     "inches"),
-                   top=unit(convertY(y, "inches", valueOnly=TRUE) -
-                     convertHeight(height, "inches", valueOnly=TRUE),
-                     "inches"),
-                   # If it's "left" or "right" then use "centre" for
-                   # vertical align
-                   unit(convertY(y, "inches", valueOnly=TRUE) -
-                     convertHeight(0.5*height, "inches", valueOnly=TRUE),
-                     "inches"))
-  locToInches(left, bottom, dev)
+leftbottom <- function(x, y, width, height,
+                       just, hjust, vjust, dev) {
+    hjust <- grid:::resolveHJust(just, hjust)
+    vjust <- grid:::resolveVJust(just, vjust)
+    left <- unit(convertX(x, "inches", valueOnly=TRUE) -
+                 convertWidth(hjust*width, "inches", valueOnly=TRUE),
+                 "inches")
+    bottom <- unit(convertY(y, "inches", valueOnly=TRUE) -
+                   convertHeight(vjust*height, "inches", valueOnly=TRUE),
+                   "inches")
+    locToInches(left, bottom, dev)
 }
 
 # Generate hjust/vjust from just
@@ -328,7 +305,7 @@ devGrob.pathgrob <- function(x, dev) {
 }
 
 devGrob.rastergrob <- function(x, dev) {
-  lb <- leftbottom(x$x, x$y, x$width, x$height, x$just, dev)
+  lb <- leftbottom(x$x, x$y, x$width, x$height, x$just, x$hjust, x$vjust, dev)
   dim <- dimToInches(x$width, x$height, dev)
 
   list(x=cx(lb$x, dev),
@@ -339,7 +316,7 @@ devGrob.rastergrob <- function(x, dev) {
 }
 
 devGrob.rect <- function(x, dev) {
-  lb <- leftbottom(x$x, x$y, x$width, x$height, x$just, dev)
+  lb <- leftbottom(x$x, x$y, x$width, x$height, x$just, x$hjust, x$vjust, dev)
   dim <- dimToInches(x$width, x$height, dev)
   list(x=cx(lb$x, dev),
        y=cy(lb$y, dev),
@@ -1110,9 +1087,12 @@ primToDev.points <- function(x, dev) {
             pgp$fill <- "transparent"
 
             devLines(devGrob(linesGrob(unit.c(x$x[i] - 0.5*pointSize, x$x[i],
-                                              x$x[i] + 0.5*pointSize, x$x[i] - 0.5*pointSize),
-                                       unit.c(x$y[i] - 0.5*pointSize, x$y[i] + 0.5*pointSize,
-                                              x$y[i] - 0.5*pointSize, x$y[i] - 0.5*pointSize),
+                                              x$x[i] + 0.5*pointSize, x$x[i] -
+                                              0.5*pointSize),
+                                       unit.c(x$y[i] - 0.5*pointSize, x$y[i] +
+                                              0.5*pointSize,
+                                              x$y[i] - 0.5*pointSize, x$y[i] -
+                                              0.5*pointSize),
                                        name = subGrobName(x$name, i),
                                        default.units = x$default.units),
                                        dev),
@@ -1486,7 +1466,8 @@ primToDev.points <- function(x, dev) {
 
         if (pchs[i] == 15) {
             # pch = 15 does not have a border
-            pgp$fill <- pgp$col
+            # Cannot use pgp$col because that might not be set!
+            pgp$fill <- get.gpar()$col
             pgp$col <- "transparent"
 
             devRect(devGrob(rectGrob(x$x[i], x$y[i],
@@ -1500,7 +1481,7 @@ primToDev.points <- function(x, dev) {
             radius <- 0.5 * pointSize
 
             # pch = 16 does not have a border
-            pgp$fill <- pgp$col
+            pgp$fill <- get.gpar()$col
             pgp$col <- "transparent"
 
             devCircle(devGrob(circleGrob(x$x[i], x$y[i],
@@ -1512,7 +1493,7 @@ primToDev.points <- function(x, dev) {
 
         if (pchs[i] == 17) {
             # pch = 17 does not have a border
-            pgp$fill <- pgp$col
+            pgp$fill <- get.gpar()$col
             pgp$col <- "transparent"
 
             devPolygon(devGrob(polygonGrob(unit.c(x$x[i] - 0.5*pointSize, x$x[i],
@@ -1527,7 +1508,7 @@ primToDev.points <- function(x, dev) {
 
         if (pchs[i] == 18) {
             # pch = 18 does not have a border
-            pgp$fill <- pgp$col
+            pgp$fill <- get.gpar()$col
             pgp$col <- "transparent"
 
             devPolygon(devGrob(polygonGrob(unit.c(x$x[i] - 0.5*pointSize, x$x[i],
@@ -1544,7 +1525,7 @@ primToDev.points <- function(x, dev) {
             radius <- 0.5 * pointSize
 
             # col is specified in place of fill
-            pgp$fill <- pgp$col
+            pgp$fill <- get.gpar()$col
 
             devCircle(devGrob(circleGrob(x$x[i], x$y[i],
                                          radius, name = subGrobName(x$name, i),
@@ -1557,7 +1538,7 @@ primToDev.points <- function(x, dev) {
             radius <- 0.5 * 2/3 * pointSize
 
             # col is specified in place of fill
-            pgp$fill <- pgp$col
+            pgp$fill <- get.gpar()$col
 
             devCircle(devGrob(circleGrob(x$x[i], x$y[i],
                                          radius, name = subGrobName(x$name, i),

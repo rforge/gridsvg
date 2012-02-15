@@ -1,6 +1,6 @@
 Package: gridSVG
 Title: Export grid graphics as SVG
-Version: 0.9-1
+Version: 0.9-2
 Author: Paul Murrell
 Description: Export grid graphics as SVG
 Maintainer: Paul Murrell <paul@stat.auckland.ac.nz>
