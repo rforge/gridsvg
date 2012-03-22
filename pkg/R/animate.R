@@ -1133,6 +1133,9 @@ applyAnimation.rastergrob <- function(x, animSet, animation, group, dev) {
                    x$name, dev@dev)
     } else {
 
+        # Raster may have NULL width or height
+        x <- grid:::resolveRasterSize(x)
+
         # We may be dealing with multiple rasters that need animating
         n <- max(length(x$x), length(x$y), length(x$width), length(x$height))
 

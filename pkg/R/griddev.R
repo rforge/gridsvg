@@ -819,56 +819,7 @@ primToDev.rastergrob <- function(x, dev) {
 
   # If we haven't been given any information about the h or w,
   # blow the image up to the full size but respect the aspect ratio
-  if (is.null(x$width) && is.null(x$height)) {
-      # height > width
-      if (rasterHeight > rasterWidth) {
-          x$height <- unit(1, "npc")
-          x$width <- unit(rasterWidth / rasterHeight, "npc")
-      }
-
-      # width > height
-      if (rasterWidth > rasterHeight) {
-          x$width <- unit(1, "npc")
-          x$height <- unit(rasterHeight / rasterWidth, "npc")
-      }
-
-      # height == width
-      if (rasterHeight == rasterWidth) {
-          x$width <- unit(1, "npc")
-          x$height <- unit(1, "npc")
-      }
-  }
-
-  # If we're missing one of width or height
-  # we need to assure a correct aspect ratio by setting
-  # an appropriate value for the missing dimension
-  if (is.null(x$width)) {
-      heightNpcs <- convertHeight(x$height, "npc", valueOnly = TRUE)
-      widthNpcs <- (rasterWidth / rasterHeight) * heightNpcs
-
-      # If we encounter any widths that exceed the plot boundaries,
-      # stretch/shrink to fit.
-      if (any(widthNpcs > 1)) {
-          widthNpcs[widthNpcs > 1] <- 1
-          x$width <- unit(widthNpcs, "npc")
-      } else {
-          x$width <- (rasterWidth / rasterHeight) * x$height
-      }
-  }
-         
-  if (is.null(x$height)) {
-      widthNpcs <- convertWidth(x$width, "npc", valueOnly = TRUE)
-      heightNpcs <- (rasterHeight / rasterWidth) * widthNpcs
-
-      # If we encounter any heights that exceed the plot boundaries,
-      # stretch/shrink to fit.
-      if (any(heightNpcs > 1)) {
-          heightNpcs[heightNpcs > 1] <- 1
-          x$height <- unit(heightNpcs, "npc")
-      } else {
-          x$height <- (rasterHeight / rasterWidth) * x$width
-      }
-  }
+  x <- grid:::resolveRasterSize(x)
 
   widths <- rep(x$width, length.out = n)
   heights <- rep(x$height, length.out = n) 

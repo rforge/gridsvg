@@ -1,5 +1,6 @@
 
-Changes from 0.9-0 to 0.9-2
+
+Changes from 0.9-0 to 0.9-3
 ===========================
 
 1.  Added dependency on R >= 2.15.0
@@ -27,6 +28,11 @@ Changes from 0.9-0 to 0.9-2
     Now works for pch=0,1,2, 5,6, 15--25 
     
     (i.e., does not work yet symbols that are combinations of shapes)
+
+6.  Fixed problem with raster aspect ratio.
+
+7.  Fixed problem with animating raster grobs when width and/or
+    height are not specified.
 
 
 Changes from 0.8-0 to 0.9-0
