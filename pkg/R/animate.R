@@ -958,7 +958,7 @@ applyAnimation.segments <- function(x, animSet, animation, group, dev) {
                                  rep[i], rev[i], subName, dev@dev)
             }
             # Any other attribute
-            if (!(animation %in% c("x", "y"))) {
+            if (!(animation %in% c("x0", "y0", "x1", "y1"))) {
                 svgAnimate(animation,
                            paste(ithValue(animSet$animations[[animation]], i),
                                  collapse=";"),

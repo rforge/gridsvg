@@ -50,6 +50,7 @@ export("animate")
 export("garnish")
 
 S3method("grobToDev", "grob")
+S3method("grobToDev", "roundrect")
 S3method("grobToDev", "gTree")
 S3method("grobToDev", "frame")
 S3method("grobToDev", "cellGrob")
