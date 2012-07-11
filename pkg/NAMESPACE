@@ -60,6 +60,8 @@ S3method("grobToDev", "script.grob")
 
 S3method("primToDev", "grob")
 S3method("primToDev", "gTree")
+S3method("primToDev", "move.to")
+S3method("primToDev", "line.to")
 S3method("primToDev", "lines")
 S3method("primToDev", "rastergrob")
 S3method("primToDev", "rect")

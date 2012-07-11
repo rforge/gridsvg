@@ -259,6 +259,48 @@ devGrob.default <- function(x, dev) {
   list(name=x$name)
 }
 
+moveToGen <- function() {
+    curx <- NA
+    cury <- NA
+
+    moveto <- function(x, dev) {
+        loc <- locToInches(x$x, x$y, dev)
+        curx <<- cx(loc$x, dev)
+        cury <<- cy(loc$y, dev)
+    }
+
+    lineto <- function(x, dev) {
+        loc <- locToInches(x$x, x$y, dev)
+        lineArrow <- x$arrow
+        if (! is.null(lineArrow)) {
+            ends <- switch(as.character(lineArrow$ends),
+                           "1" = "first",
+                           "2" = "last",
+                           "3" = "both")
+            result <- list(x=c(curx, cx(loc$x, dev)),
+                           y=c(cury, cy(loc$y, dev)),
+                           arrow=list(ends = ends),
+                           name=x$name)
+        } else {
+            result <- list(x=c(curx, cx(loc$x, dev)),
+                           y=c(cury, cy(loc$y, dev)),
+                           name=x$name)
+        }
+        print(result)
+        curx <<- cx(loc$x, dev)
+        cury <<- cy(loc$y, dev)
+        print(result)
+        result
+    }
+
+    list(moveto=moveto, lineto=lineto)
+}
+
+moveToFuns <- moveToGen()
+
+devGrob.move.to <- moveToFuns$moveto
+devGrob.line.to <- moveToFuns$lineto
+
 devGrob.lines <- function(x, dev) {
   loc <- locToInches(x$x, x$y, dev)
   
@@ -578,6 +620,31 @@ arrowAddName <- function(arrow, name) {
        ends = arrow$ends,
        type = arrow$type,
        name = name)
+}
+
+
+primToDev.move.to <- function(x, dev) {
+    devGrob(x, dev)
+}
+
+primToDev.line.to <- function(x, dev) {
+    # NOTE:  MUST NOT evaluate devGrob() more than once
+    #        because it has side-effects (within its closure)
+    dgrob <- devGrob(x, dev)
+  # Grouping the grob
+  devStartGroup(dgrob, NULL, dev)
+
+  # This is a bit of a special case where we know there is only one
+  # actual graphical object that is being created, so we are simply
+  # going to modify it's name in place.
+  dgrob$name <- subGrobName(x$name, 1)
+
+  if (! is.null(x$arrow))
+    devArrow(arrowAddName(x$arrow, x$name), gparToDevPars(x$gp), dev)
+  devLines(dgrob, gparToDevPars(x$gp), dev)
+
+  # Ending the group
+  devEndGroup(x$name, dev)
 }
 
 primToDev.lines <- function(x, dev) {
