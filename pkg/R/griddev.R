@@ -286,10 +286,8 @@ moveToGen <- function() {
                            y=c(cury, cy(loc$y, dev)),
                            name=x$name)
         }
-        print(result)
         curx <<- cx(loc$x, dev)
         cury <<- cy(loc$y, dev)
-        print(result)
         result
     }
 
