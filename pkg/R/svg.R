@@ -34,10 +34,10 @@ svgClipPath <- function(id, vpx, vpy, vpw,
                '">\n', sep=""),
          svgdev)
   incindent(svgdev)
-  catsvg(paste('<rect x="', vpx, '" ',
-               'y="', vpy, '" ',
-               'width="', vpw, '" ',
-               'height="', vph, '" ',
+  catsvg(paste('<rect x="', round(vpx, 2), '" ',
+               'y="', round(vpy, 2), '" ',
+               'width="', round(vpw, 2), '" ',
+               'height="', round(vph, 2), '" ',
                'style="fill: none; stroke: none;"',
                ' />\n', sep=""),
          svgdev)
@@ -726,13 +726,13 @@ svgHeader <- function(width, height, svgdev=svgDevice()) {
                        '"?>', sep=""),
                  '<svg xmlns="http://www.w3.org/2000/svg"',
                  '     xmlns:xlink="http://www.w3.org/1999/xlink"',
-                 paste('     width="', width, 'px"', sep=""),
-                 paste('     height="', height, 'px"', sep=""),
+                 paste('     width="', round(width, 2), 'px"', sep=""),
+                 paste('     height="', round(height, 2), 'px"', sep=""),
                  '     version="1.0">',
                  sep="\n"), svgdev)
     # Invert the y-axis so that y and height values measure "up"
     catsvg(paste('<g transform="translate(0, ',
-                 svgDevHeight(svgdev), ') ',
+                 round(svgDevHeight(svgdev), 2), ') ',
                  ' scale(1, -1)">\n',
                  sep=""), svgdev)
 }

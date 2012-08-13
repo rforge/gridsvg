@@ -40,7 +40,7 @@ devParNameToSVGStyleName <- function(name) {
 
 # R lwd is in points
 devLwdToSVG <- function(lwd, dev) {
-    paste(lwd/72*dev@res, "px", sep="")
+    paste(round(lwd/72*dev@res, 2), "px", sep="")
 }
 
 # An R lty has to become an SVG stroke-dasharray
