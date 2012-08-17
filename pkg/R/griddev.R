@@ -1512,8 +1512,11 @@ primToDev.points <- function(x, dev) {
 
         if (pchs[i] == 15) {
             # pch = 15 does not have a border
-            # Cannot use pgp$col because that might not be set!
-            pgp$fill <- get.gpar()$col
+            # Cannot simply use pgp$col because that might not be set!
+            pgp$fill <- if (is.null(pgp$col))
+                          get.gpar()$col
+                        else
+                          pgp$col
             pgp$col <- "transparent"
 
             devRect(devGrob(rectGrob(x$x[i], x$y[i],
@@ -1527,7 +1530,10 @@ primToDev.points <- function(x, dev) {
             radius <- 0.5 * pointSize
 
             # pch = 16 does not have a border
-            pgp$fill <- get.gpar()$col
+            pgp$fill <- if (is.null(pgp$col))
+                          get.gpar()$col
+                        else
+                          pgp$col
             pgp$col <- "transparent"
 
             devCircle(devGrob(circleGrob(x$x[i], x$y[i],
@@ -1539,7 +1545,10 @@ primToDev.points <- function(x, dev) {
 
         if (pchs[i] == 17) {
             # pch = 17 does not have a border
-            pgp$fill <- get.gpar()$col
+            pgp$fill <- if (is.null(pgp$col))
+                          get.gpar()$col
+                        else
+                          pgp$col
             pgp$col <- "transparent"
 
             devPolygon(devGrob(polygonGrob(unit.c(x$x[i] - 0.5*pointSize, x$x[i],
@@ -1554,7 +1563,10 @@ primToDev.points <- function(x, dev) {
 
         if (pchs[i] == 18) {
             # pch = 18 does not have a border
-            pgp$fill <- get.gpar()$col
+            pgp$fill <- if (is.null(pgp$col))
+                          get.gpar()$col
+                        else
+                          pgp$col
             pgp$col <- "transparent"
 
             devPolygon(devGrob(polygonGrob(unit.c(x$x[i] - 0.5*pointSize, x$x[i],
@@ -1571,7 +1583,10 @@ primToDev.points <- function(x, dev) {
             radius <- 0.5 * pointSize
 
             # col is specified in place of fill
-            pgp$fill <- get.gpar()$col
+            pgp$fill <- if (is.null(pgp$col))
+                          get.gpar()$col
+                        else
+                          pgp$col
 
             devCircle(devGrob(circleGrob(x$x[i], x$y[i],
                                          radius, name = subGrobName(x$name, i),
@@ -1584,7 +1599,10 @@ primToDev.points <- function(x, dev) {
             radius <- 0.5 * 2/3 * pointSize
 
             # col is specified in place of fill
-            pgp$fill <- get.gpar()$col
+            pgp$fill <- if (is.null(pgp$col))
+                          get.gpar()$col
+                        else
+                          pgp$col
 
             devCircle(devGrob(circleGrob(x$x[i], x$y[i],
                                          radius, name = subGrobName(x$name, i),
