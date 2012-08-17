@@ -102,10 +102,8 @@ svgClipAttr <- function(id, clip) {
   # We refer to the *original* viewport name when referring
   # to clipping paths because all VP groups are going to have
   # the same clipping path
-  id <- baseGrobName(id)
-
   if (clip)
-    paste('clip-path="url(#', id, '.clipPath)" ', sep="")
+    paste('clip-path="url(#', baseGrobName(id), '.clipPath)" ', sep="")
   else
     ""
 }
