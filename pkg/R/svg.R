@@ -799,7 +799,7 @@ svgHeader <- function(width, height, svgdev=svgDevice()) {
                  '     xmlns:xlink="http://www.w3.org/1999/xlink"',
                  paste('     width="', round(width, 2), 'px"', sep=""),
                  paste('     height="', round(height, 2), 'px"', sep=""),
-                 '     version="1.0">',
+                 '     version="1.1">',
                  sep="\n"), svgdev)
     # Invert the y-axis so that y and height values measure "up"
     catsvg(paste('<g transform="translate(0, ',
