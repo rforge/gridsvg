@@ -492,33 +492,48 @@ getvpID <- function(vpname) {
   vpID
 }
 
+getCoordsInfo <- function(vp, tm, dev) {
+  # Need to maintain x, y, xscale, yscale, transform
+  # Units of particular interest, npc, native, inches
+  # Keep inches as our baseline
+  transloc <- c(0, 0, 1) %*% tm
+  loc <- (transloc / transloc[3])[-3]
+
+  coords <- list(x = round(cx(unit(loc[1], "inches"), dev), 2),
+                 y = round(cy(unit(loc[2], "inches"), dev), 2),
+                 width = round(cw(unit(1, "npc"), dev), 2),
+                 height = round(ch(unit(1, "npc"), dev), 2),
+                 xscale = vp$xscale,
+                 yscale = vp$yscale,
+                 inch = round(cw(unit(1, "inches"), dev), 2))
+  coords
+}
+
 devGrob.viewport <- function(x, dev) {
   vp <- x
-  tm <- current.transform()
+  coords <- getCoordsInfo(vp, current.transform(), dev)
+
   if (is.null(vp$clip)) {
       clip <- FALSE
-      list(name=getvpID(vp$name), clip=clip)
+      list(name=getvpID(vp$name), clip=clip, coords=coords)
   } else if (is.na(vp$clip)) {
       # Clipping has been turned OFF
       # FIXME:  CANNOT do this in SVG (enlarge the clip path)
       clip <- FALSE
-      list(name=getvpID(vp$name), clip=clip)
+      list(name=getvpID(vp$name), clip=clip, coords=coords)
   } else if (! vp$clip) {
       clip <- FALSE
-      list(name=getvpID(vp$name), clip=clip)
+      list(name=getvpID(vp$name), clip=clip, coords=coords)
   } else {
       clip <- TRUE
-
-      transloc <- c(0, 0, 1) %*% tm
-      loc <- (transloc / transloc[3])[-3]
-      
-      list(vpx=cx(unit(loc[1], "inches"), dev),
-           vpy=cy(unit(loc[2], "inches"), dev),
-           vpw=cw(unit(1, "npc"), dev),
-           vph=ch(unit(1, "npc"), dev),
+      list(vpx=coords$x,
+           vpy=coords$y,
+           vpw=coords$width,
+           vph=coords$height,
            name=getvpID(vp$name),
-           clip=clip)
-  }  
+           clip=clip,
+           coords=coords)
+  }
 }
 
 devGrob.vpPath <- function(x, dev) {

@@ -413,6 +413,7 @@ setMethod("devStartGroup", signature(device="svgDevice"),
                           attributes=device@attrs,
                           links=device@links,
                           style=devParToSVGStyle(gp, device),
+                          coords = group$coords,
                           svgdev=device@dev)
           })
 

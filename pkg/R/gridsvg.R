@@ -4,10 +4,18 @@
 
 
 # User function
-gridToSVG <- function(name="Rplots.svg") {
+gridToSVG <- function(name="Rplots.svg",
+                      export.coords=c("file", "inline", "none")) {
+    # Saving we know how to export coord info
+    export.coords <- match.arg(export.coords)
+    assign("export.coords", export.coords, envir = .gridSVGEnv)
+
     # Ensure we're at the top level
     upViewport(0)
     rootgp <- get.gpar()
+    rootvp <- current.viewport()
+    roottm <- current.transform()
+
     svgdev <- openSVGDev(name, width=par("din")[1], height=par("din")[2])
     # Create a gTree from the current page
     # NOTE that set the 'gp' slot on this top-level gTree
@@ -19,6 +27,12 @@ gridToSVG <- function(name="Rplots.svg") {
                                count = integer(0),
                                stringsAsFactors=FALSE)
     assign("vpUsageTable", vpUsageTable, envir = .gridSVGEnv)
+    # Because the root viewport is never entered into, we need to set
+    # the root vp coordinate information before we start entering into
+    # other VPs
+    currVpCoords <- list(ROOT = getCoordsInfo(rootvp, roottm, svgdev))
+    assign("vpCoords", currVpCoords, envir = .gridSVGEnv)
+
     # Convert gTree to SVG
     gridToDev(gTree, svgdev)
     devClose(svgdev)

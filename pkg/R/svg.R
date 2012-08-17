@@ -21,8 +21,49 @@ svgOpen <- function(filename="Rplots.svg", width=200, height=200) {
 }
 
 svgClose <- function(svgdev) {
+  # Test whether this var exists, if we're building up an SVG doc using
+  # the internal svg* functions then this var may not exist.
+  export.coords <- if (exists("export.coords", envir = .gridSVGEnv))
+                     get("export.coords", envir = .gridSVGEnv)    
+                   else
+                     "none"
+  # See if we need to write out coords info at all
+  if (export.coords != "none")
+    svgCoords(export.coords, svgdev)
+
   svgFooter(svgdev)
   close(svgDevFile(svgdev))
+}
+
+svgCoords <- function(export.coords, svgdev) {
+  if (require(RJSONIO)) {
+    coordsJSON <- toJSON(get("vpCoords", envir = .gridSVGEnv))
+    coordsJSON <- paste("var gridSVGCoords = ", coordsJSON, ";", sep = "")
+
+    if (export.coords == "file") {
+      # Kinda clunky, but we're grabbing the filename of the SVG device
+      # and appending to it
+      coordsFn <- paste(summary(svgDevFile(svgdev))$description,
+                        ".coords.js", sep="")
+      coordsFile <- file(coordsFn, "w")
+      cat(coordsJSON, file = coordsFile, sep = "")
+      close(coordsFile)
+      catsvg(paste('<script type="text/ecmascript" src="',
+                   coordsFn,
+                   '"></script>\n', sep=""), svgdev)
+    }
+
+    if (export.coords == "inline") {
+      catsvg(paste('<script type="text/ecmascript">\n',
+                   paste('<![CDATA[\n',
+                         coordsJSON, '\n',
+                         '  ]]>\n',
+                         sep=""),
+                   '</script>\n', sep=""), svgdev)
+    }
+  } else {
+    warning("To produce a coordinates file, the RJSONIO package is required.")
+  }
 }
 
 svgClipPath <- function(id, vpx, vpy, vpw,
@@ -57,7 +98,23 @@ svgClipAttr <- function(id, clip) {
 
 svgStartGroup <- function(id=NULL, clip=FALSE,
                           attributes=svgAttrib(), links=NULL,
-                          style=svgStyle(), svgdev=svgDevice()) {
+                          style=svgStyle(), coords=NULL, svgdev=svgDevice()) {
+
+  # If this is a viewport that we're starting a group for
+  # we will have coordinate information, otherwise don't bother.
+  if (! is.null(coords)) {
+    currVpCoords <- get("vpCoords", envir = .gridSVGEnv)
+
+    # Because we have to draw a group each time we go into a VP
+    # but the VP information stays the same, only modify the coords
+    # list for each VP, *not* each time entered.
+    currId <- getid(id, svgdev)
+    vpId <- baseGrobName(currId) # Removing suffix
+    if (is.null(currVpCoords[[vpId]]))
+      currVpCoords[[vpId]] <- coords
+    assign("vpCoords", currVpCoords, envir = .gridSVGEnv)
+  }
+
   incindent(svgdev)
   if (!is.null(id)) {
       link <- links[id]
