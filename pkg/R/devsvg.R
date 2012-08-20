@@ -62,7 +62,7 @@ devLtyToSVG <- function(lty, lwd, dev) {
     # Convert to SVG stroke-dasharray string
     paste(ifelse(scaledlty == 0,
                  "none",
-                 paste(scaledlty/72*dev@res, "px", sep="")),
+                 paste(round(scaledlty/72*dev@res, 2), "px", sep="")),
           collapse=",")
 }
 
