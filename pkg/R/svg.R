@@ -68,16 +68,7 @@ svgCoords <- function(export.coords, svgdev) {
 
 svgClipPath <- function(id, vpx, vpy, vpw,
                         vph, svgdev=svgDevice()) {
-  # In order to avoid writing out a clipPath multiple times
-  # we can just write it out once, and if we've visited the
-  # VP more than once, we can just refer to that
-  vput <- get("vpUsageTable", envir = .gridSVGEnv)
-  vpcount <- vput[vput$vpname == baseGrobName(id), "count"]
-  if (vpcount > 1)
-    return()
-    
-  # ID is the *unmangled*, *original* viewport name
-  clipPathID <- paste(baseGrobName(id), "clipPath", sep=".")
+  clipPathID <- paste(id, "clipPath", sep=".")
   catsvg('<defs>\n', svgdev)
   incindent(svgdev)
   catsvg(paste('<clipPath id="', clipPathID,
@@ -99,11 +90,8 @@ svgClipPath <- function(id, vpx, vpy, vpw,
 }
 
 svgClipAttr <- function(id, clip) {
-  # We refer to the *original* viewport name when referring
-  # to clipping paths because all VP groups are going to have
-  # the same clipping path
   if (clip)
-    paste('clip-path="url(#', baseGrobName(id), '.clipPath)" ', sep="")
+    paste('clip-path="url(#', id, '.clipPath)" ', sep="")
   else
     ""
 }
@@ -116,14 +104,8 @@ svgStartGroup <- function(id=NULL, clip=FALSE,
   # we will have coordinate information, otherwise don't bother.
   if (! is.null(coords)) {
     currVpCoords <- get("vpCoords", envir = .gridSVGEnv)
-
-    # Because we have to draw a group each time we go into a VP
-    # but the VP information stays the same, only modify the coords
-    # list for each VP, *not* each time entered.
     currId <- getid(id, svgdev)
-    vpId <- baseGrobName(currId) # Removing suffix
-    if (is.null(currVpCoords[[vpId]]))
-      currVpCoords[[vpId]] <- coords
+    currVpCoords[[currId]] <- coords
     assign("vpCoords", currVpCoords, envir = .gridSVGEnv)
   }
 
