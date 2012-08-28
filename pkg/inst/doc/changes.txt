@@ -55,6 +55,10 @@ Changes from 0.9-0 to 0.9-4
 15. Added support for coordinate system importing and unit conversion.
     (Simon)
 
+16. Added support for exporting a JS file with utility functions present.
+    Of note is that these include JS implementations of unit conversion
+    routines. (Simon)
+
 
 Changes from 0.8-0 to 0.9-0
 ===========================

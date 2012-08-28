@@ -7,7 +7,8 @@
 }
 \usage{
 gridToSVG(name = "Rplots.svg",
-          export.coords = c("file", "inline", "none"))
+          export.coords = c("file", "inline", "none"),
+          export.js = c("file", "inline", "none"))
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -17,6 +18,15 @@ gridToSVG(name = "Rplots.svg",
     a coordinates file is written.
 
     If this parameter is \code{file}, the coordinates file is written to
+    a file, while \code{inline} will include the contents within the SVG
+    document.
+  }
+  \item{export.js}{
+    If this parameter is not \code{none} a JavaScript file is written out.
+    This contains useful functions for manipulating gridSVG plots in the
+    browser, including unit conversion functions.
+
+    If this parameter is \code{file}, the JavaScript file is written to
     a file, while \code{inline} will include the contents within the SVG
     document.
   }
@@ -30,7 +40,8 @@ gridToSVG(name = "Rplots.svg",
   None.  The side effect is to produce an SVG file of the specified
   name, AND a very rudimentary HTML file with the SVG document embedded.
   Optionally a JavaScript file containing coordinate transformation
-  information is also exported.
+  information is also exported. Optionally a JavaScript file containing
+  utility JavaScript functions is also exported.
 }
 \author{ Paul Murrell }
 \seealso{ \code{\link{grid.hyperlink}}, \code{\link{grid.animate}} }

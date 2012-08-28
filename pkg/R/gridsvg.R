@@ -5,10 +5,13 @@
 
 # User function
 gridToSVG <- function(name="Rplots.svg",
-                      export.coords=c("file", "inline", "none")) {
-    # Saving we know how to export coord info
+                      export.coords=c("file", "inline", "none"),
+                      export.js=c("file", "inline", "none")) {
+    # Saving we know how to export
     export.coords <- match.arg(export.coords)
+    export.js <- match.arg(export.js)
     assign("export.coords", export.coords, envir = .gridSVGEnv)
+    assign("export.js", export.js, envir = .gridSVGEnv)
 
     # Ensure we're at the top level
     upViewport(0)

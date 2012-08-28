@@ -21,18 +21,48 @@ svgOpen <- function(filename="Rplots.svg", width=200, height=200) {
 }
 
 svgClose <- function(svgdev) {
-  # Test whether this var exists, if we're building up an SVG doc using
-  # the internal svg* functions then this var may not exist.
+  # Test whether these vars exists, if we're building up an SVG doc using
+  # the internal svg* functions then these vars may not exist.
   export.coords <- if (exists("export.coords", envir = .gridSVGEnv))
                      get("export.coords", envir = .gridSVGEnv)    
                    else
                      "none"
+  export.js <- if (exists("export.js", envir = .gridSVGEnv))
+                 get("export.js", envir = .gridSVGEnv)    
+               else
+                 "none"
   # See if we need to write out coords info at all
   if (export.coords != "none")
     svgCoords(export.coords, svgdev)
+  if (export.js != "none")
+    svgJSUtils(export.js, svgdev)
 
   svgFooter(svgdev)
   close(svgDevFile(svgdev))
+}
+
+svgJSUtils <- function(export.js, svgdev) {
+  # Kinda clunky, but we're grabbing the filename of the SVG device
+  # and appending to it
+  utilsFn <- paste(summary(svgDevFile(svgdev))$description,
+                   ".convert.js", sep="")
+  utilsFile <- file(system.file("js/convert.js", package = "gridSVG"))
+  utilsLines <- readLines(utilsFile)
+  close(utilsFile)
+  if (export.js == "file") {
+    destFile <- file(utilsFn)
+    writeLines(utilsLines, destFile)
+    close(destFile)
+  }
+
+  if (export.js == "inline") {
+    catsvg(paste('<script type="text/ecmascript">\n',
+                 paste('<![CDATA[\n',
+                       paste(utilsLines, collapse = "\n"), '\n',
+                       '  ]]>\n',
+                       sep=""),
+                 '</script>\n', sep=""), svgdev)
+  }
 }
 
 svgCoords <- function(export.coords, svgdev) {
