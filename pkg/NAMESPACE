@@ -43,6 +43,12 @@ export("grid.hyperlink",
        "gridToSVG"
        )
 
+export("gridSVGCoords",
+       "viewportConvertX",
+       "viewportConvertY",
+       "viewportConvertWidth",
+       "viewportConvertHeight")
+
 # So other PACKAGES can write translation methods for new grobs
 export("grobToDev")
 export("primToDev")

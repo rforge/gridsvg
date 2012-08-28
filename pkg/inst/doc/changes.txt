@@ -40,6 +40,21 @@ Changes from 0.9-0 to 0.9-4
 
 10. Added support for 'move.to' and 'line.to' grobs.
 
+11. Rounding more SVG attributes to 2dp, only a few were missed ealier.
+    (Simon)
+
+12. Points grobs for pch=15:20 now check whether there is an explicit
+    gpar(col). If so, the fill is set to that, otherwise this is
+    retrieved from the viewport. (Simon)
+
+13. Bumped the SVG version number to 1.1. (Simon)
+
+14. Initial implementation of viewport coordinate info exporting.
+    (Simon)
+
+15. Added support for coordinate system importing and unit conversion.
+    (Simon)
+
 
 Changes from 0.8-0 to 0.9-0
 ===========================
