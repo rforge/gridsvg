@@ -14,12 +14,11 @@ gridToSVG(name = "Rplots.svg",
 \arguments{
   \item{name}{ The name of the SVG file to produce }
   \item{export.coords}{
-    If \code{RJSONIO} is installed and the parameter is not \code{none}
-    a coordinates file is written.
+    If this parameter is not \code{none} a coordinates file is exported.
 
-    If this parameter is \code{file}, the coordinates file is written to
-    a file, while \code{inline} will include the contents within the SVG
-    document.
+    If this parameter is \code{file}, the coordinates information is
+    written to a file, while \code{inline} will include the contents
+    within the SVG document.
   }
   \item{export.js}{
     If this parameter is not \code{none} a JavaScript file is written out.

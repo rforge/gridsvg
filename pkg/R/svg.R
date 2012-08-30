@@ -66,33 +66,29 @@ svgJSUtils <- function(export.js, svgdev) {
 }
 
 svgCoords <- function(export.coords, svgdev) {
-  if (require(RJSONIO)) {
-    coordsJSON <- toJSON(get("vpCoords", envir = .gridSVGEnv))
-    coordsJSON <- paste("var gridSVGCoords = ", coordsJSON, ";", sep = "")
+  coordsJSON <- toJSON(get("vpCoords", envir = .gridSVGEnv))
+  coordsJSON <- paste("var gridSVGCoords = ", coordsJSON, ";", sep = "")
 
-    if (export.coords == "file") {
-      # Kinda clunky, but we're grabbing the filename of the SVG device
-      # and appending to it
-      coordsFn <- paste(summary(svgDevFile(svgdev))$description,
-                        ".coords.js", sep="")
-      coordsFile <- file(coordsFn, "w")
-      cat(coordsJSON, file = coordsFile, sep = "")
-      close(coordsFile)
-      catsvg(paste('<script type="text/ecmascript" src="',
-                   coordsFn,
-                   '"></script>\n', sep=""), svgdev)
-    }
+  if (export.coords == "file") {
+    # Kinda clunky, but we're grabbing the filename of the SVG device
+    # and appending to it
+    coordsFn <- paste(summary(svgDevFile(svgdev))$description,
+                      ".coords.js", sep="")
+    coordsFile <- file(coordsFn, "w")
+    cat(coordsJSON, file = coordsFile, sep = "")
+    close(coordsFile)
+    catsvg(paste('<script type="text/ecmascript" src="',
+                 coordsFn,
+                 '"></script>\n', sep=""), svgdev)
+  }
 
-    if (export.coords == "inline") {
-      catsvg(paste('<script type="text/ecmascript">\n',
-                   paste('<![CDATA[\n',
-                         coordsJSON, '\n',
-                         '  ]]>\n',
-                         sep=""),
-                   '</script>\n', sep=""), svgdev)
-    }
-  } else {
-    warning("To produce a coordinates file, the RJSONIO package is required.")
+  if (export.coords == "inline") {
+    catsvg(paste('<script type="text/ecmascript">\n',
+                 paste('<![CDATA[\n',
+                       coordsJSON, '\n',
+                       '  ]]>\n',
+                       sep=""),
+                 '</script>\n', sep=""), svgdev)
   }
 }
 
