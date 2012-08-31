@@ -24,13 +24,21 @@ gridSVGCoords(newcoords = NULL)
   import it as a named list via \code{fromJSON}. This can then
   initialise a coordinate system by passing that named list into
   \code{gridSVGCoords}.
+
+  We can supply new definitions of a viewport's coordinate system by
+  simply passing in an appropriate list with information for that
+  viewport.
+
+  All viewport coordinate system information can be wiped if a single
+  \code{NA} value is passed in.
 }
 \value{
   If \code{newcoords} is \code{NULL}, then we get back a named list
   representing coordinate system information.
 
   If we pass the named list representing a coordinate system into the
-  function, we get no output.
+  function, we get no output. We also get no output if we pass in a
+  single \code{NA} value.
 }
 \author{
   Simon Potter
