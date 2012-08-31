@@ -221,37 +221,37 @@ var roundNumber = function(number, digits) {
 };
 
 /**
- * Returns the name of the viewport that a grob belongs to.
+ * Returns the name of the viewport path that a grob belongs to.
  *
- * Note that this is going to find the first matching viewport name from
+ * Note that this is going to find the first matching viewport path from
  * the list of element IDs up the tree. It may end up incorrectly returning
- * a grob name instead of a viewport name in the case where a grob has the
- * same name as a viewport.
+ * a grob name instead of a viewport path in the case where a grob has the
+ * same name as a viewport path.
  *
  * @param {string} grobName The name of a grob
- * @returns {string} The name of the viewport that the grob belongs to
+ * @returns {string} The unique path of the viewport that the grob belongs to
  */
 var grobViewport = function(grobName) {
     var grob = document.getElementById(grobName);
     if (grob) {
         var foundViewport = false;
-        var viewportName;
+        var viewportPath;
         var grobParent = grob.parentNode;
         while (! foundViewport) {
-            var vpName = grob.getAttribute("id");
-            var testVP = gridSVGCoords[vpName];
-            // If we have found a match in our VP coordinate list
-            // we have a candidate viewport, but a grob might have
-            // the same name as a viewport... 
+            var vpPath = grob.getAttribute("id");
+            var testVP = gridSVGCoords[baseViewportPath(vpPath)];
+            // If we have found a match in our VP coordinate list we
+            // have a candidate viewport path, but a grob might have
+            // the same name as a viewport path... 
             if (testVP) {
-                viewportName = vpName;
+                viewportPath = vpPath;
                 foundViewport = true;
             } else {
                 grob = grobParent;
                 grobParent = grob.parentNode;
             }
         }
-        return viewportName;
+        return viewportPath;
     } else {
         console.error("Unable to find grob [%s]", grobName);
     }
@@ -299,3 +299,35 @@ var pruneTextNodes = function(node) {
     }
 };
 
+/**
+ * Removes the numeric suffix from a viewport path.
+ *
+ * This function is useful in the case where we have a viewport path
+ * because these paths are required to be unique. The reason for this is
+ * because a viewport path can be used more than once.
+ *
+ * @param {string} vppath The modified and unique viewport path produced by gridSVG
+ * @returns {string} The canonical viewport path, as known to grid
+ */
+var baseViewportPath = function(vppath) {
+    var splitPath = vppath.split(".");
+    // If there was actually something to split, get rid of the last value
+    if (splitPath.length > 1) {
+        splitPath.pop();
+    }
+    return splitPath.join(".");
+};
+
+/**
+ * Escapes the colons present in a viewport path for use in selectors.
+ *
+ * Because the colon is a special character in CSS selectors, escape the
+ * viewport path using this function first to ensure that the selector
+ * will work as expected.
+ *
+ * @param {string} vppath The viewport path to escape.
+ * @returns {string} An escaped viewport path, safe for use as a selector
+ */
+var escapeViewportPath = function(vppath) {
+    return vppath.replace(/:/g, "\\:");
+}

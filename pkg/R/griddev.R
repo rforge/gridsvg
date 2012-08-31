@@ -511,26 +511,27 @@ getCoordsInfo <- function(vp, tm, dev) {
 
 devGrob.viewport <- function(x, dev) {
   vp <- x
+  vpname <- as.character(current.vpPath())
   coords <- getCoordsInfo(vp, current.transform(), dev)
 
   if (is.null(vp$clip)) {
       clip <- FALSE
-      list(name=getvpID(vp$name), clip=clip, coords=coords)
+      list(name=getvpID(vpname), clip=clip, coords=coords)
   } else if (is.na(vp$clip)) {
       # Clipping has been turned OFF
       # FIXME:  CANNOT do this in SVG (enlarge the clip path)
       clip <- FALSE
-      list(name=getvpID(vp$name), clip=clip, coords=coords)
+      list(name=getvpID(vpname), clip=clip, coords=coords)
   } else if (! vp$clip) {
       clip <- FALSE
-      list(name=getvpID(vp$name), clip=clip, coords=coords)
+      list(name=getvpID(vpname), clip=clip, coords=coords)
   } else {
       clip <- TRUE
       list(vpx=coords$x,
            vpy=coords$y,
            vpw=coords$width,
            vph=coords$height,
-           name=getvpID(vp$name),
+           name=getvpID(vpname),
            clip=clip,
            coords=coords)
   }

@@ -53,6 +53,9 @@ svgJSUtils <- function(export.js, svgdev) {
     destFile <- file(utilsFn)
     writeLines(utilsLines, destFile)
     close(destFile)
+    catsvg(paste('<script type="text/ecmascript" xlink:href="',
+                 utilsFn,
+                 '"></script>\n', sep=""), svgdev)
   }
 
   if (export.js == "inline") {
@@ -77,7 +80,7 @@ svgCoords <- function(export.coords, svgdev) {
     coordsFile <- file(coordsFn, "w")
     cat(coordsJSON, file = coordsFile, sep = "")
     close(coordsFile)
-    catsvg(paste('<script type="text/ecmascript" src="',
+    catsvg(paste('<script type="text/ecmascript" xlink:href="',
                  coordsFn,
                  '"></script>\n', sep=""), svgdev)
   }
@@ -94,7 +97,12 @@ svgCoords <- function(export.coords, svgdev) {
 
 svgClipPath <- function(id, vpx, vpy, vpw,
                         vph, svgdev=svgDevice()) {
-  clipPathID <- paste(id, "clipPath", sep=".")
+  splitID <- strsplit(id, ".", fixed = TRUE)[[1]]
+  usageNumber <- as.numeric(tail(splitID, 1))
+  if (usageNumber > 1)
+    return()
+
+  clipPathID <- paste(baseGrobName(id), "clipPath", sep=".")
   catsvg('<defs>\n', svgdev)
   incindent(svgdev)
   catsvg(paste('<clipPath id="', clipPathID,
@@ -117,7 +125,7 @@ svgClipPath <- function(id, vpx, vpy, vpw,
 
 svgClipAttr <- function(id, clip) {
   if (clip)
-    paste('clip-path="url(#', id, '.clipPath)" ', sep="")
+    paste('clip-path="url(#', baseGrobName(id), '.clipPath)" ', sep="")
   else
     ""
 }
@@ -130,7 +138,7 @@ svgStartGroup <- function(id=NULL, clip=FALSE,
   # we will have coordinate information, otherwise don't bother.
   if (! is.null(coords)) {
     currVpCoords <- get("vpCoords", envir = .gridSVGEnv)
-    currId <- getid(id, svgdev)
+    currId <- baseGrobName(getid(id, svgdev))
     currVpCoords[[currId]] <- coords
     assign("vpCoords", currVpCoords, envir = .gridSVGEnv)
   }
