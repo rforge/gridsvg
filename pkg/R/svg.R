@@ -53,13 +53,13 @@ svgJSUtils <- function(export.js, svgdev) {
     destFile <- file(utilsFn)
     writeLines(utilsLines, destFile)
     close(destFile)
-    catsvg(paste('<script type="text/ecmascript" xlink:href="',
+    catsvg(paste('<script type="application/ecmascript" xlink:href="',
                  utilsFn,
                  '"></script>\n', sep=""), svgdev)
   }
 
   if (export.js == "inline") {
-    catsvg(paste('<script type="text/ecmascript">\n',
+    catsvg(paste('<script type="application/ecmascript">\n',
                  paste('<![CDATA[\n',
                        paste(utilsLines, collapse = "\n"), '\n',
                        '  ]]>\n',
@@ -80,13 +80,13 @@ svgCoords <- function(export.coords, svgdev) {
     coordsFile <- file(coordsFn, "w")
     cat(coordsJSON, file = coordsFile, sep = "")
     close(coordsFile)
-    catsvg(paste('<script type="text/ecmascript" xlink:href="',
+    catsvg(paste('<script type="application/ecmascript" xlink:href="',
                  coordsFn,
                  '"></script>\n', sep=""), svgdev)
   }
 
   if (export.coords == "inline") {
-    catsvg(paste('<script type="text/ecmascript">\n',
+    catsvg(paste('<script type="application/ecmascript">\n',
                  paste('<![CDATA[\n',
                        coordsJSON, '\n',
                        '  ]]>\n',
@@ -705,7 +705,7 @@ svgCircle <- function(x, y, r, id=NULL,
   catsvg(circles, svgdev, link=links[id])
 }
 
-svgScript <- function(body, href, type="text/ecmascript",
+svgScript <- function(body, href, type="application/ecmascript",
                       id=NULL, svgdev=svgDevice()) {
   script <- paste('<script type="', type, '" ',
                   'id="', getid(id, svgdev, 1), '" ',
