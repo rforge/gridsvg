@@ -39,6 +39,15 @@ gridToSVG <- function(name="Rplots.svg",
     # Convert gTree to SVG
     gridToDev(gTree, svgdev)
     devClose(svgdev)
+
+    # In an on-screen device, we can be left with a blank device
+    # so refresh just to ensure we can see everything. Also happens
+    # with devices like png and pdf so just force a refresh.
+    # Also, to avoid having to ask to refresh, just temporarily
+    # disable asking.
+    old.ask <- devAskNewPage(FALSE)
+    on.exit(devAskNewPage(old.ask))
+    grid.refresh()
 }
 
 old.gridToSVG <- function(name="Rplots.svg") {
