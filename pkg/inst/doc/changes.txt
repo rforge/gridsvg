@@ -73,6 +73,8 @@ Changes from 0.9-0 to 0.9-4
 20. New vignette describing how to use the new coordinate system
     functionality. (Simon)
 
+21. Axis sub-grobs now adhere to the common gridSVG naming scheme. (Simon)
+
 
 Changes from 0.8-0 to 0.9-0
 ===========================

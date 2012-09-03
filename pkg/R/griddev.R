@@ -1682,10 +1682,17 @@ primToDev.xaxis <- function(x, dev) {
   # children;  need to be calculated on-the-fly
   if (is.null(x$at)) {
     at <- grid.pretty(current.viewport()$xscale)
-    grobToDev(grid:::make.xaxis.major(at, x$main), dev)
-    grobToDev(grid:::make.xaxis.ticks(at, x$main), dev)
-    if (x$label)
-      grobToDev(grid:::make.xaxis.labels(at, x$label, x$main), dev)
+    major <- grid:::make.xaxis.major(at, x$main) 
+    major$name <- paste(x$name, major$name, sep = ".")
+    ticks <- grid:::make.xaxis.ticks(at, x$main)
+    ticks$name <- paste(x$name, ticks$name, sep = ".")
+    grobToDev(major, dev)
+    grobToDev(ticks, dev)
+    if (x$label) {
+      label <- grid:::make.xaxis.labels(at, x$label, x$main)
+      label$name <- paste(x$name, label$name, sep = ".")
+      grobToDev(label, dev)
+    }
   } 
     devEndGroup(x$name, dev)
 }
@@ -1696,10 +1703,17 @@ primToDev.yaxis <- function(x, dev) {
   # children;  need to be calculated on-the-fly
   if (is.null(x$at)) {
     at <- grid.pretty(current.viewport()$yscale)
-    grobToDev(grid:::make.yaxis.major(at, x$main), dev)
-    grobToDev(grid:::make.yaxis.ticks(at, x$main), dev)
-    if (x$label)
-      grobToDev(grid:::make.yaxis.labels(at, x$label, x$main), dev)
+    major <- grid:::make.yaxis.major(at, x$main) 
+    major$name <- paste(x$name, major$name, sep = ".")
+    ticks <- grid:::make.yaxis.ticks(at, x$main)
+    ticks$name <- paste(x$name, ticks$name, sep = ".")
+    grobToDev(major, dev)
+    grobToDev(ticks, dev)
+    if (x$label) {
+      label <- grid:::make.yaxis.labels(at, x$label, x$main)
+      label$name <- paste(x$name, label$name, sep = ".")
+      grobToDev(label, dev)
+    }
   } 
     devEndGroup(x$name, dev)
 }
