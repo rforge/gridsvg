@@ -32,3 +32,10 @@ validCoordsInfo <- function(vpname) {
     currCoords
   }
 }
+
+readCoordsJS <- function(filename) {
+  jsData <- readLines(filename)
+  jsData <- gsub("var gridSVGCoords = ", "", jsData)
+  jsonData <- gsub(";$", "", jsData)
+  paste0(jsonData, collapse = "\n")
+}

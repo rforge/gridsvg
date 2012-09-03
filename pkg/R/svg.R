@@ -78,7 +78,7 @@ svgCoords <- function(export.coords, svgdev) {
     coordsFn <- paste(summary(svgDevFile(svgdev))$description,
                       ".coords.js", sep="")
     coordsFile <- file(coordsFn, "w")
-    cat(coordsJSON, file = coordsFile, sep = "")
+    cat(coordsJSON, "\n", file = coordsFile, sep = "")
     close(coordsFile)
     catsvg(paste('<script type="application/ecmascript" xlink:href="',
                  coordsFn,

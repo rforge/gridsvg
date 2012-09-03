@@ -59,6 +59,20 @@ Changes from 0.9-0 to 0.9-4
     Of note is that these include JS implementations of unit conversion
     routines. (Simon)
 
+17. Using viewport paths instead of viewport names for group elements.
+    This allows us to refer to clipping paths and coordinate information
+    directly on the path, reducing redundant information (when a path is
+    used more than once). Viewport paths still have a numeric suffix.
+    (Simon)
+
+18. Script MIME type updated to be more compatible with SVG spec. (Simon)
+
+19. Adding in a call to 'grid.refresh' when running 'gridToSVG' in order
+    to avoid seeing a blank page. (Simon)
+
+20. New vignette describing how to use the new coordinate system
+    functionality. (Simon)
+
 
 Changes from 0.8-0 to 0.9-0
 ===========================
