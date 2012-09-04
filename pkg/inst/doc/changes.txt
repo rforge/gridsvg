@@ -1,4 +1,35 @@
 
+Changes from 0.9 to 1.0-0
+===========================
+
+1.  Bumped the SVG version number to 1.1. (Simon)
+
+2.  Initial implementation of viewport coordinate info exporting.
+    (Simon)
+
+3.  Added support for coordinate system importing and unit conversion.
+    (Simon)
+
+4.  Added support for exporting a JS file with utility functions present.
+    Of note is that these include JS implementations of unit conversion
+    routines. (Simon)
+
+5.  Using viewport paths instead of viewport names for group elements.
+    This allows us to refer to clipping paths and coordinate information
+    directly on the path, reducing redundant information (when a path is
+    used more than once). Viewport paths still have a numeric suffix.
+    (Simon)
+
+6.  Script MIME type updated to be more compatible with SVG spec. (Simon)
+
+7.  Adding in a call to 'grid.refresh' when running 'gridToSVG' in order
+    to avoid seeing a blank page. (Simon)
+
+8.  New vignette describing how to use the new coordinate system
+    functionality. (Simon)
+
+9.  Axis sub-grobs now adhere to the common gridSVG naming scheme. (Simon)
+
 
 Changes from 0.9-0 to 0.9-4
 ===========================
@@ -46,34 +77,6 @@ Changes from 0.9-0 to 0.9-4
 12. Points grobs for pch=15:20 now check whether there is an explicit
     gpar(col). If so, the fill is set to that, otherwise this is
     retrieved from the viewport. (Simon)
-
-13. Bumped the SVG version number to 1.1. (Simon)
-
-14. Initial implementation of viewport coordinate info exporting.
-    (Simon)
-
-15. Added support for coordinate system importing and unit conversion.
-    (Simon)
-
-16. Added support for exporting a JS file with utility functions present.
-    Of note is that these include JS implementations of unit conversion
-    routines. (Simon)
-
-17. Using viewport paths instead of viewport names for group elements.
-    This allows us to refer to clipping paths and coordinate information
-    directly on the path, reducing redundant information (when a path is
-    used more than once). Viewport paths still have a numeric suffix.
-    (Simon)
-
-18. Script MIME type updated to be more compatible with SVG spec. (Simon)
-
-19. Adding in a call to 'grid.refresh' when running 'gridToSVG' in order
-    to avoid seeing a blank page. (Simon)
-
-20. New vignette describing how to use the new coordinate system
-    functionality. (Simon)
-
-21. Axis sub-grobs now adhere to the common gridSVG naming scheme. (Simon)
 
 
 Changes from 0.8-0 to 0.9-0
