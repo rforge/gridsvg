@@ -38,7 +38,8 @@ gridToSVG <- function(name="Rplots.svg",
 
     # Convert gTree to SVG
     gridToDev(gTree, svgdev)
-    devClose(svgdev)
+    svgroot <- devClose(svgdev)
+    saveXML(svgroot, name)
 
     # In an on-screen device, we can be left with a blank device
     # so refresh just to ensure we can see everything. Also happens

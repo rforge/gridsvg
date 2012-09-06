@@ -500,9 +500,10 @@ toMML.call <- function(x, indent, fontfamily, fontface, ...) {
 
 # fontfamily is used to set explicit 'mathvariant' when it is not
 # implicit in the formula element
-expr2mml <- function(e, fontfamily, fontface) {
+expr2mml <- function(e, fontfamily, fontface, svgdev) {
     bits <- lapply(e, toMML, indent="    ",
-                   fontfamily=fontfamily, fontface=fontface)
+                   fontfamily=fontfamily, fontface=fontface,
+                   svgdev = svgdev)
     # Use display="inline" to have some hope of positioning the
     # output somewhere near the right location
     paste('<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">\n',
@@ -511,5 +512,9 @@ expr2mml <- function(e, fontfamily, fontface) {
                                          sep="")),
                 collapse="\n"),
           '</math>\n', sep="")
+
+    #math <- newXMLNode("math", attrs = list(display = "inline"),
+    #                   namespaceDefinitions = "http://www.w3.org/1998/Math/MathML")
+    #svgDevChangeParent(math, svgdev)
 }
 

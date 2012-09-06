@@ -37,8 +37,7 @@ svgClose <- function(svgdev) {
   if (export.js != "none")
     svgJSUtils(export.js, svgdev)
 
-  svgFooter(svgdev)
-  close(svgDevFile(svgdev))
+  return(xmlRoot(svgDevParent(svgdev)))
 }
 
 svgJSUtils <- function(export.js, svgdev) {
@@ -103,37 +102,28 @@ svgClipPath <- function(id, vpx, vpy, vpw,
     return()
 
   clipPathID <- paste(baseGrobName(id), "clipPath", sep=".")
-  catsvg('<defs>\n', svgdev)
-  incindent(svgdev)
-  catsvg(paste('<clipPath id="', clipPathID,
-               '">\n', sep=""),
-         svgdev)
-  incindent(svgdev)
-  catsvg(paste('<rect x="', round(vpx, 2), '" ',
-               'y="', round(vpy, 2), '" ',
-               'width="', round(vpw, 2), '" ',
-               'height="', round(vph, 2), '" ',
-               'style="fill: none; stroke: none;"',
-               ' />\n', sep=""),
-         svgdev)
-  decindent(svgdev)
-  catsvg('</clipPath>\n', svgdev)
-  decindent(svgdev)
-  catsvg('</defs>\n', svgdev)
-  decindent(svgdev)
+  newXMLNode("defs", parent = svgDevParent(svgdev),
+             newXMLNode("clipPath",
+                        attrs = list(id = clipPathID),
+                        newXMLNode("rect",
+                                   attrs = list(x = round(vpx, 2),
+                                                y = round(vpy, 2),
+                                                width = round(vpw, 2),
+                                                height = round(vph, 2),
+                                                fill = "none",
+                                                stroke = "none"))))
 }
 
 svgClipAttr <- function(id, clip) {
   if (clip)
-    paste('clip-path="url(#', baseGrobName(id), '.clipPath)" ', sep="")
+    list("clip-path" = paste0("url(#", baseGrobName(id), ".clipPath)"))
   else
-    ""
+    list()
 }
 
 svgStartGroup <- function(id=NULL, clip=FALSE,
                           attributes=svgAttrib(), links=NULL,
                           style=svgStyle(), coords=NULL, svgdev=svgDevice()) {
-
   # If this is a viewport that we're starting a group for
   # we will have coordinate information, otherwise don't bother.
   if (! is.null(coords)) {
@@ -143,63 +133,56 @@ svgStartGroup <- function(id=NULL, clip=FALSE,
     assign("vpCoords", currVpCoords, envir = .gridSVGEnv)
   }
 
-  incindent(svgdev)
-  if (!is.null(id)) {
-      link <- links[id]
-      if (!(is.null(link) || is.na(link)))
-          svgStartLink(link, svgdev)
-  }
-  catsvg(paste('<g ',
-               'id="', getid(id, svgdev), '" ',
-               svgAttribTxt(attributes, id), ' ',
-               svgClipAttr(id, clip),
-               svgStyleAttributes(style), 
-               '>\n',
-               sep=""),
-         svgdev)
-  incID(svgdev)
+  has.link <- hasLink(links[id])
+  if (has.link)
+    svgStartLink(links[id], svgdev)
+  
+  attrlist <- list(id = getid(id, svgdev),
+                   svgAttribTxt(attributes, id),
+                   svgClipAttr(id, clip),
+                   svgStyleAttributes(style))
+  attrlist <- attrList(attrlist)
+  newparent <- newXMLNode("g", parent = svgDevParent(svgdev),
+                          attrs = attrlist)
+  svgDevChangeParent(newparent, svgdev)
 }
 
 svgEndGroup <- function(id=NULL, links=NULL, svgdev=svgDevice()) {
-  catsvg('</g>\n', svgdev)
-  if (!is.null(id)) {
-      link <- links[id]
-      if (!(is.null(link) || is.na(link)))
-          svgEndLink(svgdev)
-  }
-  decindent(svgdev)
+  # In the case where we've got a link on our group, set the parent
+  # one level up because we've got an "a" tag above the group
+  has.link <- hasLink(links[id])
+  if (has.link)
+    svgEndLink(svgdev)
+
+  svgDevChangeParent(xmlParent(svgDevParent(svgdev)), svgdev)
 }
 
 svgStartLink <- function(href="", svgdev=svgDevice()) {
-  incindent(svgdev)
-  catsvg(paste('<a xlink:href="', href, '">\n',
-               sep=""), svgdev)  
+  link <- newXMLNode("a",
+                     parent = svgDevParent(svgdev),
+                     attrs = list("xlink:href" = href))
+  svgDevChangeParent(link, svgdev)
 }
 
 svgEndLink <- function(svgdev=svgDevice()) {
-  catsvg('</a>\n', svgdev)
-  decindent(svgdev)
+  parent <- xmlParent(svgDevParent(svgdev))
+  svgDevChangeParent(parent, svgdev)
 }
 
 svgAnimate <- function(attrib, values,
                        begin, interp, duration, rep, revert, id=NULL, 
                        svgdev=svgDevice()) {
   n <- if (is.null(id)) 1 else length(unique(id))
-  catsvg(paste('<animate ',
-               'xlink:href="#', getid(id, svgdev, n), '" ',
-               'attributeName="', attrib, '" ',
-               'begin="', begin, 's" ',
-               'calcMode="', interp, '" ',
-               'dur="', duration, 's" ',
-               'values="', values, '" ',
-               'repeatCount="',
-               if (is.numeric(rep)) rep else if (rep) "indefinite" else 1,
-               '" ',
-               'fill="',
-               if (revert) "remove" else "freeze",
-               '" ',               
-               '/>\n', sep=""),
-         svgdev)
+
+  newXMLNode("animate", parent = svgDevParent(svgdev),
+             attrs = list("xlink:href" = paste0("#", getid(id, svgdev, n)),
+                          attributeName = attrib,
+                          begin = paste0(begin, "s"),
+                          calcMode = interp,
+                          dur = paste0(duration, "s"),
+                          values = values,
+                          repeatCount = if (is.numeric(rep)) rep else if (rep) "indefinite" else 1,
+                          fill = if (revert) "remove" else "freeze"))
 }
 
 # This and svgAnimateY are untested with id != NULL
@@ -283,22 +266,16 @@ svgAnimateTransform <- function(attrib, values,
                                 id=NULL,
                                 svgdev=svgDevice()) {
   n <- if (is.null(id)) 1 else length(unique(id))
-  catsvg(paste('<animateTransform ',
-               'xlink:href="#', getid(id, svgdev, n), '" ',
-               'attributeName="transform" ',
-               'type="', attrib, '" ',
-               'begin="', begin, 's" ',
-               'calcMode="', interp, '" ',
-               'dur="', duration, 's" ',
-               'values="', values, '" ',
-               'repeatCount="',
-               if (is.numeric(rep)) rep else if (rep) "indefinite" else 1,
-               '" ',
-               'fill="',
-               if (revert) "remove" else "freeze",
-               '" ',
-               '/>\n', sep=""),
-         svgdev)
+  newXMLNode("animateTransform", parent = svgDevParent(svgdev),
+             attrs = list("xlink:href" = paste0("#", getid(id, svgdev, n)),
+                          attributeName = "transform",
+                          type = attrib,
+                          begin = paste0(begin, "s"),
+                          calcMode = interp,
+                          dur = paste0(duration, "s"),
+                          values = values,
+                          repeatCount = if (is.numeric(rep)) rep else if (rep) "indefinite" else 1,
+                          fill = if (revert) "remove" else "freeze"))
 }
 
 svgAnimateTranslation <- function(xvalues, yvalues,
@@ -326,29 +303,32 @@ svgAnimateScale <- function(xvalues, yvalues,
 svgLines <- function(x, y, id=NULL, arrow = NULL,
                      attributes=svgAttrib(), links=NULL,
                      style=svgStyle(), svgdev=svgDevice()) {
-
   # Grabbing arrow info for marker element references
   if (! is.null(arrow$ends))
       lineMarkerTxt <- markerTxt(arrow$ends, id)
   else
-      lineMarkerTxt <- ""
+      lineMarkerTxt <- NULL
 
   # Never fill a line
   style$fill <- "none"
 
-  catsvg(paste('<polyline ',
-               'id="', id, '" ',
-               'points="',
-               paste(round(x, 2), ",",
-                     round(y, 2), sep="",
-                     collapse=" "),
-               '" ',
-               lineMarkerTxt,
-               svgAttribTxt(attributes, id), ' ',
-               svgStyleAttributes(style), 
-               ' />\n', sep=""),
-         svgdev,
-         link=links[id])  
+  has.link <- hasLink(links[id])
+  if (has.link)
+    svgStartLink(links[id], svgdev)
+
+  attrlist <- list(svgAttribTxt(attributes, id),
+                   lineMarkerTxt,
+                   svgStyleAttributes(style),
+                   id = id,
+                   points = paste0(round(x, 2), ",",
+                                   round(y, 2),
+                                   collapse=" "))
+  attrlist <- attrList(attrlist)
+  newXMLNode("polyline", parent = svgDevParent(svgdev),
+             attrs = attrlist)
+
+  if (has.link)
+    svgEndLink(svgdev)
 }
 
 svgMarker <- function(x, y, type, ends, name,
@@ -382,37 +362,53 @@ svgMarker <- function(x, y, type, ends, name,
     if (type == 1)
         style$fill <- "none"
 
-    markerDefs <- paste('<marker ',
-                        'id="', markerName("both", name), '" ',
-                        'refX="', round(c(-width, width), 2),
-                        '" refY="', round(c(-height / 2, height / 2), 2), '" ',
-                        'overflow="visible" ',
-                        'markerUnits="userSpaceOnUse" ',
-                        'markerWidth="', round(width, 2), '" ',
-                        'markerHeight="', round(height, 2), '" ',
-                        'orient="auto">\n',
-                        '<path ',
-                        'd="', d, '" ',
-                        c('transform="rotate(180)" ', ''),
-                        svgStyleAttributes(style), 
-                        ' />\n',
-                        '</marker>\n', sep="", collapse="")
-    catsvg(paste('<defs>\n',
-                 markerDefs,
-                 '</defs>\n', sep=""),
-           svgdev)
+    # [[1]] and [1]: markerStart
+    # [[2]] and [2]: markerEnd
+    # pathattrs is simply a list where each element
+    # is a list that we can simply pass in as attrs
+    # to newXMLNode
+    ids <- markerName("both", name)
+    refXs <- round(c(-width, width), 2)
+    refYs <- round(c(-height / 2, height / 2), 2)
+    pathlist <- attrList(list(svgStyleAttributes(style),
+                              d = d))
+    pathattrs <- list(pathlist,
+                      pathlist)
+    pathattrs[[1]]$transform <- "rotate(180)"
+
+    newXMLNode("defs", parent = svgDevParent(svgdev),
+               newXMLNode("marker",
+                          attrs = list(id = ids[1],
+                                       refX = refXs[1],
+                                       refY = refYs[1],
+                                       overflow = "visible",
+                                       markerUnits = "userSpaceOnUse",
+                                       markerWidth = round(width, 2),
+                                       markerHeight = round(height, 2),
+                                       orient = "auto"),
+                          newXMLNode("path", attrs = pathattrs[[1]])),
+               newXMLNode("marker",
+                          attrs = list(id = ids[2],
+                                       refX = refXs[2],
+                                       refY = refYs[2],
+                                       overflow = "visible",
+                                       markerUnits = "userSpaceOnUse",
+                                       markerWidth = round(width, 2),
+                                       markerHeight = round(height, 2),
+                                       orient = "auto"),
+                          newXMLNode("path", attrs = pathattrs[[2]])))
 }
 
 markerTxt <- function(ends, name) {
     mname <- markerName(ends, name)
+
     if (ends == "first")
-        lmt <- paste('marker-start="url(#', mname, ')" ', sep="")
+        lmt <- list("marker-start" = paste0("url(#", mname, ")"))
     if (ends == "last")
-        lmt <- paste('marker-end="url(#', mname, ')" ', sep="")
+        lmt <- list("marker-end" = paste0("url(#", mname, ")"))
     if (ends == "both")
-        lmt <- paste(paste('marker-start="url(#', mname[1], ')" ', sep=""),
-                     paste('marker-end="url(#', mname[2], ')" ', sep=""),
-                     sep="")
+        lmt <- list("marker-start" = paste0("url(#", mname[1], ")"),
+                    "marker-end" = paste0("url(#", mname[2], ")"))
     lmt
 }
 
@@ -433,17 +429,22 @@ svgPolygon <- function(x, y, id=NULL,
   if (length(x) != length(y))
     stop("x and y must be same length")
 
-  catsvg(paste('<polygon ',
-               'id="', id, '" ',
-               'points="', 
-               paste(round(x, 2), ",",
-                     round(y, 2), sep="",
-                     collapse=" "),
-               '" ', 
-               svgAttribTxt(attributes, id), ' ',
-               svgStyleAttributes(style), 
-               ' />\n', sep=""),
-         svgdev, link=links[id])  
+  has.link <- hasLink(links[id])
+  if (has.link)
+    svgStartLink(links[id], svgdev)
+
+  tmpattr <- list(svgAttribTxt(attributes, id),
+                  svgStyleAttributes(style),
+                  id = id,
+                  points = paste0(round(x, 2), ",",
+                                  round(y, 2),
+                                  collapse = " "))
+  tmpattr <- attrList(tmpattr)
+  newXMLNode("polygon", parent = svgDevParent(svgdev),
+             attrs = tmpattr)
+
+  if (has.link)
+    svgEndLink(svgdev)
 }
 
 # Differs from polygon because it can have sub-paths
@@ -469,78 +470,90 @@ svgPath <- function(x, y, rule, id=NULL,
                           "Z")
                 }, x, y)
 
-    catsvg(paste('<path ',
-                 'id="', id, '" ',
-                 'd="', paste(unlist(d), collapse=" "), '" ', 
-                 'fill-rule="',
-                 switch(rule, winding="nonzero", "evenodd"), '" ',
-                 svgAttribTxt(attributes, id), ' ',
-                 svgStyleAttributes(style), 
-                 ' />\n', sep=""),
-           svgdev, link=links[id])  
+    tmpattr <- list(svgAttribTxt(attributes, id),
+                    svgStyleAttributes(style),
+                    id = id,
+                    d = paste(unlist(d), collapse = " "),
+                    "fill-rule" = switch(rule, winding="nonzero", "evenodd"))
+    tmpattr <- attrList(tmpattr)
+
+
+    has.link <- hasLink(links[id])
+    if (has.link)
+        svgStartLink(links[id], svgdev)
+
+    newXMLNode("path", parent = svgDevParent(svgdev),
+               attrs = tmpattr)
+
+    if (has.link)
+        svgEndLink(svgdev)
 }
 
 svgRaster <- function(x, y, width, height, id=NULL,
                       just, vjust, hjust,
                       attributes=svgAttrib(), links=NULL,
                       style=svgStyle(), svgdev=svgDevice()) {
-
   # Need to extract the original grob name in order to link to the image
   grobname <- baseGrobName(id)
   fileloc <- paste(grobname, ".png", sep = "")
 
-  rasters <- paste('<g ',
-                   'id="', id, '" ',
-                   # Attributes applied to group
-                   svgAttribTxt(attributes, id), ' ',
-                   svgStyleAttributes(style), ' ',
-                   # Flip image vertically to correct orientation
-                   'transform="translate(',
-                   round(x, 2), ', ',
-                   round(height + y, 2), ') ',
-                   '">\n',
-                   '<g ',
-                   'id="', paste(id, "scale", sep="."), '" ',
-                   'transform="scale(',
-                   round(width, 2), ', ',
-                   round(-height, 2), ')',
-                   '">\n',
-                   '<image ',
-                   'x="0" y="0" width="1" height="1" ', 
-                   'xlink:href="', fileloc, '" ',
-                   'preserveAspectRatio="none"',
-                   ' />\n',
-                   '</g>\n',
-                   '</g>\n',
-                   sep="")
-  
-  catsvg(rasters, svgdev, link=links[id])
+  has.link <- hasLink(links[id])
+  if (has.link)
+    svgStartLink(links[id], svgdev)
+
+  attrlist <- list(id = id,
+                   svgAttribTxt(attributes, id),
+                   svgStyleAttributes(style))
+  attrlist <- attrList(attrlist)
+  newXMLNode("g", parent = svgDevParent(svgdev),
+             attrs = attrlist,
+             newXMLNode("g",
+                        attrs = list(id = paste(id, "scale", sep="."),
+                                     transform = paste0("scale(",
+                                                        round(width, 2), ", ",
+                                                        round(-height, 2), ")")),
+                        newXMLNode("image",
+                                   attrs = list(x = 0,
+                                                y = 0,
+                                                width = 1,
+                                                height = 1,
+                                                "xlink:href" = fileloc,
+                                                preserveAspectRatio = "none"))))
+
+  if (has.link)
+    svgEndLink(svgdev)
 }
 
 svgRect <- function(x, y, width, height, id=NULL,
                     attributes=svgAttrib(), links=NULL,
                     style=svgStyle(), svgdev=svgDevice()) {
-  rects <- paste('<rect ',
-                 'id="', id, '" ',
-                 'x="', round(x, 2), '" ',
-                 'y="', round(y, 2), '" ',
-                 'width="', round(width, 2), '" ',
-                 'height="', round(height, 2), '" ',
-                 svgAttribTxt(attributes, id), ' ',
-                 svgStyleAttributes(style),
-                 ' />\n',
-                 sep="")
-  catsvg(rects, svgdev, link=links[id])
+  has.link <- hasLink(links[id])
+  if (has.link)
+    svgStartLink(links[id], svgdev)
+
+  attrlist <- list(id = id,
+                   x = round(x, 2),
+                   y = round(y, 2),
+                   width = round(width, 2),
+                   height = round(height, 2),
+                   svgAttribTxt(attributes, id),
+                   svgStyleAttributes(style))
+  attrlist <- attrList(attrlist)
+  newXMLNode("rect", parent = svgDevParent(svgdev),
+             attrs = attrlist)
+
+  if (has.link)
+    svgEndLink(svgdev)
 }
 
-svgTextSplitLines <- function(text, lineheight, charheight, vjust) {
+svgTextSplitLines <- function(text, lineheight, charheight,
+                              vjust, svgdev) {
     # Splitting based on linebreaks
     splitText <- strsplit(text, "\n")
     # If text is "", produces character(0), so fix that
     if (length(splitText[[1]]) == 0)
         splitText[[1]] <- ""
 
-    svgText <- list()
     n <- length(splitText[[1]])
 
     # Need to adjust positioning based on vertical justification.
@@ -555,35 +568,38 @@ svgTextSplitLines <- function(text, lineheight, charheight, vjust) {
         firstDelta <- charheight
     lineheight <- c(firstDelta, rep(lineheight, n - 1))
 
-    svgText[[1]] <- paste('<tspan dy="',
-                          round(lineheight, 2),
-                          '" ',
-                          'x="0"', # Needs to be pushed to the left
-                          '>',
-                          splitText[[1]],
-                          '</tspan>',
-                          sep="", collapse="\n")
-
-    svgText <- paste(unlist(svgText), collapse="\n")
-
-    svgText
+    textContent <- splitText[[1]]
+    # Note that x=0 here so that we push it to the left, hjust
+    # is worked out automatically from there
+    for (i in 1:n) {
+        newXMLNode("tspan", parent = svgDevParent(svgdev),
+                   attrs = list(dy = round(lineheight[i], 2),
+                                x = 0),
+                   newXMLTextNode(textContent[i]))
+    }
 }
 
 svgTextElement <- function(text, rot, hjust, vjust,
-                           lineheight, charheight, style) {
-    paste('<text x="0" y="0" ',
-          if (rot != 0) {
-              paste('transform="rotate(',
-                    # Rotation in SVG goes clockwise from +ve x=axis
-                    round(-rot, 2),
-                    ')" ', sep="")
-          } else "",
-          textAnchor(hjust), ' ',
-          svgStyleAttributes(style),
-          ' >\n',
-          svgTextSplitLines(text, lineheight, charheight, vjust),
-          '</text>\n',
-          sep="")
+                           lineheight, charheight, style, svgdev=svgDevice()) {
+    # Rotation in SVG goes clockwise from +ve x=axis
+    transform <- if (rot != 0)
+                   list(transform = paste0("rotate(", round(-rot, 2), ")"))
+                 else
+                   NULL
+    attrlist <- list(x = 0,
+                     y = 0,
+                     transform,
+                     textAnchor(hjust),
+                     svgStyleAttributes(style))
+    attrlist <- attrList(attrlist)
+    newpar <- newXMLNode("text", parent = svgDevParent(svgdev),
+                         attrs = attrlist)
+    # Set parent of all <tspan>s to be the <text> el
+    svgDevChangeParent(newpar, svgdev)
+    # Write each of the lines here
+    svgTextSplitLines(text, lineheight, charheight, vjust, svgdev)
+    # Resetting parent
+    svgDevChangeParent(xmlParent(newpar), svgdev)
 }
 
 # NOTE that the precise placement of math is even less likely to work
@@ -602,7 +618,8 @@ svgTextElement <- function(text, rot, hjust, vjust,
 svgMathElement <- function(text, rot, hjust, vjust,
                            width, height, ascent, descent,
                            lineheight, charheight, fontheight,
-                           fontfamily, fontface, style) {
+                           fontfamily, fontface, style,
+                           svgdev=svgDevice()) {
     # Determine x/y based on width/height and hjust/vjust
     if (hjust %in% c("centre", "center"))
         x <- -width/2
@@ -620,24 +637,39 @@ svgMathElement <- function(text, rot, hjust, vjust,
         else
             y <- (ascent - fontheight)
     }
-    # Adjust exact width/height up by large fudge factor to allow for
-    # larger fonts and different layout in viewer
-    # Hopefully there are no downsides to that approach ...
-    paste('<foreignObject x="', round(x, 2),
-                       '" y="', round(y, 2),
-                       '" width="', round(3*width, 2),
-                       '" height="', round(3*height, 2), '" ',
-          if (rot != 0) {
-              paste('transform="rotate(',
-                    # Rotation in SVG goes clockwise from +ve x=axis
-                    round(-rot, 2),
-                    ')" ', sep="")
-          } else "",
-          svgStyleAttributes(style),
-          ' >\n',
-          expr2mml(text, fontfamily, fontface),
-          '</foreignObject>\n',
-          sep="")
+
+    tmpattr <- list(x = round(x, 2),
+                    y = round(y, 2),
+                    width = round(3*width, 2),
+                    height = round(3*height, 2),
+                    svgStyleAttributes(style))
+    if (rot != 0)
+        tmpattr$transform <- paste0("rotate(", round(-rot, 2), ")")
+
+    foreignObj <- newXMLNode("foreignObject", parent = svgDevParent(svgdev),
+                             attrs = tmpattr)
+    svgDevChangeParent(foreignObject, svgdev)
+    exprNode <- expr2mml(text, fontfamily, fontface, svgdev)
+    svgDevChangeParent(xmlParent(foreignObj), svgdev)
+
+   # # Adjust exact width/height up by large fudge factor to allow for
+   # # larger fonts and different layout in viewer
+   # # Hopefully there are no downsides to that approach ...
+   # paste('<foreignObject x="', round(x, 2),
+   #                    '" y="', round(y, 2),
+   #                    '" width="', round(3*width, 2),
+   #                    '" height="', round(3*height, 2), '" ',
+   #       if (rot != 0) {
+   #           paste('transform="rotate(',
+   #                 # Rotation in SVG goes clockwise from +ve x=axis
+   #                 round(-rot, 2),
+   #                 ')" ', sep="")
+   #       } else "",
+   #       svgStyleAttributes(style),
+   #       ' >\n',
+   #       expr2mml(text, fontfamily, fontface),
+   #       '</foreignObject>\n',
+   #       sep="")
 }
 
 svgText <- function(x, y, text, hjust="left", vjust="bottom", rot=0,
@@ -646,83 +678,86 @@ svgText <- function(x, y, text, hjust="left", vjust="bottom", rot=0,
                     fontfamily="sans", fontface="plain",
                     id=NULL, attributes=svgAttrib(), links=NULL,
                     style=svgStyle(), svgdev=svgDevice()) {
-    # Avoid XML specials in text
-    if (!is.language(text))
-        text <-
-            gsub("<", "&lt;",
-                 gsub(">", "&gt;",
-                      gsub("'", "&apos;",
-                           gsub("\"", "&quot;",
-                                # DO & FIRST !!!!
-                                gsub("&", "&amp;",
-                                     text)))))
+    has.link <- hasLink(links[id])
+    if (has.link)
+        svgStartLink(links[id], svgdev)
+
+    topattrs <- svgAttribTxt(attributes, id)
+    topattrs$transform <- paste0("translate(",
+                                 round(x, 2), ", ",
+                                 round(y, 2), ")")
+    topattrs$`stroke-width` <- "0.1px"
 
     # Flip the y-direction again so that text is drawn "upright"
     # Do the flip in a separate <g> so that can animate the
     # translation easily
     # Use a tspan to do the vertical alignment
-    texts <- paste('<g ',
-                   'id="', id, '" ',
-                   # Attributes applied to group
-                   svgAttribTxt(attributes, id), ' ',
-                   # Only draw a REALLY thin line for the text outline
-                   'stroke-width=".1" ',
-                   'transform="translate(',
-                   round(x, 2), ', ',
-                   round(y, 2), ') ',
-                   '">\n',
-                   '<g transform="scale(1, -1)">\n',
-                   if (is.language(text)) {
-                       svgMathElement(text, rot, hjust, vjust,
-                                      width, height, ascent, descent,
-                                      lineheight, charheight, fontheight,
-                                      fontfamily, fontface, style)
-                   } else {
-                       svgTextElement(text, rot, hjust, vjust,
-                                      lineheight, charheight, style)
-                   },
-                   '</g>\n',
-                   '</g>\n',
-                   sep="")
+    topg <- newXMLNode("g", parent = svgDevParent(svgdev),
+                       attrs = topattrs)
+    sec <- newXMLNode("g", parent = topg,
+                      attrs = list(transform = "scale(1, -1)"))
 
-    catsvg(texts, svgdev, link=links[id])
+    # Let all child <tspan> elements or MathML fragments be
+    # located under the *second* <g>
+    svgDevChangeParent(sec, svgdev)
+
+    if (is.language(text)) {
+        svgMathElement(text, rot, hjust, vjust,
+                       width, height, ascent, descent,
+                       lineheight, charheight, fontheight,
+                       fontfamily, fontface, style,
+                       svgdev)
+    } else {
+        svgTextElement(text, rot, hjust, vjust,
+                       lineheight, charheight, style,
+                       svgdev)
+    }
+
+    # Reset parent to parent of entire text "grob"
+    svgDevChangeParent(xmlParent(topg), svgdev)
+
+    if (has.link)
+        svgEndLink(svgdev)
 }
 
 svgCircle <- function(x, y, r, id=NULL,
                       attributes=svgAttrib(), links=NULL,
                       style=svgStyle(), svgdev=svgDevice()) {
+  has.link <- hasLink(links[id])
+  if (has.link)
+    svgStartLink(links[id], svgdev)
 
-  circles <- paste('<circle ',
-                   'id="', id, '" ',
-                   'cx="', round(x, 2), '" ',
-                   'cy="', round(y, 2), '" ',
-                   'r="', round(r, 2), '" ',
-                   svgAttribTxt(attributes, id), ' ',
-                   svgStyleAttributes(style),
-                   ' />\n',
-                   sep="")
+  tmpattr <- list(id = id,
+                  cx = round(x, 2),
+                  cy = round(y, 2),
+                  r = round(r, 2),
+                  svgAttribTxt(attributes, id),
+                  svgStyleAttributes(style))
+  tmpattr <- attrList(tmpattr)
+  has.link <- hasLink(links[id])
+  newXMLNode("circle", parent = svgDevParent(svgdev),
+             attrs = tmpattr)
 
-  catsvg(circles, svgdev, link=links[id])
+  if (has.link)
+    svgEndLink(svgdev)
 }
 
 svgScript <- function(body, href, type="application/ecmascript",
                       id=NULL, svgdev=svgDevice()) {
-  script <- paste('<script type="', type, '" ',
-                  'id="', getid(id, svgdev, 1), '" ',
-                  if (nchar(href) > 0) 
-                      paste('xlink:href="', href, '" ' ,sep="")
-                  else
-                      '',
-                  '>\n',
-                  if (nchar(body) > 0)
-                      paste('<![CDATA[\n',
-                            body, '\n',
-                            '  ]]>\n',
-                            sep="")
-                  else
-                      '',
-                  '</script>\n',sep="");
-  catsvg(script, svgdev)
+  tmpattr <- list(type = type,
+                  id = getid(id, svgdev, 1))
+  if (nchar(href) > 0)
+    tmpattr$`xlink:href` <- href
+
+  script <- newXMLNode("script", parent = svgDevParent(svgdev),
+                       attrs = tmpattr)
+
+  if (nchar(body) > 0) {
+    # "body" adds newlines because otherwise the CDATA delimiters are part
+    # of the first and last line of text, break it apart to look nicer
+    newXMLCDataNode(paste0("\n", body, "\n"),
+                    parent = script)
+  }
 }
 
 #############
@@ -742,6 +777,7 @@ svgDevice <- function(file="", width=200, height=200) {
   assign("file", file, envir=dev)
   assign("width", width, envir=dev)
   assign("height", height, envir=dev)
+  assign("parent", NULL, envir=dev)
   assign("indent", "", envir=dev)
   assign("id", 1, envir=dev)
   return(dev)
@@ -759,6 +795,14 @@ svgDevHeight <- function(svgdev) {
   get("height", envir=svgdev)
 }
 
+svgDevParent <- function(svgdev) {
+  get("parent", envir=svgdev)
+}
+
+svgDevChangeParent <- function(newpar, svgdev) {
+  assign("parent", newpar, envir=svgdev)
+}
+
 getid <- function(id, svgdev, n=1) {
   if (is.null(id))
     svgID(svgdev) + (1:n - 1)
@@ -774,18 +818,22 @@ svgID <- function(svgdev) {
   get("id", envir=svgdev)
 }
 
+hasLink <- function(link) {
+  ! (is.null(link) || is.na(link))
+}
+
 # SVG output
 # This guy can optionally add an <a> element around the output
-catsvg <- function(text, svgdev, link=NULL) {
-    hasLink <- !(is.null(link) || is.na(link))
-    if (hasLink) {
-        svgStartLink(link, svgdev)
-    }
-    cat(paste(get("indent", envir=svgdev), text, sep=""),
-        file=svgDevFile(svgdev))
-    if (hasLink) {
-        svgEndLink(svgdev)
-    }
+catsvg <- function(node, svgdev, link=NULL) {
+    #hasLink <- !(is.null(link) || is.na(link))
+    #if (hasLink) {
+    #    svgStartLink(link, svgdev)
+    #}
+    #cat(paste(get("indent", envir=svgdev), text, sep=""),
+    #    file=svgDevFile(svgdev))
+    #if (hasLink) {
+    #    svgEndLink(svgdev)
+    #}
 }
 
 decindent <- function(svgdev) {
@@ -806,26 +854,22 @@ incID <- function(svgdev, n=1) {
 svgHeader <- function(width, height, svgdev=svgDevice()) {
     # This header tested on standalone SVG file in Firefox 3
     # FIXME:  add default xmlns for animation and scripts too?
-    catsvg(paste(paste('<?xml version="1.0" encoding="',
-                       localeToCharset()[1],
-                       '"?>', sep=""),
-                 '<svg xmlns="http://www.w3.org/2000/svg"',
-                 '     xmlns:xlink="http://www.w3.org/1999/xlink"',
-                 paste('     width="', round(width, 2), 'px"', sep=""),
-                 paste('     height="', round(height, 2), 'px"', sep=""),
-                 '     version="1.1">',
-                 sep="\n"), svgdev)
+    svgdoc <- newXMLNode("svg",
+                         namespaceDefinitions = list("http://www.w3.org/2000/svg",
+                                                     xlink = "http://www.w3.org/1999/xlink"),
+                         attrs = list(width = paste0(round(width, 2), "px"),
+                                      height = paste0(round(height, 2), "px"),
+                                      version = "1.1"))
     # Invert the y-axis so that y and height values measure "up"
-    catsvg(paste('<g transform="translate(0, ',
-                 round(svgDevHeight(svgdev), 2), ') ',
-                 ' scale(1, -1)">\n',
-                 sep=""), svgdev)
+    rootg <- newXMLNode("g",
+                        parent = svgdoc,
+                        attrs = list(transform = paste0("translate(0, ",
+                                                        round(svgDevHeight(svgdev), 2),
+                                                        ") scale(1, -1)")))
+    svgDevChangeParent(rootg, svgdev)
 }
 
-svgFooter <- function(svgdev=svgDevice()) {
-  catsvg('</g>\n', svgdev);
-  catsvg('</svg>\n', svgdev);
-}
+svgFooter <- function(svgdev=svgDevice()) {}
 
 # SVG attributes
 svgAttrib <- function(...) {
@@ -836,6 +880,13 @@ svgAttrib <- function(...) {
     list()
   else
     temp
+}
+
+# Removes NULL values and flattens our attrib list
+# so we can include lists as elements in "alist"
+# and arrive at a flattened list
+attrList <- function(alist) {
+  as.list(unlist(alist))
 }
 
 listToSVGAttrib <- function(alist) {
@@ -849,7 +900,7 @@ emptyAttrib <- function(attributes) {
 # Only use the attributes that are for this 'id'
 svgAttribTxt <- function(attributes, id) {
     if (emptyAttrib(attributes)) {
-        ""
+        list()
     } else {
         attributes <- lapply(attributes,
                              function(attr, id) {
@@ -862,11 +913,16 @@ svgAttribTxt <- function(attributes, id) {
                              id)
         # Drop NULL attributes
         attributes <- attributes[!sapply(attributes, is.null)]
+
+        # Need to wipe out names because it messes things up when we
+        # need to create an attribute list for nodes
         if (length(attributes) > 0)
-            paste(names(attributes), '="', attributes, '"', sep="",
-                  collapse=" ")
+            lapply(attributes, function(x) {
+                       names(x) <- NULL
+                       x
+                   })
         else
-            ""
+            list()
     }
 }
 
@@ -911,57 +967,54 @@ svgStyleCSS <- function(svgstyle) {
 #   Can also override with general style sheet later.
 svgStyleAttributes <- function(svgstyle) {
     if (emptyStyle(svgstyle)) {
-        ""
+        list()
     } else {
         if (any(sapply(svgstyle, length) > 1))
             stop("All SVG style attribute values must have length 1")
-        paste(names(svgstyle), "=\"", svgstyle, "\"", sep="", collapse=" ")
+        svgstyle
+        #paste(names(svgstyle), "=\"", svgstyle, "\"", sep="", collapse=" ")
     }    
 }
 
 # Specifying text justification
 textAnchor <- function(hjust) {
-  paste("text-anchor=",
-        switch(hjust,
-               left='"start"',
-               center='"middle"',
-               centre='"middle"',
-               right='"end"',
-               '"start"'),
-        sep="")
+  list("text-anchor" = 
+       switch(hjust,
+              left="start",
+              center="middle",
+              centre="middle",
+              right="end",
+              "start"))
 }
 
 dominantBaseline <- function(vjust) {
-  paste("dominant-baseline=",
-        switch(vjust,
-               bottom='"auto"',
-               center='"middle"',
-               centre='"middle"',
-               top='"text-top"',
-               '"baseline"'),
-        sep="")
+  list("dominant-baseline" =
+       switch(vjust,
+              bottom="auto",
+              center="middle",
+              centre="middle",
+              top="text-top",
+              "baseline"))
 }
 
 baselineShift <- function(vjust) {
-  paste('baseline-shift=',
-        switch(vjust,
-               bottom='"0%"',
-               center='"-50%"',
-               centre='"-50%"',
-               top='"-100%"',
-               '"0%"'),
-        sep="")
+  list("baseline-shift" =
+       switch(vjust,
+              bottom="0%",
+              center="-50%",
+              centre="-50%",
+              top="-100%",
+              "0%"))
 }
 
 alignmentBaseline <- function(vjust) {
-  paste("alignment-baseline=",
-        switch(vjust,
-               baseline='"baseline"',
-               bottom='"bottom"',
-               center='"middle"',
-               centre='"middle"',
-               top='"top"',
-               '"baseline"'),
-        sep="")
+  list("alignment-baseline" =
+       switch(vjust,
+              baseline="baseline",
+              bottom="bottom",
+              center="middle",
+              centre="middle",
+              top="top",
+              "baseline"))
 }
 
