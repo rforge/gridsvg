@@ -1,3 +1,6 @@
+xmlPrefix <- function() {
+    paste0('<?xml version="1.0" encoding="', localeToCharset()[1], '"?>')
+}
 
 svgOpen <- function(filename="Rplots.svg", width=200, height=200) {
   # For viewing using Adobe SVG Viewer in IE
@@ -651,30 +654,12 @@ svgMathElement <- function(text, rot, hjust, vjust,
     if (rot != 0)
         tmpattr$transform <- paste0("rotate(", round(-rot, 2), ")")
 
-    foreignObj <- newXMLNode("foreignObject", parent = svgDevParent(svgdev),
+    switch <- newXMLNode("switch", parent = svgDevParent(svgdev))
+    foreignObj <- newXMLNode("foreignObject", parent = switch,
                              attrs = attrList(tmpattr))
     svgDevChangeParent(foreignObj, svgdev)
     expr2mml(text, fontfamily, fontface, svgdev)
-    svgDevChangeParent(xmlParent(foreignObj), svgdev)
-
-   # # Adjust exact width/height up by large fudge factor to allow for
-   # # larger fonts and different layout in viewer
-   # # Hopefully there are no downsides to that approach ...
-   # paste('<foreignObject x="', round(x, 2),
-   #                    '" y="', round(y, 2),
-   #                    '" width="', round(3*width, 2),
-   #                    '" height="', round(3*height, 2), '" ',
-   #       if (rot != 0) {
-   #           paste('transform="rotate(',
-   #                 # Rotation in SVG goes clockwise from +ve x=axis
-   #                 round(-rot, 2),
-   #                 ')" ', sep="")
-   #       } else "",
-   #       svgStyleAttributes(style),
-   #       ' >\n',
-   #       expr2mml(text, fontfamily, fontface),
-   #       '</foreignObject>\n',
-   #       sep="")
+    svgDevChangeParent(xmlParent(switch), svgdev)
 }
 
 svgText <- function(x, y, text, hjust="left", vjust="bottom", rot=0,

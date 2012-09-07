@@ -43,7 +43,7 @@ gridToSVG <- function(name="Rplots.svg",
     gridToDev(gTree, svgdev)
     svgroot <- devClose(svgdev)
     svgdoc <- xmlDoc(svgroot)
-    doctxt <- saveXML(svgdoc)
+    doctxt <- saveXML(svgdoc, prefix = xmlPrefix())
 
     # MathML fix, XML package is escaping too much, even when we tell it
     # not to. Unescape the second level of escaping
