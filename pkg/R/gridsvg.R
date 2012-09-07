@@ -13,6 +13,9 @@ gridToSVG <- function(name="Rplots.svg",
     assign("export.coords", export.coords, envir = .gridSVGEnv)
     assign("export.js", export.js, envir = .gridSVGEnv)
 
+    # Don't do text substitution until necessary
+    assign("plotmathUsed", FALSE, envir = .gridSVGEnv)
+
     # Ensure we're at the top level
     upViewport(0)
     rootgp <- get.gpar()
@@ -39,7 +42,21 @@ gridToSVG <- function(name="Rplots.svg",
     # Convert gTree to SVG
     gridToDev(gTree, svgdev)
     svgroot <- devClose(svgdev)
-    saveXML(svgroot, name)
+    svgdoc <- xmlDoc(svgroot)
+    doctxt <- saveXML(svgdoc)
+
+    # MathML fix, XML package is escaping too much, even when we tell it
+    # not to. Unescape the second level of escaping
+    if (get("plotmathUsed", envir = .gridSVGEnv)) {
+        doctxt <- gsub("&amp;(#x[0-9A-Fa-f]+;)", "&\\1", doctxt)
+        doctxt <- gsub("&amp;gt;", "&gt;", doctxt)
+        doctxt <- gsub("&amp;lt;", "&lt;", doctxt)
+        doctxt <- gsub("&amp;amp;", "&amp;", doctxt)
+        doctxt <- gsub("&amp;apos;", "&apos;", doctxt)
+        doctxt <- gsub("&amp;quot;", "&quot;", doctxt)
+    }
+
+    cat(doctxt, file = name)
 
     # In an on-screen device, we can be left with a blank device
     # so refresh just to ensure we can see everything. Also happens

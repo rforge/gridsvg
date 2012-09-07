@@ -620,6 +620,11 @@ svgMathElement <- function(text, rot, hjust, vjust,
                            lineheight, charheight, fontheight,
                            fontfamily, fontface, style,
                            svgdev=svgDevice()) {
+    # Because there are special characters that the XML package does
+    # not escape properly (escapes the escapes), set a flag to force
+    # text substitution once the SVG doc has been created.
+    assign("plotmathUsed", TRUE, envir = .gridSVGEnv)
+
     # Determine x/y based on width/height and hjust/vjust
     if (hjust %in% c("centre", "center"))
         x <- -width/2
@@ -647,9 +652,9 @@ svgMathElement <- function(text, rot, hjust, vjust,
         tmpattr$transform <- paste0("rotate(", round(-rot, 2), ")")
 
     foreignObj <- newXMLNode("foreignObject", parent = svgDevParent(svgdev),
-                             attrs = tmpattr)
-    svgDevChangeParent(foreignObject, svgdev)
-    exprNode <- expr2mml(text, fontfamily, fontface, svgdev)
+                             attrs = attrList(tmpattr))
+    svgDevChangeParent(foreignObj, svgdev)
+    expr2mml(text, fontfamily, fontface, svgdev)
     svgDevChangeParent(xmlParent(foreignObj), svgdev)
 
    # # Adjust exact width/height up by large fudge factor to allow for
