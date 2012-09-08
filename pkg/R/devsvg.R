@@ -436,9 +436,9 @@ openSVGDev <- function(name="Rplots.svg", width=6, height=6) {
     # par("cra")[2]/par("cin")[2]*height))
     
     new("svgDevice",
-        name=name, width=width, height=height,
+        width=width, height=height,
         res=res,
-        dev=svgOpen(name, res*width, res*height))
+        dev=svgOpen(res*width, res*height))
 }
                    
 

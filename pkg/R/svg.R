@@ -1,8 +1,8 @@
 xmlPrefix <- function() {
-    paste0('<?xml version="1.0" encoding="', localeToCharset()[1], '"?>')
+  paste0('<?xml version="1.0" encoding="', localeToCharset()[1], '"?>')
 }
 
-svgOpen <- function(filename="Rplots.svg", width=200, height=200) {
+htmlFile <- function(filename, svgdev) {
   # For viewing using Adobe SVG Viewer in IE
   # OR in Firefox 3 (native support)
   # create a "wrapper" html file
@@ -11,43 +11,34 @@ svgOpen <- function(filename="Rplots.svg", width=200, height=200) {
     # See ~/Research/Rstuff/SVG/PlotMath/README for notes from some
     # experiments AND email from David Scott that contains an
     # example from org-babel output 2011-11-01
-  htmlfile <- file(paste(filename, ".html", sep=""), "w")
-  # NOTE that different browsers prefer different approaches
-  # See email from David Scott 2011-11-03 for some sample code
-  cat(paste('<object data="', filename, '" type="image/svg+xml"',
-            ' width="', ceiling(width), 'px" height="', ceiling(height), 'px"> </object>\n',
-            sep=''), file=htmlfile)
-  close(htmlfile)
-  svgdev <- svgDevice(file(filename, 'w'), width, height)
+  htmlfile <- paste0(filename, ".html")
+    # NOTE that different browsers prefer different approaches
+    # See email from David Scott 2011-11-03 for some sample code
+  # The empty text node is so that we ensure the object tag is not
+  # self-closing, i.e. there is an explicit closing tag written out
+  obj <- newXMLNode("object",
+                    attrs = list(data = filename,
+                                 type = "image/svg+xml",
+                                 width = paste0(ceiling(svgDevWidth(svgdev)), "px"),
+                                 height = paste0(ceiling(svgDevHeight(svgdev)), "px")),
+                    newXMLTextNode(""))
+  saveXML(obj, file = htmlfile)
+}
+
+svgOpen <- function(width=200, height=200) {
+  svgdev <- svgDevice(width, height)
   svgHeader(width, height, svgdev)
   return(svgdev)
 }
 
 svgClose <- function(svgdev) {
-  # Test whether these vars exists, if we're building up an SVG doc using
-  # the internal svg* functions then these vars may not exist.
-  export.coords <- if (exists("export.coords", envir = .gridSVGEnv))
-                     get("export.coords", envir = .gridSVGEnv)    
-                   else
-                     "none"
-  export.js <- if (exists("export.js", envir = .gridSVGEnv))
-                 get("export.js", envir = .gridSVGEnv)    
-               else
-                 "none"
-  # See if we need to write out coords info at all
-  if (export.coords != "none")
-    svgCoords(export.coords, svgdev)
-  if (export.js != "none")
-    svgJSUtils(export.js, svgdev)
-
   return(xmlRoot(svgDevParent(svgdev)))
 }
 
-svgJSUtils <- function(export.js, svgdev) {
-  # Kinda clunky, but we're grabbing the filename of the SVG device
-  # and appending to it
-  utilsFn <- paste(summary(svgDevFile(svgdev))$description,
-                   ".convert.js", sep="")
+svgJSUtils <- function(export.js, svgfile, svgroot) {
+  if (export.js == "none")
+    return()
+  utilsFn <- paste0(svgfile, ".convert.js")
   utilsFile <- file(system.file("js/convert.js", package = "gridSVG"))
   utilsLines <- readLines(utilsFile)
   close(utilsFile)
@@ -55,45 +46,38 @@ svgJSUtils <- function(export.js, svgdev) {
     destFile <- file(utilsFn)
     writeLines(utilsLines, destFile)
     close(destFile)
-    catsvg(paste('<script type="application/ecmascript" xlink:href="',
-                 utilsFn,
-                 '"></script>\n', sep=""), svgdev)
+    newXMLNode("script", parent = svgroot,
+                      attrs = list(type = "application/ecmascript",
+                                   "xlink:href" = utilsFn))
   }
 
   if (export.js == "inline") {
-    catsvg(paste('<script type="application/ecmascript">\n',
-                 paste('<![CDATA[\n',
-                       paste(utilsLines, collapse = "\n"), '\n',
-                       '  ]]>\n',
-                       sep=""),
-                 '</script>\n', sep=""), svgdev)
+    newXMLNode("script", parent = svgroot,
+               attrs = list(type = "application/ecmascript"),
+               newXMLCDataNode(paste0(c("", utilsLines, ""), collapse = "\n")))
   }
 }
 
-svgCoords <- function(export.coords, svgdev) {
+svgCoords <- function(export.coords, svgfile, svgroot) {
+  if (export.coords == "none")
+    return()
   coordsJSON <- toJSON(get("vpCoords", envir = .gridSVGEnv))
   coordsJSON <- paste("var gridSVGCoords = ", coordsJSON, ";", sep = "")
 
   if (export.coords == "file") {
-    # Kinda clunky, but we're grabbing the filename of the SVG device
-    # and appending to it
-    coordsFn <- paste(summary(svgDevFile(svgdev))$description,
-                      ".coords.js", sep="")
+    coordsFn <- paste0(svgfile, ".coords.js")
     coordsFile <- file(coordsFn, "w")
     cat(coordsJSON, "\n", file = coordsFile, sep = "")
     close(coordsFile)
-    catsvg(paste('<script type="application/ecmascript" xlink:href="',
-                 coordsFn,
-                 '"></script>\n', sep=""), svgdev)
+    newXMLNode("script", parent = svgroot,
+                      attrs = list(type = "application/ecmascript",
+                                   "xlink:href" = coordsFn))
   }
 
   if (export.coords == "inline") {
-    catsvg(paste('<script type="application/ecmascript">\n',
-                 paste('<![CDATA[\n',
-                       coordsJSON, '\n',
-                       '  ]]>\n',
-                       sep=""),
-                 '</script>\n', sep=""), svgdev)
+    newXMLNode("script", parent = svgroot,
+               attrs = list(type = "application/ecmascript"),
+               newXMLCDataNode(paste0(c("", coordsJSON, ""), collapse = "\n")))
   }
 }
 
@@ -762,19 +746,13 @@ svgScript <- function(body, href, type="application/ecmascript",
 # to be defined within user coordinates (see svgPushViewport
 # and svgPopViewport)
 
-svgDevice <- function(file="", width=200, height=200) {
+svgDevice <- function(width=200, height=200) {
   dev <- new.env(FALSE, emptyenv())
-  assign("file", file, envir=dev)
   assign("width", width, envir=dev)
   assign("height", height, envir=dev)
   assign("parent", NULL, envir=dev)
-  assign("indent", "", envir=dev)
   assign("id", 1, envir=dev)
   return(dev)
-}
-
-svgDevFile <- function(svgdev) {
-  get("file", envir=svgdev)
 }
 
 svgDevWidth <- function(svgdev) {
@@ -812,31 +790,6 @@ hasLink <- function(link) {
   ! (is.null(link) || is.na(link))
 }
 
-# SVG output
-# This guy can optionally add an <a> element around the output
-catsvg <- function(node, svgdev, link=NULL) {
-    #hasLink <- !(is.null(link) || is.na(link))
-    #if (hasLink) {
-    #    svgStartLink(link, svgdev)
-    #}
-    #cat(paste(get("indent", envir=svgdev), text, sep=""),
-    #    file=svgDevFile(svgdev))
-    #if (hasLink) {
-    #    svgEndLink(svgdev)
-    #}
-}
-
-decindent <- function(svgdev) {
-  indent <- get("indent", envir=svgdev)
-  assign("indent", substr(indent, 1, nchar(indent) - 2),
-         envir=svgdev)
-}
-
-incindent <- function(svgdev) {
-  assign("indent", paste(get("indent", envir=svgdev), "  ", sep=""),
-         envir=svgdev)
-}
-
 incID <- function(svgdev, n=1) {
   assign("id", get("id", envir=svgdev) + n, envir=svgdev)
 }
@@ -858,8 +811,6 @@ svgHeader <- function(width, height, svgdev=svgDevice()) {
                                                         ") scale(1, -1)")))
     svgDevChangeParent(rootg, svgdev)
 }
-
-svgFooter <- function(svgdev=svgDevice()) {}
 
 # SVG attributes
 svgAttrib <- function(...) {

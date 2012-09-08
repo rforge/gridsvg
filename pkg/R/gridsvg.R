@@ -42,8 +42,14 @@ gridToSVG <- function(name="Rplots.svg",
     # Convert gTree to SVG
     gridToDev(gTree, svgdev)
     svgroot <- devClose(svgdev)
+    # Adding in JS if necessary, always write coords *first*
+    # Not strictly necessary but may avoid potential issues
+    svgCoords(export.coords, name, svgroot)
+    svgJSUtils(export.js, name, svgroot)
     svgdoc <- xmlDoc(svgroot)
     doctxt <- saveXML(svgdoc, prefix = xmlPrefix())
+    # Write an HTML wrapper for this
+    htmlFile(name, svgdev@dev)
 
     # MathML fix, XML package is escaping too much, even when we tell it
     # not to. Unescape the second level of escaping
