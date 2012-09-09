@@ -10,7 +10,8 @@ gridToSVG(name = "Rplots.svg",
           export.coords = c("file", "inline", "none"),
           export.js = c("file", "inline", "none"),
           res = NULL,
-          indent = TRUE)
+          indent = TRUE,
+          xmldecl = xmlDecl())
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -45,6 +46,18 @@ gridToSVG(name = "Rplots.svg",
     Indentation makes the document more readable, but when \code{indent}
     is set to \code{FALSE}, parsing the SVG in JavaScript is easier
     because there are no empty text nodes.
+  }
+  \item{xmldecl}{
+    This parameter sets the XML declaraction that will be applied to the
+    SVG document.
+
+    By default this parameter simply declares that the document is XML
+    version 1.0, along with the character encoding that was used to
+    export the SVG document.
+
+    If \code{xmldecl} is \code{NULL}, then no XML declaration is
+    printed. This may be useful when you want only the SVG document and
+    nothing more.
   }
 }
 \details{

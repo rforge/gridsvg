@@ -8,7 +8,8 @@ gridToSVG <- function(name="Rplots.svg",
                       export.coords=c("file", "inline", "none"),
                       export.js=c("file", "inline", "none"),
                       res = NULL,
-                      indent = TRUE) {
+                      indent = TRUE,
+                      xmldecl = xmlDecl()) {
     # Saving we know how to export
     export.coords <- match.arg(export.coords)
     export.js <- match.arg(export.js)
@@ -63,7 +64,10 @@ gridToSVG <- function(name="Rplots.svg",
         doctxt <- gsub("&amp;quot;", "&quot;", doctxt)
     }
 
-    cat(xmlPrefix(), "\n", doctxt, file = name, sep = "")
+    if (is.null(xmldecl))
+        cat(doctxt, file = name)
+    else
+        cat(xmlDecl(), "\n", doctxt, file = name, sep = "")
 
     # In an on-screen device, we can be left with a blank device
     # so refresh just to ensure we can see everything. Also happens

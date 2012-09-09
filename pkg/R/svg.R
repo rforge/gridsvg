@@ -1,4 +1,4 @@
-xmlPrefix <- function() {
+xmlDecl <- function() {
   paste0('<?xml version="1.0" encoding="', localeToCharset()[1], '"?>')
 }
 

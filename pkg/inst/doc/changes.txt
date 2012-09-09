@@ -40,6 +40,10 @@ Changes from 0.9 to 1.0-0
     with hierarchical indentation, or none at all. All output occurs in
     one line in the case that the 'indent' option is 'FALSE'. (Simon)
 
+13. Making the XML declaration optional. This means that inserting SVG
+    straight into an HTML5 document is more easily done because the
+    declaration is not necessary with inline SVG. (Simon)
+
 
 Changes from 0.9-0 to 0.9-4
 ===========================
