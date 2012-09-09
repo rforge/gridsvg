@@ -1,5 +1,5 @@
 xmlDecl <- function() {
-  paste0('<?xml version="1.0" encoding="', localeToCharset()[1], '"?>')
+  paste0('<?xml version="1.0" encoding="', localeToCharset()[1], '"?>\n')
 }
 
 htmlFile <- function(filename, svgdev) {

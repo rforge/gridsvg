@@ -44,6 +44,8 @@ Changes from 0.9 to 1.0-0
     straight into an HTML5 document is more easily done because the
     declaration is not necessary with inline SVG. (Simon)
 
+14. When the filename is set to 'NULL' or '""' return the SVG document
+    as a character vector. (Simon)
 
 Changes from 0.9-0 to 0.9-4
 ===========================

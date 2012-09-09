@@ -13,6 +13,19 @@ gridToSVG <- function(name="Rplots.svg",
     # Saving we know how to export
     export.coords <- match.arg(export.coords)
     export.js <- match.arg(export.js)
+    # If we are exporting js but returning a character
+    # vector we need to save the contents inline, because
+    # we don't want to touch the disk
+    if (is.null(name) || ! nzchar(name)) {
+        if (export.coords == "file") {
+            export.coords <- "inline"
+            warning('export.coords changed from "file" to "inline"')
+        }
+        if (export.js == "file") {
+            export.js <- "inline"
+            warning('export.js changed from "file" to "inline"')
+        }
+    }
     assign("export.coords", export.coords, envir = .gridSVGEnv)
     assign("export.js", export.js, envir = .gridSVGEnv)
 
@@ -50,8 +63,6 @@ gridToSVG <- function(name="Rplots.svg",
     svgCoords(export.coords, name, svgroot)
     svgJSUtils(export.js, name, svgroot)
     doctxt <- saveXML(svgroot, indent = indent)
-    # Write an HTML wrapper for this
-    htmlFile(name, svgdev@dev)
 
     # MathML fix, XML package is escaping too much, even when we tell it
     # not to. Unescape the second level of escaping
@@ -64,11 +75,6 @@ gridToSVG <- function(name="Rplots.svg",
         doctxt <- gsub("&amp;quot;", "&quot;", doctxt)
     }
 
-    if (is.null(xmldecl))
-        cat(doctxt, file = name)
-    else
-        cat(xmlDecl(), "\n", doctxt, file = name, sep = "")
-
     # In an on-screen device, we can be left with a blank device
     # so refresh just to ensure we can see everything. Also happens
     # with devices like png and pdf so just force a refresh.
@@ -77,6 +83,19 @@ gridToSVG <- function(name="Rplots.svg",
     old.ask <- devAskNewPage(FALSE)
     on.exit(devAskNewPage(old.ask))
     grid.refresh()
+
+    # See if we need an XML declaration added
+    if (! is.null(xmldecl))
+        doctxt <- paste0(xmldecl, doctxt)
+
+    # Return SVG vector when an inadequate filename is supplied
+    if (is.null(name) || ! nzchar(name))
+        return(doctxt)
+
+    # Save SVG
+    cat(doctxt, file = name)
+    # Write an HTML wrapper for this
+    htmlFile(name, svgdev@dev)
 }
 
 old.gridToSVG <- function(name="Rplots.svg") {

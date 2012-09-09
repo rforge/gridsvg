@@ -15,7 +15,12 @@ gridToSVG(name = "Rplots.svg",
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{name}{ The name of the SVG file to produce. }
+  \item{name}{
+    The name of the SVG file to produce.
+
+    If this parameter is \code{NULL} or \code{""}, a character vector
+    containing the SVG document is returned.
+  }
   \item{export.coords}{
     If this parameter is not \code{none} a coordinates file is exported.
 
