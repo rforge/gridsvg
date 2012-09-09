@@ -6,7 +6,9 @@
 # User function
 gridToSVG <- function(name="Rplots.svg",
                       export.coords=c("file", "inline", "none"),
-                      export.js=c("file", "inline", "none")) {
+                      export.js=c("file", "inline", "none"),
+                      res = NULL,
+                      indent = TRUE) {
     # Saving we know how to export
     export.coords <- match.arg(export.coords)
     export.js <- match.arg(export.js)
@@ -22,7 +24,7 @@ gridToSVG <- function(name="Rplots.svg",
     rootvp <- current.viewport()
     roottm <- current.transform()
 
-    svgdev <- openSVGDev(name, width=par("din")[1], height=par("din")[2])
+    svgdev <- openSVGDev(name, width=par("din")[1], height=par("din")[2], res = res)
     # Create a gTree from the current page
     # NOTE that set the 'gp' slot on this top-level gTree
     # based on ROOT vp
@@ -46,8 +48,7 @@ gridToSVG <- function(name="Rplots.svg",
     # Not strictly necessary but may avoid potential issues
     svgCoords(export.coords, name, svgroot)
     svgJSUtils(export.js, name, svgroot)
-    svgdoc <- xmlDoc(svgroot)
-    doctxt <- saveXML(svgdoc, prefix = xmlPrefix())
+    doctxt <- saveXML(svgroot, indent = indent)
     # Write an HTML wrapper for this
     htmlFile(name, svgdev@dev)
 
@@ -62,7 +63,7 @@ gridToSVG <- function(name="Rplots.svg",
         doctxt <- gsub("&amp;quot;", "&quot;", doctxt)
     }
 
-    cat(doctxt, file = name)
+    cat(xmlPrefix(), "\n", doctxt, file = name, sep = "")
 
     # In an on-screen device, we can be left with a blank device
     # so refresh just to ensure we can see everything. Also happens

@@ -8,11 +8,13 @@
 \usage{
 gridToSVG(name = "Rplots.svg",
           export.coords = c("file", "inline", "none"),
-          export.js = c("file", "inline", "none"))
+          export.js = c("file", "inline", "none"),
+          res = NULL,
+          indent = TRUE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{name}{ The name of the SVG file to produce }
+  \item{name}{ The name of the SVG file to produce. }
   \item{export.coords}{
     If this parameter is not \code{none} a coordinates file is exported.
 
@@ -29,6 +31,21 @@ gridToSVG(name = "Rplots.svg",
     a file, while \code{inline} will include the contents within the SVG
     document.
   }
+  \item{res}{
+    The device resolution to print at (in DPI).
+
+    If \code{NULL}, this is automatically calculated to be the
+    resolution of the current device. Typically the PDF device would be
+    used, and this uses a resolution of 72, i.e. 72 DPI.
+  }
+  \item{indent}{
+    Determines whether the resulting SVG document will be exported with
+    indentation present.
+
+    Indentation makes the document more readable, but when \code{indent}
+    is set to \code{FALSE}, parsing the SVG in JavaScript is easier
+    because there are no empty text nodes.
+  }
 }
 \details{
   See the files in the directory gridSVG/tests for examples
@@ -36,11 +53,14 @@ gridToSVG(name = "Rplots.svg",
   for limitations.
 }
 \value{
-  None.  The side effect is to produce an SVG file of the specified
-  name, AND a very rudimentary HTML file with the SVG document embedded.
+  None. The side effect is to produce an SVG file of the specified name,
+  AND a very rudimentary HTML file with the SVG document embedded.
+
   Optionally a JavaScript file containing coordinate transformation
-  information is also exported. Optionally a JavaScript file containing
-  utility JavaScript functions is also exported.
+  information is also exported.
+
+  Optionally a JavaScript file containing utility JavaScript functions
+  is also exported.
 }
 \author{ Paul Murrell }
 \seealso{ \code{\link{grid.hyperlink}}, \code{\link{grid.animate}} }
