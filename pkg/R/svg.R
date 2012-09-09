@@ -22,7 +22,7 @@ htmlFile <- function(filename, svgdev) {
                                  width = paste0(ceiling(svgDevWidth(svgdev)), "px"),
                                  height = paste0(ceiling(svgDevHeight(svgdev)), "px")),
                     newXMLTextNode(""))
-  saveXML(obj, file = htmlfile)
+  fn <- saveXML(obj, file = htmlfile)
 }
 
 svgOpen <- function(width=200, height=200) {
