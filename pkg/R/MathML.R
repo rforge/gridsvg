@@ -1,10 +1,4 @@
 
-indentInc <- "  "
-
-incind <- function(indent) {
-    paste(indent, indentInc, sep="")
-}
-
 explicitMathVariant <- function(fontfamily, fontface) {
     currentFonts <- getSVGFonts()
     stackname <- fontStackFromFontFamily(fontfamily, currentFonts)
@@ -107,47 +101,47 @@ symbolNames <-
 # create a single MathML element.
 # This means that, if the output is a collection of several
 # elements, we wrap the whole collection in an <mrow>
-mmlJuxta <- function(e, indent, fontfamily, fontface, svgdev) {
+mmlJuxta <- function(e, fontfamily, fontface, svgdev) {
     mrow <- newXMLNode("mrow", parent = svgDevParent(svgdev))
     svgDevChangeParent(mrow, svgdev)
 
     e <- e[-1]
     lapply(e, function(x) {
-        toMML(x, indent, fontfamily, fontface, svgdev)
+        toMML(x, fontfamily, fontface, svgdev)
     })
 
     svgDevChangeParent(xmlParent(mrow), svgdev)
 }
 
-mmlBinOp <- function(e, indent, fontfamily, fontface, op, svgdev) {
+mmlBinOp <- function(e, fontfamily, fontface, op, svgdev) {
     mrow <- newXMLNode("mrow", parent = svgDevParent(svgdev))
     svgDevChangeParent(mrow, svgdev)
 
-    toMML(e[[2]], indent, fontfamily, fontface, svgdev)
+    toMML(e[[2]], fontfamily, fontface, svgdev)
     newXMLNode("mo", parent = svgDevParent(svgdev),
                newXMLTextNode(I(op)))
-    toMML(e[[3]], indent, fontfamily, fontface, svgdev)
+    toMML(e[[3]], fontfamily, fontface, svgdev)
 
     svgDevChangeParent(xmlParent(mrow), svgdev)
 }
 
-mmlParen <- function(e, indent, fontfamily, fontface, svgdev) {
+mmlParen <- function(e, fontfamily, fontface, svgdev) {
     mfenced <- newXMLNode("mfenced", parent = svgDevParent(svgdev))
     mrow <- newXMLNode("mrow", parent = mfenced)
     svgDevChangeParent(mrow, svgdev)
 
-    toMML(e[[2]], incind(indent), fontfamily, fontface, svgdev)
+    toMML(e[[2]], fontfamily, fontface, svgdev)
 
     svgDevChangeParent(xmlParent(mfenced), svgdev)
 }
 
-mmlBrace <- function(e, indent, fontfamily, fontface, svgdev) {
+mmlBrace <- function(e, fontfamily, fontface, svgdev) {
     mfenced <- newXMLNode("mfenced", parent = svgDevParent(svgdev),
                           attrs = list(open = "", close = ""))
     mrow <- newXMLNode("mrow", parent = mfenced)    
     svgDevChangeParent(mrow, svgdev)
 
-    toMML(e[[2]], incind(indent), fontfamily, fontface, svgdev)
+    toMML(e[[2]], fontfamily, fontface, svgdev)
 
     svgDevChangeParent(xmlParent(mfenced), svgdev)
 }
@@ -164,7 +158,7 @@ convertDelim <- function(delim) {
         delim
 }
 
-mmlGroup <- function(e, indent, fontfamily, fontface, svgdev) {
+mmlGroup <- function(e, fontfamily, fontface, svgdev) {
     # e[[2]] and e[[4]] are the delimiters
     if (length(e) < 4)
         stop("Invalid plotmath group()")
@@ -176,55 +170,55 @@ mmlGroup <- function(e, indent, fontfamily, fontface, svgdev) {
     mrow <- newXMLNode("mrow", parent = mfenced)    
     svgDevChangeParent(mrow, svgdev)
 
-    toMML(e[[3]], incind(indent), fontfamily, fontface, svgdev)
+    toMML(e[[3]], fontfamily, fontface, svgdev)
 
     svgDevChangeParent(xmlParent(mfenced), svgdev)
 }
 
-mmlSup <- function(e, indent, fontfamily, fontface, svgdev) {
+mmlSup <- function(e, fontfamily, fontface, svgdev) {
     msup <- newXMLNode("msup", parent = svgDevParent(svgdev))
     svgDevChangeParent(msup, svgdev)
 
-    toMML(e[[2]], incind(indent), fontfamily, fontface, svgdev)
-    toMML(e[[3]], incind(indent), fontfamily, fontface, svgdev)
+    toMML(e[[2]], fontfamily, fontface, svgdev)
+    toMML(e[[3]], fontfamily, fontface, svgdev)
 
     svgDevChangeParent(xmlParent(msup), svgdev)
 }
 
-mmlSub <- function(e, indent, fontfamily, fontface, svgdev) {
+mmlSub <- function(e, fontfamily, fontface, svgdev) {
     msub <- newXMLNode("msub", parent = svgDevParent(svgdev))
     svgDevChangeParent(msub, svgdev)
 
-    toMML(e[[2]], incind(indent), fontfamily, fontface, svgdev)
-    toMML(e[[3]], incind(indent), fontfamily, fontface, svgdev)
+    toMML(e[[2]], fontfamily, fontface, svgdev)
+    toMML(e[[3]], fontfamily, fontface, svgdev)
 
     svgDevChangeParent(xmlParent(msub), svgdev)
 }
 
-mmlSqrt <- function(e, indent, fontfamily, fontface, svgdev) {
+mmlSqrt <- function(e, fontfamily, fontface, svgdev) {
     if (length(e) > 2) {
         mroot <- newXMLNode("mroot", parent = svgDevParent(svgdev))
         svgDevChangeParent(mroot, svgdev)
 
-        toMML(e[[2]], incind(indent), fontfamily, fontface, svgdev)
-        toMML(e[[3]], incind(indent), fontfamily, fontface, svgdev)
+        toMML(e[[2]], fontfamily, fontface, svgdev)
+        toMML(e[[3]], fontfamily, fontface, svgdev)
 
         svgDevChangeParent(xmlParent(mroot), svgdev)
     } else {
         msqrt <- newXMLNode("msqrt", parent = svgDevParent(svgdev))
         svgDevChangeParent(msqrt, svgdev)
 
-        toMML(e[[2]], incind(indent), fontfamily, fontface, svgdev)
+        toMML(e[[2]], fontfamily, fontface, svgdev)
 
         svgDevChangeParent(xmlParent(msqrt), svgdev)
     }
 }
 
-mmlFont <- function(e, indent, fontfamily, fontface, svgdev) {
-    toMML(e[[2]], indent, fontfamily, fontface, svgdev)
+mmlFont <- function(e, fontfamily, fontface, svgdev) {
+    toMML(e[[2]], fontfamily, fontface, svgdev)
 }
 
-mmlStyle <- function(e, indent, fontfamily, fontface, style, svgdev) {
+mmlStyle <- function(e, fontfamily, fontface, style, svgdev) {
     displaystyle <- switch(style,
                            display="true",
                            "false")
@@ -239,36 +233,36 @@ mmlStyle <- function(e, indent, fontfamily, fontface, style, svgdev) {
                                       scriptlevel = scriptlevel))
     svgDevChangeParent(mstyle, svgdev)
 
-    toMML(e[[2]], incind(indent), fontfamily, fontface, svgdev)
+    toMML(e[[2]], fontfamily, fontface, svgdev)
 
     svgDevChangeParent(xmlParent(mstyle), svgdev)
 }
 
-mmlSymbol <- function(e, indent, fontfamily, fontface, svgdev) {
+mmlSymbol <- function(e, fontfamily, fontface, svgdev) {
     newXMLNode("mtext", parent = svgDevParent(svgdev),
                attrs = list(mathvariant =
                    explicitMathVariant(fontfamily, fontface)),
                newXMLTextNode(I(unicode[as.integer(charToRaw(e[[2]])) - 31])))
 }
 
-mmlCSL <- function(e, indent, fontfamily, fontface, svgdev) {
+mmlCSL <- function(e, fontfamily, fontface, svgdev) {
     mfenced <- newXMLNode("mfenced", parent = svgDevParent(svgdev),
                          attrs = list(open = "", close = ""))
     svgDevChangeParent(mfenced, svgdev)
 
-    sapply(e[-1], toMML, incind(indent), fontfamily, fontface, svgdev)
+    sapply(e[-1], toMML, fontfamily, fontface, svgdev)
 
     svgDevChangeParent(xmlParent(mfenced), svgdev)
 }
 
-mmlAccent <- function(e, indent, fontfamily, fontface, accent, svgdev) {
+mmlAccent <- function(e, fontfamily, fontface, accent, svgdev) {
     mover <- newXMLNode("mover", parent = svgDevParent(svgdev),
                          attrs = list(accent = "true",
                                       align = "center"))
     mrow <- newXMLNode("mrow", parent = mover)
     svgDevChangeParent(mrow, svgdev)
 
-    toMML(e[[2]], incind(indent), fontfamily, fontface, svgdev)
+    toMML(e[[2]], fontfamily, fontface, svgdev)
     newXMLNode("mo", parent = mover,
                attrs = list(stretchy = "false"),
                newXMLTextNode(I(accent)))
@@ -276,14 +270,14 @@ mmlAccent <- function(e, indent, fontfamily, fontface, accent, svgdev) {
     svgDevChangeParent(xmlParent(mover), svgdev)
 }
 
-mmlWideAccent <- function(e, indent, fontfamily, fontface, accent, svgdev) {
+mmlWideAccent <- function(e, fontfamily, fontface, accent, svgdev) {
     mover <- newXMLNode("mover", parent = svgDevParent(svgdev),
                          attrs = list(accent = "true",
                                       align = "center"))
     mrow <- newXMLNode("mrow", parent = mover)
     svgDevChangeParent(mrow, svgdev)
 
-    toMML(e[[2]], incind(indent), fontfamily, fontface, svgdev)
+    toMML(e[[2]], fontfamily, fontface, svgdev)
     newXMLNode("mo", parent = mover,
                attrs = list(stretchy = "true"),
                newXMLTextNode(I(accent)))
@@ -291,14 +285,14 @@ mmlWideAccent <- function(e, indent, fontfamily, fontface, accent, svgdev) {
     svgDevChangeParent(xmlParent(mover), svgdev)
 }
 
-mmlUnderline <- function(e, indent, fontfamily, fontface, svgdev) {
+mmlUnderline <- function(e, fontfamily, fontface, svgdev) {
     # NOTE: <mstack> and <msline> are currently not supported
     #       by Mozilla-based browsers (2011-11-21)
     munder <- newXMLNode("munder", parent = svgDevParent(svgdev))
     mrow <- newXMLNode("mrow", parent = munder)
     svgDevChangeParent(mrow, svgdev)
 
-    toMML(e[[2]], incind(indent), fontfamily, fontface, svgdev)
+    toMML(e[[2]], fontfamily, fontface, svgdev)
     newXMLNode("mo", parent = munder,
                attrs = list(stretchy = "true"),
                newXMLTextNode(I("&#x00AF;")))
@@ -306,49 +300,49 @@ mmlUnderline <- function(e, indent, fontfamily, fontface, svgdev) {
     svgDevChangeParent(xmlParent(munder), svgdev)
 }
 
-mmlSpace <- function(e, indent, fontfamily, fontface, svgdev) {
+mmlSpace <- function(e, fontfamily, fontface, svgdev) {
     mrow <- newXMLNode("mrow", parent = svgDevParent(svgdev))
     svgDevChangeParent(mrow, svgdev)
 
     if (length(e) > 2) {
-        toMML(e[[2]], incind(indent), fontfamily, fontface, svgdev)
+        toMML(e[[2]], fontfamily, fontface, svgdev)
         newXMLNode("mtext", parent = svgDevParent(svgdev),
                    attrs = list(mathvariant =
                                 explicitMathVariant(fontfamily, fontface)),
                    newXMLTextNode(I("&#x00A0;")))
-        toMML(e[[3]], incind(indent), fontfamily, fontface, svgdev)
+        toMML(e[[3]], fontfamily, fontface, svgdev)
     } else {
         newXMLNode("mtext", parent = svgDevParent(svgdev),
                    attrs = list(mathvariant =
                                 explicitMathVariant(fontfamily, fontface)),
                    newXMLTextNode(I("&#x00A0;")))
-        toMML(e[[2]], incind(indent), fontfamily, fontface, svgdev)
+        toMML(e[[2]], fontfamily, fontface, svgdev)
     }
 
     svgDevChangeParent(xmlParent(mrow), svgdev)
 }
 
-mmlPhantom <- function(e, indent, fontfamily, fontface, svgdev) {
+mmlPhantom <- function(e, fontfamily, fontface, svgdev) {
     mphantom <- newXMLNode("mphantom", parent = svgDevParent(svgdev))
     svgDevChangeParent(mphantom, svgdev)
 
-    toMML(e[[2]], incind(indent), fontfamily, fontface, svgdev)
+    toMML(e[[2]], fontfamily, fontface, svgdev)
 
     svgDevChangeParent(xmlParent(mphantom), svgdev)
 }
 
-mmlFrac <- function(e, indent, fontfamily, fontface, svgdev, lwd="medium") {
+mmlFrac <- function(e, fontfamily, fontface, svgdev, lwd="medium") {
     mfrac <- newXMLNode("mfrac", parent = svgDevParent(svgdev),
                         attrs = list(linethickness = lwd))
     svgDevChangeParent(mfrac, svgdev)
 
-    toMML(e[[2]], incind(indent), fontfamily, fontface, svgdev)
-    toMML(e[[3]], incind(indent), fontfamily, fontface, svgdev)
+    toMML(e[[2]], fontfamily, fontface, svgdev)
+    toMML(e[[3]], fontfamily, fontface, svgdev)
 
     svgDevChangeParent(xmlParent(mfrac), svgdev)
 }
 
-mmlBigOp <- function(e, indent, fontfamily, fontface, svgdev, op=NULL) {
+mmlBigOp <- function(e, fontfamily, fontface, svgdev, op=NULL) {
     mrow <- newXMLNode("mrow", parent = svgDevParent(svgdev))
 
     # When checking for is.null(op),
@@ -358,7 +352,7 @@ mmlBigOp <- function(e, indent, fontfamily, fontface, svgdev, op=NULL) {
         if (is.null(op)) {
             opmrow <- newXMLNode("mrow", parent = mrow)
             svgDevChangeParent(opmrow, svgdev)
-            toMML(e[[1]], incind(indent), fontfamily, fontface, svgdev)
+            toMML(e[[1]], fontfamily, fontface, svgdev)
             svgDevChangeParent(xmlParent(opmrow), svgdev)
             newXMLNode("mtext", parent = opmrow,
                        attrs = list(mathvariant =
@@ -370,14 +364,14 @@ mmlBigOp <- function(e, indent, fontfamily, fontface, svgdev, op=NULL) {
         }
 
         svgDevChangeParent(mrow, svgdev)
-        toMML(e[[2]], incind(indent), fontfamily, fontface, svgdev)
+        toMML(e[[2]], fontfamily, fontface, svgdev)
     } else if (length(e) < 4) {
         munder <- newXMLNode("munder", parent = mrow)
 
         if (is.null(op)) {
             opmrow <- newXMLNode("mrow", parent = munder)
             svgDevChangeParent(opmrow, svgdev)
-            toMML(e[[1]], incind(indent), fontfamily, fontface, svgdev)
+            toMML(e[[1]], fontfamily, fontface, svgdev)
             svgDevChangeParent(xmlParent(opmrow), svgdev)
             newXMLNode("mtext", parent = opmrow,
                        attrs = list(mathvariant =
@@ -389,16 +383,16 @@ mmlBigOp <- function(e, indent, fontfamily, fontface, svgdev, op=NULL) {
         }
 
         svgDevChangeParent(munder, svgdev)
-        toMML(e[[3]], incind(indent), fontfamily, fontface, svgdev)
+        toMML(e[[3]], fontfamily, fontface, svgdev)
         svgDevChangeParent(xmlParent(munder), svgdev)
-        toMML(e[[2]], incind(indent), fontfamily, fontface, svgdev)
+        toMML(e[[2]], fontfamily, fontface, svgdev)
     } else {
         munderover <- newXMLNode("munderover", parent = mrow)
 
         if (is.null(op)) {
             opmrow <- newXMLNode("mrow", parent = munderover)
             svgDevChangeParent(opmrow, svgdev)
-            toMML(e[[1]], incind(indent), fontfamily, fontface, svgdev)
+            toMML(e[[1]], fontfamily, fontface, svgdev)
             svgDevChangeParent(xmlParent(opmrow), svgdev)
             newXMLNode("mtext", parent = opmrow,
                        attrs = list(mathvariant =
@@ -410,16 +404,16 @@ mmlBigOp <- function(e, indent, fontfamily, fontface, svgdev, op=NULL) {
         }
 
         svgDevChangeParent(munderover, svgdev)
-        toMML(e[[3]], incind(indent), fontfamily, fontface, svgdev)
-        toMML(e[[4]], incind(indent), fontfamily, fontface, svgdev)
+        toMML(e[[3]], fontfamily, fontface, svgdev)
+        toMML(e[[4]], fontfamily, fontface, svgdev)
         svgDevChangeParent(xmlParent(munderover), svgdev)
-        toMML(e[[2]], incind(indent), fontfamily, fontface, svgdev)
+        toMML(e[[2]], fontfamily, fontface, svgdev)
     }
 
     svgDevChangeParent(xmlParent(mrow), svgdev)
 }
 
-mmlFun <- function(e, indent, fontfamily, fontface, svgdev) {
+mmlFun <- function(e, fontfamily, fontface, svgdev) {
     mrow <- newXMLNode("mrow", parent = svgDevParent(svgdev))
     mtext <- newXMLNode("mtext", parent = mrow,
                         attrs = list(mathvariant = explicitMathVariant(fontfamily, fontface)),
@@ -427,28 +421,28 @@ mmlFun <- function(e, indent, fontfamily, fontface, svgdev) {
     mfenced <- newXMLNode("mfenced", parent = mrow)
     svgDevChangeParent(mfenced, svgdev)
 
-    toMML(e[[2]], incind(indent), fontfamily, fontface, svgdev)
+    toMML(e[[2]], fontfamily, fontface, svgdev)
 
     svgDevChangeParent(xmlParent(mrow), svgdev)
 }
 
-toMML <- function(x, indent, fontfamily, fontface, svgdev, ...) {
+toMML <- function(x, fontfamily, fontface, svgdev, ...) {
     UseMethod("toMML")
 }
 
-toMML.numeric <- function(x, indent, fontfamily, fontface, svgdev, ...) {
+toMML.numeric <- function(x, fontfamily, fontface, svgdev, ...) {
     newXMLNode("mn", parent = svgDevParent(svgdev),
                newXMLTextNode(as.character(x)))
 }
 
-toMML.character <- function(x, indent, fontfamily, fontface, svgdev, ...) {
+toMML.character <- function(x, fontfamily, fontface, svgdev, ...) {
     newXMLNode("mtext", parent = svgDevParent(svgdev),
                attrs = list(mathvariant =
                    explicitMathVariant(fontfamily, fontface)),
                newXMLTextNode(x))
 }
 
-toMML.name <- function(x, indent, fontfamily, fontface, svgdev, ...) {
+toMML.name <- function(x, fontfamily, fontface, svgdev, ...) {
     # Convert special names
     if (as.character(x) %in% names(symbolNames))
         x <- symbolNames[as.character(x)]
@@ -460,114 +454,114 @@ toMML.name <- function(x, indent, fontfamily, fontface, svgdev, ...) {
 }
 
 # A "language" object may have class "call" or "(" or "{"
-"toMML.(" <- function(x, indent, fontfamily, fontface, svgdev, ...) {
-    toMML.call(x, indent, fontfamily, fontface, svgdev, ...)
+"toMML.(" <- function(x, fontfamily, fontface, svgdev, ...) {
+    toMML.call(x, fontfamily, fontface, svgdev, ...)
 }
 
-"toMML.{" <- function(x, indent, fontfamily, fontface, svgdev, ...) {
-    toMML.call(x, indent, fontfamily, fontface, svgdev, ...)
+"toMML.{" <- function(x, fontfamily, fontface, svgdev, ...) {
+    toMML.call(x, fontfamily, fontface, svgdev, ...)
 }
 
-funCallToMML <- function(x, indent, fontfamily, fontface, svgdev) {
+funCallToMML <- function(x, fontfamily, fontface, svgdev) {
     funName <- as.character(x[[1]])
     switch(funName,
            "+"=,
-           "/"=mmlBinOp(x, indent, fontfamily, fontface, funName, svgdev),
-           "-"=mmlBinOp(x, indent, fontfamily, fontface, "&#x2212;", svgdev),
-           "*"=mmlBinOp(x, indent, fontfamily, fontface, "&#x2062;", svgdev),
-           "%+-%"=mmlBinOp(x, indent, fontfamily, fontface, "&#x00B1;", svgdev),
-           "%/%"=mmlBinOp(x, indent, fontfamily, fontface, "&#x00F7;", svgdev),
-           "%*%"=mmlBinOp(x, indent, fontfamily, fontface, "&#x00D7;", svgdev),
-           "%.%"=mmlBinOp(x, indent, fontfamily, fontface, "&#x22C5;", svgdev),
-           "["=mmlSub(x, indent, fontfamily, fontface, svgdev),
-           "^"=mmlSup(x, indent, fontfamily, fontface, svgdev),
-           "paste"=mmlJuxta(x, indent, fontfamily, fontface, svgdev),
-           "sqrt"=mmlSqrt(x, indent, fontfamily, fontface, svgdev),
-           "("=mmlParen(x, indent, fontfamily, fontface, svgdev),
-           "{"=mmlBrace(x, indent, fontfamily, fontface, svgdev),
-           "=="=mmlBinOp(x, indent, fontfamily, fontface, "=", svgdev),
-           "!="=mmlBinOp(x, indent, fontfamily, fontface, "&#x2260;", svgdev),
-           "<"=mmlBinOp(x, indent, fontfamily, fontface, "&lt;", svgdev),
-           "<="=mmlBinOp(x, indent, fontfamily, fontface, "&#x2264;", svgdev),
-           ">"=mmlBinOp(x, indent, fontfamily, fontface, "&gt;", svgdev),
-           ">="=mmlBinOp(x, indent, fontfamily, fontface, "&#x2265;", svgdev),
-           "%~~%"=mmlBinOp(x, indent, fontfamily, fontface, "&#x2248;", svgdev),
-           "%=~%"=mmlBinOp(x, indent, fontfamily, fontface, "&#x2245;", svgdev),
-           "%==%"=mmlBinOp(x, indent, fontfamily, fontface, "&#x2261;", svgdev),
-           "%prop%"=mmlBinOp(x, indent, fontfamily, fontface, "&#x221D;", svgdev),
-           "plain"=mmlFont(x, indent, fontfamily, "plain", svgdev),
-           "bold"=mmlFont(x, indent, fontfamily, "bold", svgdev),
-           "italic"=mmlFont(x, indent, fontfamily, "italic", svgdev),
-           "bolditalic"=mmlFont(x, indent, fontfamily, "bold.italic", svgdev),
-           "symbol"=mmlSymbol(x, indent, fontfamily, fontface, svgdev),
-           "list"=mmlCSL(x, indent, fontfamily, fontface, svgdev),
-           "%subset%"=mmlBinOp(x, indent, fontfamily, fontface, "&#x2282;", svgdev),
-           "%subseteq%"=mmlBinOp(x, indent, fontfamily, fontface, "&#x2286;", svgdev),
-           "%notsubset%"=mmlBinOp(x, indent, fontfamily, fontface, "&#x2284;", svgdev),
-           "%supset%"=mmlBinOp(x, indent, fontfamily, fontface, "&#x2283;", svgdev),
-           "%supseteq%"=mmlBinOp(x, indent, fontfamily, fontface, "&#x2287;", svgdev),
-           "%notsupset%"=mmlBinOp(x, indent, fontfamily, fontface, "&#x2285;", svgdev),
-           "%in%"=mmlBinOp(x, indent, fontfamily, fontface, "&#x2208;", svgdev),
-           "%notin%"=mmlBinOp(x, indent, fontfamily, fontface, "&#x2209;", svgdev),
-           "hat"=mmlAccent(x, indent, fontfamily, fontface, "&#x005E;", svgdev),
-           "tilde"=mmlAccent(x, indent, fontfamily, fontface, "&#x007E;", svgdev),
-           "dot"=mmlAccent(x, indent, fontfamily, fontface, "&#x02D9;", svgdev),
-           "ring"=mmlAccent(x, indent, fontfamily, fontface, "&#x02DA;", svgdev),
+           "/"=mmlBinOp(x, fontfamily, fontface, funName, svgdev),
+           "-"=mmlBinOp(x, fontfamily, fontface, "&#x2212;", svgdev),
+           "*"=mmlBinOp(x, fontfamily, fontface, "&#x2062;", svgdev),
+           "%+-%"=mmlBinOp(x, fontfamily, fontface, "&#x00B1;", svgdev),
+           "%/%"=mmlBinOp(x, fontfamily, fontface, "&#x00F7;", svgdev),
+           "%*%"=mmlBinOp(x, fontfamily, fontface, "&#x00D7;", svgdev),
+           "%.%"=mmlBinOp(x, fontfamily, fontface, "&#x22C5;", svgdev),
+           "["=mmlSub(x, fontfamily, fontface, svgdev),
+           "^"=mmlSup(x, fontfamily, fontface, svgdev),
+           "paste"=mmlJuxta(x, fontfamily, fontface, svgdev),
+           "sqrt"=mmlSqrt(x, fontfamily, fontface, svgdev),
+           "("=mmlParen(x, fontfamily, fontface, svgdev),
+           "{"=mmlBrace(x, fontfamily, fontface, svgdev),
+           "=="=mmlBinOp(x, fontfamily, fontface, "=", svgdev),
+           "!="=mmlBinOp(x, fontfamily, fontface, "&#x2260;", svgdev),
+           "<"=mmlBinOp(x, fontfamily, fontface, "&lt;", svgdev),
+           "<="=mmlBinOp(x, fontfamily, fontface, "&#x2264;", svgdev),
+           ">"=mmlBinOp(x, fontfamily, fontface, "&gt;", svgdev),
+           ">="=mmlBinOp(x, fontfamily, fontface, "&#x2265;", svgdev),
+           "%~~%"=mmlBinOp(x, fontfamily, fontface, "&#x2248;", svgdev),
+           "%=~%"=mmlBinOp(x, fontfamily, fontface, "&#x2245;", svgdev),
+           "%==%"=mmlBinOp(x, fontfamily, fontface, "&#x2261;", svgdev),
+           "%prop%"=mmlBinOp(x, fontfamily, fontface, "&#x221D;", svgdev),
+           "plain"=mmlFont(x, fontfamily, "plain", svgdev),
+           "bold"=mmlFont(x, fontfamily, "bold", svgdev),
+           "italic"=mmlFont(x, fontfamily, "italic", svgdev),
+           "bolditalic"=mmlFont(x, fontfamily, "bold.italic", svgdev),
+           "symbol"=mmlSymbol(x, fontfamily, fontface, svgdev),
+           "list"=mmlCSL(x, fontfamily, fontface, svgdev),
+           "%subset%"=mmlBinOp(x, fontfamily, fontface, "&#x2282;", svgdev),
+           "%subseteq%"=mmlBinOp(x, fontfamily, fontface, "&#x2286;", svgdev),
+           "%notsubset%"=mmlBinOp(x, fontfamily, fontface, "&#x2284;", svgdev),
+           "%supset%"=mmlBinOp(x, fontfamily, fontface, "&#x2283;", svgdev),
+           "%supseteq%"=mmlBinOp(x, fontfamily, fontface, "&#x2287;", svgdev),
+           "%notsupset%"=mmlBinOp(x, fontfamily, fontface, "&#x2285;", svgdev),
+           "%in%"=mmlBinOp(x, fontfamily, fontface, "&#x2208;", svgdev),
+           "%notin%"=mmlBinOp(x, fontfamily, fontface, "&#x2209;", svgdev),
+           "hat"=mmlAccent(x, fontfamily, fontface, "&#x005E;", svgdev),
+           "tilde"=mmlAccent(x, fontfamily, fontface, "&#x007E;", svgdev),
+           "dot"=mmlAccent(x, fontfamily, fontface, "&#x02D9;", svgdev),
+           "ring"=mmlAccent(x, fontfamily, fontface, "&#x02DA;", svgdev),
            # Used "macron"
-           "bar"=mmlAccent(x, indent, fontfamily, fontface, "&#x00AF;", svgdev),
+           "bar"=mmlAccent(x, fontfamily, fontface, "&#x00AF;", svgdev),
            # FIXME:  these are just normal accents positioned as limits
-           "widehat"=mmlWideAccent(x, indent, fontfamily, fontface,
+           "widehat"=mmlWideAccent(x, fontfamily, fontface,
                                    "&#x005E;", svgdev),
-           "widetilde"=mmlWideAccent(x, indent, fontfamily, fontface,
+           "widetilde"=mmlWideAccent(x, fontfamily, fontface,
                                      "&#x007E;", svgdev),
-           "%<->%"=mmlBinOp(x, indent, fontfamily, fontface, "&#x2194;", svgdev),
-           "%->%"=mmlBinOp(x, indent, fontfamily, fontface, "&#x2192;", svgdev),
-           "%<-%"=mmlBinOp(x, indent, fontfamily, fontface, "&#x2190;", svgdev),
-           "%up%"=mmlBinOp(x, indent, fontfamily, fontface, "&#x2191;", svgdev),
-           "%down%"=mmlBinOp(x, indent, fontfamily, fontface, "&#x2193;", svgdev),
-           "%<=>%"=mmlBinOp(x, indent, fontfamily, fontface, "&#x21D4;", svgdev),
-           "%=>%"=mmlBinOp(x, indent, fontfamily, fontface, "&#x21D2;", svgdev),
-           "%<=%"=mmlBinOp(x, indent, fontfamily, fontface, "&#x21D0;", svgdev),
-           "%dblup%"=mmlBinOp(x, indent, fontfamily, fontface, "&#x21D1;", svgdev),
-           "%dbldown%"=mmlBinOp(x, indent, fontfamily, fontface, "&#x21D3;", svgdev),
-           "displaystyle"=mmlStyle(x, indent, fontfamily, fontface, "display", svgdev),
-           "textstyle"=mmlStyle(x, indent, fontfamily, fontface, "text", svgdev),
-           "scriptstyle"=mmlStyle(x, indent, fontfamily, fontface, "script", svgdev),
-           "scriptscriptstyle"=mmlStyle(x, indent, fontfamily, fontface,
+           "%<->%"=mmlBinOp(x, fontfamily, fontface, "&#x2194;", svgdev),
+           "%->%"=mmlBinOp(x, fontfamily, fontface, "&#x2192;", svgdev),
+           "%<-%"=mmlBinOp(x, fontfamily, fontface, "&#x2190;", svgdev),
+           "%up%"=mmlBinOp(x, fontfamily, fontface, "&#x2191;", svgdev),
+           "%down%"=mmlBinOp(x, fontfamily, fontface, "&#x2193;", svgdev),
+           "%<=>%"=mmlBinOp(x, fontfamily, fontface, "&#x21D4;", svgdev),
+           "%=>%"=mmlBinOp(x, fontfamily, fontface, "&#x21D2;", svgdev),
+           "%<=%"=mmlBinOp(x, fontfamily, fontface, "&#x21D0;", svgdev),
+           "%dblup%"=mmlBinOp(x, fontfamily, fontface, "&#x21D1;", svgdev),
+           "%dbldown%"=mmlBinOp(x, fontfamily, fontface, "&#x21D3;", svgdev),
+           "displaystyle"=mmlStyle(x, fontfamily, fontface, "display", svgdev),
+           "textstyle"=mmlStyle(x, fontfamily, fontface, "text", svgdev),
+           "scriptstyle"=mmlStyle(x, fontfamily, fontface, "script", svgdev),
+           "scriptscriptstyle"=mmlStyle(x, fontfamily, fontface,
                                         "scriptscript", svgdev),
-           "underline"=mmlUnderline(x, indent, fontfamily, fontface, svgdev),
-           "~"=mmlSpace(x, indent, fontfamily, fontface, svgdev),
-           "phantom"=mmlPhantom(x, indent, fontfamily, fontface, svgdev),
+           "underline"=mmlUnderline(x, fontfamily, fontface, svgdev),
+           "~"=mmlSpace(x, fontfamily, fontface, svgdev),
+           "phantom"=mmlPhantom(x, fontfamily, fontface, svgdev),
            "over"=,
-           "frac"=mmlFrac(x, indent, fontfamily, fontface, svgdev),
-           "atop"=mmlFrac(x, indent, fontfamily, fontface, lwd="0em", svgdev),
-           "sum"=mmlBigOp(x, indent, fontfamily, fontface, svgdev, "&#x2211;"),
-           "prod"=mmlBigOp(x, indent, fontfamily, fontface, svgdev, "&#x220F;"),
-           "integral"=mmlBigOp(x, indent, fontfamily, fontface, svgdev, "&#x222B;"),
-           "union"=mmlBigOp(x, indent, fontfamily, fontface, svgdev, "&#x22C3;"),
-           "intersect"=mmlBigOp(x, indent, fontfamily, fontface, svgdev, "&#x22C2;"),
-           "prod"=mmlBigOp(x, indent, fontfamily, fontface, svgdev, "&#x220F;"),
-           "lim"=mmlBigOp(x, indent, fontfamily, fontface, svgdev),
-           "min"=mmlBigOp(x, indent, fontfamily, fontface, svgdev),
-           "inf"=mmlBigOp(x, indent, fontfamily, fontface, svgdev),
-           "sup"=mmlBigOp(x, indent, fontfamily, fontface, svgdev),
-           "group"=mmlGroup(x, indent, fontfamily, fontface, svgdev),
-           "bgroup"=mmlGroup(x, indent, fontfamily, fontface, svgdev),
-           mmlFun(x, indent, fontfamily, fontface, svgdev))
+           "frac"=mmlFrac(x, fontfamily, fontface, svgdev),
+           "atop"=mmlFrac(x, fontfamily, fontface, lwd="0em", svgdev),
+           "sum"=mmlBigOp(x, fontfamily, fontface, svgdev, "&#x2211;"),
+           "prod"=mmlBigOp(x, fontfamily, fontface, svgdev, "&#x220F;"),
+           "integral"=mmlBigOp(x, fontfamily, fontface, svgdev, "&#x222B;"),
+           "union"=mmlBigOp(x, fontfamily, fontface, svgdev, "&#x22C3;"),
+           "intersect"=mmlBigOp(x, fontfamily, fontface, svgdev, "&#x22C2;"),
+           "prod"=mmlBigOp(x, fontfamily, fontface, svgdev, "&#x220F;"),
+           "lim"=mmlBigOp(x, fontfamily, fontface, svgdev),
+           "min"=mmlBigOp(x, fontfamily, fontface, svgdev),
+           "inf"=mmlBigOp(x, fontfamily, fontface, svgdev),
+           "sup"=mmlBigOp(x, fontfamily, fontface, svgdev),
+           "group"=mmlGroup(x, fontfamily, fontface, svgdev),
+           "bgroup"=mmlGroup(x, fontfamily, fontface, svgdev),
+           mmlFun(x, fontfamily, fontface, svgdev))
 }
 
 # Table of Unicode math ops at
 # http://www.w3.org/TR/MathML2/022.html
-toMML.call <- function(x, indent, fontfamily, fontface, svgdev, ...) {
+toMML.call <- function(x, fontfamily, fontface, svgdev, ...) {
     if (is.name(x[[1]])) {
-        funCallToMML(x, indent, fontfamily, fontface, svgdev)
+        funCallToMML(x, fontfamily, fontface, svgdev)
     } else {
         mrow <- newXMLNode("mrow", parent = svgDevParent(svgdev))
         svgDevChangeParent(mrow, svgdev)
-        toMML(x[[1]], incind(indent), fontfamily, fontface, svgdev)
+        toMML(x[[1]], fontfamily, fontface, svgdev)
         mfenced <- newXMLNode("mfenced", parent = mrow)
         svgDevChangeParent(mfenced, svgdev) 
-        toMML(x[[2]], incind(indent), fontfamily, fontface, svgdev)
+        toMML(x[[2]], fontfamily, fontface, svgdev)
         svgDevChangeParent(xmlParent(mrow), svgdev) 
     }
 }
@@ -581,8 +575,7 @@ expr2mml <- function(e, fontfamily, fontface, svgdev) {
     lapply(e, function(x) {
         mrow <- newXMLNode("mrow", parent = math)
         svgDevChangeParent(mrow, svgdev)
-        toMML(x, indent = "    ",
-              fontfamily = fontfamily, fontface = fontface,
+        toMML(x, fontfamily = fontfamily, fontface = fontface,
               svgdev = svgdev)
     })
 
