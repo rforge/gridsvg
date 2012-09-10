@@ -123,7 +123,7 @@ svgStartGroup <- function(id=NULL, clip=FALSE,
   has.link <- hasLink(links[id])
   if (has.link)
     svgStartLink(links[id], svgdev)
-  
+
   attrlist <- list(id = getid(id, svgdev),
                    svgAttribTxt(attributes, id),
                    svgClipAttr(id, clip),
@@ -157,7 +157,7 @@ svgEndLink <- function(svgdev=svgDevice()) {
 }
 
 svgAnimate <- function(attrib, values,
-                       begin, interp, duration, rep, revert, id=NULL, 
+                       begin, interp, duration, rep, revert, id=NULL,
                        svgdev=svgDevice()) {
   n <- if (is.null(id)) 1 else length(unique(id))
 
@@ -182,7 +182,7 @@ svgAnimateXYWH <- function(attrib, values,
                            svgdev=svgDevice()) {
   svgAnimate(attrib,
              paste(round(values, 2), collapse=";"),
-             begin, interp, duration, rep, revert, id, svgdev)  
+             begin, interp, duration, rep, revert, id, svgdev)
 }
 
 # DON'T call this with a list of length < 2!
@@ -190,7 +190,7 @@ old.lpaste <- function(alist, collapse) {
   n <- length(alist)
   if (n == 2)
     result <- paste(alist[[1]], alist[[2]])
-  else 
+  else
     result <- paste(alist[[n]], lpaste(alist[1:(n-1)], collapse))
   paste(result, collapse=collapse)
 }
@@ -216,7 +216,7 @@ svgAnimatePoints <- function(xvalues, yvalues, timeid,
                                    timeid),
                              paste, collapse=" "),
                       collapse=";"),
-               begin, interp, duration, rep, revert, id, svgdev)  
+               begin, interp, duration, rep, revert, id, svgdev)
 }
 
 svgAnimatePath <- function(xvalues, yvalues, pathid, timeid,
@@ -244,7 +244,7 @@ svgAnimatePath <- function(xvalues, yvalues, pathid, timeid,
                       paste(unlist(txt), collapse=" ")
                   }, x, y, pid)
       svgAnimate("d", paste(d, collapse=";"),
-                 begin, interp, duration, rep, revert, id, svgdev)      
+                 begin, interp, duration, rep, revert, id, svgdev)
   }
 }
 
@@ -273,7 +273,7 @@ svgAnimateTranslation <- function(xvalues, yvalues,
                       paste(round(xvalues, 2),
                             round(yvalues, 2),
                             sep=",", collapse=';'),
-                      begin, interp, duration, rep, revert, id, svgdev)  
+                      begin, interp, duration, rep, revert, id, svgdev)
 }
 
 svgAnimateScale <- function(xvalues, yvalues,
@@ -284,7 +284,7 @@ svgAnimateScale <- function(xvalues, yvalues,
                       paste(round(xvalues, 2),
                             round(yvalues, 2),
                             sep=",", collapse=';'),
-                      begin, interp, duration, rep, revert, id, svgdev)  
+                      begin, interp, duration, rep, revert, id, svgdev)
 }
 
 svgLines <- function(x, y, id=NULL, arrow = NULL,
@@ -601,17 +601,12 @@ svgTextElement <- function(text, rot, hjust, vjust,
 # baseline (just from observation).
 # The code below tries to do something rational by making use
 # of finer detail metric information for the formula
-# to mimic R's vertical justification.  
+# to mimic R's vertical justification.
 svgMathElement <- function(text, rot, hjust, vjust,
                            width, height, ascent, descent,
                            lineheight, charheight, fontheight,
                            fontfamily, fontface, style,
                            svgdev=svgDevice()) {
-    # Because there are special characters that the XML package does
-    # not escape properly (escapes the escapes), set a flag to force
-    # text substitution once the SVG doc has been created.
-    assign("plotmathUsed", TRUE, envir = .gridSVGEnv)
-
     # Determine x/y based on width/height and hjust/vjust
     if (hjust %in% c("centre", "center"))
         x <- -width/2
@@ -914,12 +909,12 @@ svgStyleAttributes <- function(svgstyle) {
             stop("All SVG style attribute values must have length 1")
         svgstyle
         #paste(names(svgstyle), "=\"", svgstyle, "\"", sep="", collapse=" ")
-    }    
+    }
 }
 
 # Specifying text justification
 textAnchor <- function(hjust) {
-  list("text-anchor" = 
+  list("text-anchor" =
        switch(hjust,
               left="start",
               center="middle",

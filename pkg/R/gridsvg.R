@@ -29,9 +29,6 @@ gridToSVG <- function(name="Rplots.svg",
     assign("export.coords", export.coords, envir = .gridSVGEnv)
     assign("export.js", export.js, envir = .gridSVGEnv)
 
-    # Don't do text substitution until necessary
-    assign("plotmathUsed", FALSE, envir = .gridSVGEnv)
-
     # Ensure we're at the top level
     upViewport(0)
     rootgp <- get.gpar()
@@ -64,17 +61,6 @@ gridToSVG <- function(name="Rplots.svg",
     svgJSUtils(export.js, name, svgroot)
     doctxt <- saveXML(svgroot, indent = indent)
 
-    # MathML fix, XML package is escaping too much, even when we tell it
-    # not to. Unescape the second level of escaping
-    if (get("plotmathUsed", envir = .gridSVGEnv)) {
-        doctxt <- gsub("&amp;(#x[0-9A-Fa-f]+;)", "&\\1", doctxt)
-        doctxt <- gsub("&amp;gt;", "&gt;", doctxt)
-        doctxt <- gsub("&amp;lt;", "&lt;", doctxt)
-        doctxt <- gsub("&amp;amp;", "&amp;", doctxt)
-        doctxt <- gsub("&amp;apos;", "&apos;", doctxt)
-        doctxt <- gsub("&amp;quot;", "&quot;", doctxt)
-    }
-
     # In an on-screen device, we can be left with a blank device
     # so refresh just to ensure we can see everything. Also happens
     # with devices like png and pdf so just force a refresh.
@@ -102,7 +88,7 @@ old.gridToSVG <- function(name="Rplots.svg") {
   svgdev <- openSVGDev(name, width=par("din")[1], height=par("din")[2])
   # Start a new page because we are going to be reproducing the
   # pushing and popping of viewports and this needs to be done
-  # from scratch 
+  # from scratch
   grid.newpage(recording=FALSE)
   # Traverse the grid display list producing
   # SVG equivalents of all grid output

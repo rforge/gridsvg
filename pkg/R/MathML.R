@@ -25,50 +25,50 @@ explicitMathVariant <- function(fontfamily, fontface) {
 }
 
 unicode <-
-c("&#x0020;", "&#x0021;", "&#x2200;", "&#x0023;", "&#x2203;", 
-"&#x0025;", "&#x0026;", "&#x220B;", "&#x0028;", "&#x0029;", "&#x2217;", 
-"&#x002B;", "&#x002C;", "&#x2212;", "&#x002E;", "&#x002F;", "&#x0030;", 
-"&#x0031;", "&#x0032;", "&#x0033;", "&#x0034;", "&#x0035;", "&#x0036;", 
-"&#x0037;", "&#x0038;", "&#x0039;", "&#x003A;", "&#x003B;", "&#x003C;", 
-"&#x003D;", "&#x003E;", "&#x003F;", "&#x2245;", "&#x0391;", "&#x0392;", 
-"&#x03A7;", "&#x0394;", "&#x0395;", "&#x03A6;", "&#x0393;", "&#x0397;", 
-"&#x0399;", "&#x03D1;", "&#x039A;", "&#x039B;", "&#x039C;", "&#x039D;", 
-"&#x039F;", "&#x03A0;", "&#x0398;", "&#x03A1;", "&#x03A3;", "&#x03A4;", 
-"&#x03A5;", "&#x03C2;", "&#x03A9;", "&#x039E;", "&#x03A8;", "&#x0396;", 
-"&#x005B;", "&#x2234;", "&#x005D;", "&#x22A5;", "&#x005F;", "&#xF8E5;", 
-"&#x03B1;", "&#x03B2;", "&#x03C7;", "&#x03B4;", "&#x03B5;", "&#x03C6;", 
-"&#x03B3;", "&#x03B7;", "&#x03B9;", "&#x03D5;", "&#x03BA;", "&#x03BB;", 
-"&#x03BC;", "&#x03BD;", "&#x03BF;", "&#x03C0;", "&#x03B8;", "&#x03C1;", 
-"&#x03C3;", "&#x03C4;", "&#x03C5;", "&#x03D6;", "&#x03C9;", "&#x03BE;", 
-"&#x03C8;", "&#x03B6;", "&#x007B;", "&#x007C;", "&#x007D;", "&#x223C;", 
-"&#x20AC;", "&#x03D2;", "&#x2032;", "&#x2264;", "&#x2044;", "&#x221E;", 
-"&#x0192;", "&#x2663;", "&#x2666;", "&#x2665;", "&#x2660;", "&#x2194;", 
-"&#x2190;", "&#x2191;", "&#x2192;", "&#x2193;", "&#x00B0;", "&#x00B1;", 
-"&#x2033;", "&#x2265;", "&#x00D7;", "&#x221D;", "&#x2202;", "&#x2022;", 
-"&#x00F7;", "&#x2260;", "&#x2261;", "&#x2248;", "&#x2026;", "&#xF8E6;", 
-"&#xF8E7;", "&#x21B5;", "&#x2135;", "&#x2111;", "&#x211C;", "&#x2118;", 
-"&#x2297;", "&#x2295;", "&#x2205;", "&#x2229;", "&#x222A;", "&#x2283;", 
-"&#x2287;", "&#x2284;", "&#x2282;", "&#x2286;", "&#x2208;", "&#x2209;", 
-"&#x2220;", "&#x2207;", "&#xF6DA;", "&#xF6D9;", "&#xF6DB;", "&#x220F;", 
-"&#x221A;", "&#x22C5;", "&#x00AC;", "&#x2227;", "&#x2228;", "&#x21D4;", 
-"&#x21D0;", "&#x21D1;", "&#x21D2;", "&#x21D3;", "&#x25CA;", "&#x2329;", 
-"&#xF8E8;", "&#xF8E9;", "&#xF8EA;", "&#x2211;", "&#xF8EB;", "&#xF8EC;", 
-"&#xF8ED;", "&#xF8EE;", "&#xF8EF;", "&#xF8F0;", "&#xF8F1;", "&#xF8F2;", 
-"&#xF8F3;", "&#xF8F4;", "&#x232A;", "&#x222B;", "&#x2320;", "&#xF8F5;", 
-"&#x2321;", "&#xF8F6;", "&#xF8F7;", "&#xF8F8;", "&#xF8F9;", "&#xF8FA;", 
-"&#xF8FB;", "&#xF8FC;", "&#xF8FD;", "&#xF8FE;")
+c("\u0020", "\u0021", "\u2200", "\u0023", "\u2203", 
+"\u0025", "\u0026", "\u220B", "\u0028", "\u0029", "\u2217", 
+"\u002B", "\u002C", "\u2212", "\u002E", "\u002F", "\u0030", 
+"\u0031", "\u0032", "\u0033", "\u0034", "\u0035", "\u0036", 
+"\u0037", "\u0038", "\u0039", "\u003A", "\u003B", "\u003C", 
+"\u003D", "\u003E", "\u003F", "\u2245", "\u0391", "\u0392", 
+"\u03A7", "\u0394", "\u0395", "\u03A6", "\u0393", "\u0397", 
+"\u0399", "\u03D1", "\u039A", "\u039B", "\u039C", "\u039D", 
+"\u039F", "\u03A0", "\u0398", "\u03A1", "\u03A3", "\u03A4", 
+"\u03A5", "\u03C2", "\u03A9", "\u039E", "\u03A8", "\u0396", 
+"\u005B", "\u2234", "\u005D", "\u22A5", "\u005F", "\uF8E5", 
+"\u03B1", "\u03B2", "\u03C7", "\u03B4", "\u03B5", "\u03C6", 
+"\u03B3", "\u03B7", "\u03B9", "\u03D5", "\u03BA", "\u03BB", 
+"\u03BC", "\u03BD", "\u03BF", "\u03C0", "\u03B8", "\u03C1", 
+"\u03C3", "\u03C4", "\u03C5", "\u03D6", "\u03C9", "\u03BE", 
+"\u03C8", "\u03B6", "\u007B", "\u007C", "\u007D", "\u223C", 
+"\u20AC", "\u03D2", "\u2032", "\u2264", "\u2044", "\u221E", 
+"\u0192", "\u2663", "\u2666", "\u2665", "\u2660", "\u2194", 
+"\u2190", "\u2191", "\u2192", "\u2193", "\u00B0", "\u00B1", 
+"\u2033", "\u2265", "\u00D7", "\u221D", "\u2202", "\u2022", 
+"\u00F7", "\u2260", "\u2261", "\u2248", "\u2026", "\uF8E6", 
+"\uF8E7", "\u21B5", "\u2135", "\u2111", "\u211C", "\u2118", 
+"\u2297", "\u2295", "\u2205", "\u2229", "\u222A", "\u2283", 
+"\u2287", "\u2284", "\u2282", "\u2286", "\u2208", "\u2209", 
+"\u2220", "\u2207", "\uF6DA", "\uF6D9", "\uF6DB", "\u220F", 
+"\u221A", "\u22C5", "\u00AC", "\u2227", "\u2228", "\u21D4", 
+"\u21D0", "\u21D1", "\u21D2", "\u21D3", "\u25CA", "\u2329", 
+"\uF8E8", "\uF8E9", "\uF8EA", "\u2211", "\uF8EB", "\uF8EC", 
+"\uF8ED", "\uF8EE", "\uF8EF", "\uF8F0", "\uF8F1", "\uF8F2", 
+"\uF8F3", "\uF8F4", "\u232A", "\u222B", "\u2320", "\uF8F5", 
+"\u2321", "\uF8F6", "\uF8F7", "\uF8F8", "\uF8F9", "\uF8FA", 
+"\uF8FB", "\uF8FC", "\uF8FD", "\uF8FE")
 
 # See ~/Research/Rstuff/SVG/PlotMath/greek.R
 greek <-
-structure(c("&#x03B1;", "&#x03B2;", "&#x03B3;", "&#x03B4;", "&#x03B5;", 
-"&#x03B6;", "&#x03B7;", "&#x03B8;", "&#x03B9;", "&#x03BA;", "&#x03BB;", 
-"&#x03BC;", "&#x03BD;", "&#x03BE;", "&#x03BF;", "&#x03C0;", "&#x03C1;", 
-"&#x03C2;", "&#x03C3;", "&#x03C4;", "&#x03C5;", "&#x03D5;", "&#x03C7;", 
-"&#x03C8;", "&#x03C9;", "&#x0391;", "&#x0392;", "&#x0393;", "&#x0394;", 
-"&#x0395;", "&#x0396;", "&#x0397;", "&#x0398;", "&#x0399;", "&#x039A;", 
-"&#x039B;", "&#x039C;", "&#x039D;", "&#x039E;", "&#x039F;", "&#x03A0;", 
-"&#x03A1;", "&#x03A2;", "&#x03A3;", "&#x03A4;", "&#x03A5;", "&#x03A6;", 
-"&#x03A7;", "&#x03A8;", "&#x03A9;"), .Names = c("alpha", "beta", 
+structure(c("\u03B1", "\u03B2", "\u03B3", "\u03B4", "\u03B5", 
+"\u03B6", "\u03B7", "\u03B8", "\u03B9", "\u03BA", "\u03BB", 
+"\u03BC", "\u03BD", "\u03BE", "\u03BF", "\u03C0", "\u03C1", 
+"\u03C2", "\u03C3", "\u03C4", "\u03C5", "\u03D5", "\u03C7", 
+"\u03C8", "\u03C9", "\u0391", "\u0392", "\u0393", "\u0394", 
+"\u0395", "\u0396", "\u0397", "\u0398", "\u0399", "\u039A", 
+"\u039B", "\u039C", "\u039D", "\u039E", "\u039F", "\u03A0", 
+"\u03A1", "\u03A2", "\u03A3", "\u03A4", "\u03A5", "\u03A6", 
+"\u03A7", "\u03A8", "\u03A9"), .Names = c("alpha", "beta", 
 "gamma", "delta", "epsilon", "zeta", "eta", "theta", "iota", 
 "kappa", "lambda", "mu", "nu", "xi", "omicron", "pi", "rho", 
 "", "sigma", "tau", "upsilon", "phi", "chi", "psi", "omega", 
@@ -78,24 +78,24 @@ structure(c("&#x03B1;", "&#x03B2;", "&#x03B3;", "&#x03B4;", "&#x03B5;",
 "Omega"))
 
 symbolNames <-
-    c("..."="&#x2026;",
-      cdots="&#x22EF;",
-      ldots="&#x2026;",
+    c("..."="\u2026",
+      cdots="\u22EF",
+      ldots="\u2026",
       greek,
-      theta1="&#x03D1;",
-      vartheta="&#x03D1;",
-      phi1="&#x03C6;",
-      sigma1="&#x03C2;",
-      varsigma="&#x03C2;",
-      omega1="&#x03D6;",
-      Upsilon1="&#x03D2;",
-      aleph="&#x05D0;",
-      infinity="&#x221E;",
-      partialdiff="&#x2202;",
-      nabla="&#x2207;",
-      degree="&#x00B0;",
-      minute="&#x2032;",
-      second="&#x2033;")
+      theta1="\u03D1",
+      vartheta="\u03D1",
+      phi1="\u03C6",
+      sigma1="\u03C2",
+      varsigma="\u03C2",
+      omega1="\u03D6",
+      Upsilon1="\u03D2",
+      aleph="\u05D0",
+      infinity="\u221E",
+      partialdiff="\u2202",
+      nabla="\u2207",
+      degree="\u00B0",
+      minute="\u2032",
+      second="\u2033")
 
 # The general idea with each of these mml*() functions is to
 # create a single MathML element.
@@ -119,7 +119,7 @@ mmlBinOp <- function(e, fontfamily, fontface, op, svgdev) {
 
     toMML(e[[2]], fontfamily, fontface, svgdev)
     newXMLNode("mo", parent = svgDevParent(svgdev),
-               newXMLTextNode(I(op)))
+               newXMLTextNode(op))
     toMML(e[[3]], fontfamily, fontface, svgdev)
 
     svgDevChangeParent(xmlParent(mrow), svgdev)
@@ -146,10 +146,10 @@ mmlBrace <- function(e, fontfamily, fontface, svgdev) {
     svgDevChangeParent(xmlParent(mfenced), svgdev)
 }
 
-delimiters <- c(lfloor="&#x230A;",
-           rfloor="&#x230B;",
-           lceil="&#x2308;",
-           rceil="&#x2309;")
+delimiters <- c(lfloor="\u230A",
+                rfloor="\u230B",
+                lceil="\u2308",
+                rceil="\u2309")
 
 convertDelim <- function(delim) {
     if (delim %in% names(delimiters))
@@ -242,7 +242,7 @@ mmlSymbol <- function(e, fontfamily, fontface, svgdev) {
     newXMLNode("mtext", parent = svgDevParent(svgdev),
                attrs = list(mathvariant =
                    explicitMathVariant(fontfamily, fontface)),
-               newXMLTextNode(I(unicode[as.integer(charToRaw(e[[2]])) - 31])))
+               newXMLTextNode(unicode[as.integer(charToRaw(e[[2]])) - 31]))
 }
 
 mmlCSL <- function(e, fontfamily, fontface, svgdev) {
@@ -265,7 +265,7 @@ mmlAccent <- function(e, fontfamily, fontface, accent, svgdev) {
     toMML(e[[2]], fontfamily, fontface, svgdev)
     newXMLNode("mo", parent = mover,
                attrs = list(stretchy = "false"),
-               newXMLTextNode(I(accent)))
+               newXMLTextNode(accent))
 
     svgDevChangeParent(xmlParent(mover), svgdev)
 }
@@ -280,7 +280,7 @@ mmlWideAccent <- function(e, fontfamily, fontface, accent, svgdev) {
     toMML(e[[2]], fontfamily, fontface, svgdev)
     newXMLNode("mo", parent = mover,
                attrs = list(stretchy = "true"),
-               newXMLTextNode(I(accent)))
+               newXMLTextNode(accent))
 
     svgDevChangeParent(xmlParent(mover), svgdev)
 }
@@ -295,7 +295,7 @@ mmlUnderline <- function(e, fontfamily, fontface, svgdev) {
     toMML(e[[2]], fontfamily, fontface, svgdev)
     newXMLNode("mo", parent = munder,
                attrs = list(stretchy = "true"),
-               newXMLTextNode(I("&#x00AF;")))
+               newXMLTextNode("\u00AF"))
 
     svgDevChangeParent(xmlParent(munder), svgdev)
 }
@@ -309,13 +309,13 @@ mmlSpace <- function(e, fontfamily, fontface, svgdev) {
         newXMLNode("mtext", parent = svgDevParent(svgdev),
                    attrs = list(mathvariant =
                                 explicitMathVariant(fontfamily, fontface)),
-                   newXMLTextNode(I("&#x00A0;")))
+                   newXMLTextNode("\u00A0"))
         toMML(e[[3]], fontfamily, fontface, svgdev)
     } else {
         newXMLNode("mtext", parent = svgDevParent(svgdev),
                    attrs = list(mathvariant =
                                 explicitMathVariant(fontfamily, fontface)),
-                   newXMLTextNode(I("&#x00A0;")))
+                   newXMLTextNode("\u00A0"))
         toMML(e[[2]], fontfamily, fontface, svgdev)
     }
 
@@ -357,10 +357,10 @@ mmlBigOp <- function(e, fontfamily, fontface, svgdev, op=NULL) {
             newXMLNode("mtext", parent = opmrow,
                        attrs = list(mathvariant =
                            explicitMathVariant(fontfamily, fontface)),
-                       newXMLTextNode(I("&#x00A0;")))
+                       newXMLTextNode("\u00A0"))
         } else {
             newXMLNode("mo", parent = mrow,
-                       newXMLTextNode(I(op)))
+                       newXMLTextNode(op))
         }
 
         svgDevChangeParent(mrow, svgdev)
@@ -376,10 +376,10 @@ mmlBigOp <- function(e, fontfamily, fontface, svgdev, op=NULL) {
             newXMLNode("mtext", parent = opmrow,
                        attrs = list(mathvariant =
                            explicitMathVariant(fontfamily, fontface)),
-                       newXMLTextNode(I("&#x00A0;")))
+                       newXMLTextNode("\u00A0"))
         } else {
             newXMLNode("mo", parent = munder,
-                       newXMLTextNode(I(op)))
+                       newXMLTextNode(op))
         }
 
         svgDevChangeParent(munder, svgdev)
@@ -397,10 +397,10 @@ mmlBigOp <- function(e, fontfamily, fontface, svgdev, op=NULL) {
             newXMLNode("mtext", parent = opmrow,
                        attrs = list(mathvariant =
                            explicitMathVariant(fontfamily, fontface)),
-                       newXMLTextNode(I("&#x00A0;")))
+                       newXMLTextNode("\u00A0"))
         } else {
             newXMLNode("mo", parent = munderover,
-                       newXMLTextNode(I(op)))
+                       newXMLTextNode(op))
         }
 
         svgDevChangeParent(munderover, svgdev)
@@ -417,7 +417,7 @@ mmlFun <- function(e, fontfamily, fontface, svgdev) {
     mrow <- newXMLNode("mrow", parent = svgDevParent(svgdev))
     mtext <- newXMLNode("mtext", parent = mrow,
                         attrs = list(mathvariant = explicitMathVariant(fontfamily, fontface)),
-                        newXMLTextNode(I(e[[1]])))
+                        newXMLTextNode(e[[1]]))
     mfenced <- newXMLNode("mfenced", parent = mrow)
     svgDevChangeParent(mfenced, svgdev)
 
@@ -467,12 +467,12 @@ funCallToMML <- function(x, fontfamily, fontface, svgdev) {
     switch(funName,
            "+"=,
            "/"=mmlBinOp(x, fontfamily, fontface, funName, svgdev),
-           "-"=mmlBinOp(x, fontfamily, fontface, "&#x2212;", svgdev),
-           "*"=mmlBinOp(x, fontfamily, fontface, "&#x2062;", svgdev),
-           "%+-%"=mmlBinOp(x, fontfamily, fontface, "&#x00B1;", svgdev),
-           "%/%"=mmlBinOp(x, fontfamily, fontface, "&#x00F7;", svgdev),
-           "%*%"=mmlBinOp(x, fontfamily, fontface, "&#x00D7;", svgdev),
-           "%.%"=mmlBinOp(x, fontfamily, fontface, "&#x22C5;", svgdev),
+           "-"=mmlBinOp(x, fontfamily, fontface, "\u2212", svgdev),
+           "*"=mmlBinOp(x, fontfamily, fontface, "\u2062", svgdev),
+           "%+-%"=mmlBinOp(x, fontfamily, fontface, "\u00B1", svgdev),
+           "%/%"=mmlBinOp(x, fontfamily, fontface, "\u00F7", svgdev),
+           "%*%"=mmlBinOp(x, fontfamily, fontface, "\u00D7", svgdev),
+           "%.%"=mmlBinOp(x, fontfamily, fontface, "\u22C5", svgdev),
            "["=mmlSub(x, fontfamily, fontface, svgdev),
            "^"=mmlSup(x, fontfamily, fontface, svgdev),
            "paste"=mmlJuxta(x, fontfamily, fontface, svgdev),
@@ -480,50 +480,50 @@ funCallToMML <- function(x, fontfamily, fontface, svgdev) {
            "("=mmlParen(x, fontfamily, fontface, svgdev),
            "{"=mmlBrace(x, fontfamily, fontface, svgdev),
            "=="=mmlBinOp(x, fontfamily, fontface, "=", svgdev),
-           "!="=mmlBinOp(x, fontfamily, fontface, "&#x2260;", svgdev),
-           "<"=mmlBinOp(x, fontfamily, fontface, "&lt;", svgdev),
-           "<="=mmlBinOp(x, fontfamily, fontface, "&#x2264;", svgdev),
-           ">"=mmlBinOp(x, fontfamily, fontface, "&gt;", svgdev),
-           ">="=mmlBinOp(x, fontfamily, fontface, "&#x2265;", svgdev),
-           "%~~%"=mmlBinOp(x, fontfamily, fontface, "&#x2248;", svgdev),
-           "%=~%"=mmlBinOp(x, fontfamily, fontface, "&#x2245;", svgdev),
-           "%==%"=mmlBinOp(x, fontfamily, fontface, "&#x2261;", svgdev),
-           "%prop%"=mmlBinOp(x, fontfamily, fontface, "&#x221D;", svgdev),
+           "!="=mmlBinOp(x, fontfamily, fontface, "\u2260", svgdev),
+           "<"=mmlBinOp(x, fontfamily, fontface, "<", svgdev),
+           "<="=mmlBinOp(x, fontfamily, fontface, "\u2264", svgdev),
+           ">"=mmlBinOp(x, fontfamily, fontface, ">", svgdev),
+           ">="=mmlBinOp(x, fontfamily, fontface, "\u2265", svgdev),
+           "%~~%"=mmlBinOp(x, fontfamily, fontface, "\u2248", svgdev),
+           "%=~%"=mmlBinOp(x, fontfamily, fontface, "\u2245", svgdev),
+           "%==%"=mmlBinOp(x, fontfamily, fontface, "\u2261", svgdev),
+           "%prop%"=mmlBinOp(x, fontfamily, fontface, "\u221D", svgdev),
            "plain"=mmlFont(x, fontfamily, "plain", svgdev),
            "bold"=mmlFont(x, fontfamily, "bold", svgdev),
            "italic"=mmlFont(x, fontfamily, "italic", svgdev),
            "bolditalic"=mmlFont(x, fontfamily, "bold.italic", svgdev),
            "symbol"=mmlSymbol(x, fontfamily, fontface, svgdev),
            "list"=mmlCSL(x, fontfamily, fontface, svgdev),
-           "%subset%"=mmlBinOp(x, fontfamily, fontface, "&#x2282;", svgdev),
-           "%subseteq%"=mmlBinOp(x, fontfamily, fontface, "&#x2286;", svgdev),
-           "%notsubset%"=mmlBinOp(x, fontfamily, fontface, "&#x2284;", svgdev),
-           "%supset%"=mmlBinOp(x, fontfamily, fontface, "&#x2283;", svgdev),
-           "%supseteq%"=mmlBinOp(x, fontfamily, fontface, "&#x2287;", svgdev),
-           "%notsupset%"=mmlBinOp(x, fontfamily, fontface, "&#x2285;", svgdev),
-           "%in%"=mmlBinOp(x, fontfamily, fontface, "&#x2208;", svgdev),
-           "%notin%"=mmlBinOp(x, fontfamily, fontface, "&#x2209;", svgdev),
-           "hat"=mmlAccent(x, fontfamily, fontface, "&#x005E;", svgdev),
-           "tilde"=mmlAccent(x, fontfamily, fontface, "&#x007E;", svgdev),
-           "dot"=mmlAccent(x, fontfamily, fontface, "&#x02D9;", svgdev),
-           "ring"=mmlAccent(x, fontfamily, fontface, "&#x02DA;", svgdev),
+           "%subset%"=mmlBinOp(x, fontfamily, fontface, "\u2282", svgdev),
+           "%subseteq%"=mmlBinOp(x, fontfamily, fontface, "\u2286", svgdev),
+           "%notsubset%"=mmlBinOp(x, fontfamily, fontface, "\u2284", svgdev),
+           "%supset%"=mmlBinOp(x, fontfamily, fontface, "\u2283", svgdev),
+           "%supseteq%"=mmlBinOp(x, fontfamily, fontface, "\u2287", svgdev),
+           "%notsupset%"=mmlBinOp(x, fontfamily, fontface, "\u2285", svgdev),
+           "%in%"=mmlBinOp(x, fontfamily, fontface, "\u2208", svgdev),
+           "%notin%"=mmlBinOp(x, fontfamily, fontface, "\u2209", svgdev),
+           "hat"=mmlAccent(x, fontfamily, fontface, "\u005E", svgdev),
+           "tilde"=mmlAccent(x, fontfamily, fontface, "\u007E", svgdev),
+           "dot"=mmlAccent(x, fontfamily, fontface, "\u02D9", svgdev),
+           "ring"=mmlAccent(x, fontfamily, fontface, "\u02DA", svgdev),
            # Used "macron"
-           "bar"=mmlAccent(x, fontfamily, fontface, "&#x00AF;", svgdev),
+           "bar"=mmlAccent(x, fontfamily, fontface, "\u00AF", svgdev),
            # FIXME:  these are just normal accents positioned as limits
            "widehat"=mmlWideAccent(x, fontfamily, fontface,
-                                   "&#x005E;", svgdev),
+                                   "\u005E", svgdev),
            "widetilde"=mmlWideAccent(x, fontfamily, fontface,
-                                     "&#x007E;", svgdev),
-           "%<->%"=mmlBinOp(x, fontfamily, fontface, "&#x2194;", svgdev),
-           "%->%"=mmlBinOp(x, fontfamily, fontface, "&#x2192;", svgdev),
-           "%<-%"=mmlBinOp(x, fontfamily, fontface, "&#x2190;", svgdev),
-           "%up%"=mmlBinOp(x, fontfamily, fontface, "&#x2191;", svgdev),
-           "%down%"=mmlBinOp(x, fontfamily, fontface, "&#x2193;", svgdev),
-           "%<=>%"=mmlBinOp(x, fontfamily, fontface, "&#x21D4;", svgdev),
-           "%=>%"=mmlBinOp(x, fontfamily, fontface, "&#x21D2;", svgdev),
-           "%<=%"=mmlBinOp(x, fontfamily, fontface, "&#x21D0;", svgdev),
-           "%dblup%"=mmlBinOp(x, fontfamily, fontface, "&#x21D1;", svgdev),
-           "%dbldown%"=mmlBinOp(x, fontfamily, fontface, "&#x21D3;", svgdev),
+                                     "\u007E", svgdev),
+           "%<->%"=mmlBinOp(x, fontfamily, fontface, "\u2194", svgdev),
+           "%->%"=mmlBinOp(x, fontfamily, fontface, "\u2192", svgdev),
+           "%<-%"=mmlBinOp(x, fontfamily, fontface, "\u2190", svgdev),
+           "%up%"=mmlBinOp(x, fontfamily, fontface, "\u2191", svgdev),
+           "%down%"=mmlBinOp(x, fontfamily, fontface, "\u2193", svgdev),
+           "%<=>%"=mmlBinOp(x, fontfamily, fontface, "\u21D4", svgdev),
+           "%=>%"=mmlBinOp(x, fontfamily, fontface, "\u21D2", svgdev),
+           "%<=%"=mmlBinOp(x, fontfamily, fontface, "\u21D0", svgdev),
+           "%dblup%"=mmlBinOp(x, fontfamily, fontface, "\u21D1", svgdev),
+           "%dbldown%"=mmlBinOp(x, fontfamily, fontface, "\u21D3", svgdev),
            "displaystyle"=mmlStyle(x, fontfamily, fontface, "display", svgdev),
            "textstyle"=mmlStyle(x, fontfamily, fontface, "text", svgdev),
            "scriptstyle"=mmlStyle(x, fontfamily, fontface, "script", svgdev),
@@ -535,12 +535,12 @@ funCallToMML <- function(x, fontfamily, fontface, svgdev) {
            "over"=,
            "frac"=mmlFrac(x, fontfamily, fontface, svgdev),
            "atop"=mmlFrac(x, fontfamily, fontface, lwd="0em", svgdev),
-           "sum"=mmlBigOp(x, fontfamily, fontface, svgdev, "&#x2211;"),
-           "prod"=mmlBigOp(x, fontfamily, fontface, svgdev, "&#x220F;"),
-           "integral"=mmlBigOp(x, fontfamily, fontface, svgdev, "&#x222B;"),
-           "union"=mmlBigOp(x, fontfamily, fontface, svgdev, "&#x22C3;"),
-           "intersect"=mmlBigOp(x, fontfamily, fontface, svgdev, "&#x22C2;"),
-           "prod"=mmlBigOp(x, fontfamily, fontface, svgdev, "&#x220F;"),
+           "sum"=mmlBigOp(x, fontfamily, fontface, svgdev, "\u2211"),
+           "prod"=mmlBigOp(x, fontfamily, fontface, svgdev, "\u220F"),
+           "integral"=mmlBigOp(x, fontfamily, fontface, svgdev, "\u222B"),
+           "union"=mmlBigOp(x, fontfamily, fontface, svgdev, "\u22C3"),
+           "intersect"=mmlBigOp(x, fontfamily, fontface, svgdev, "\u22C2"),
+           "prod"=mmlBigOp(x, fontfamily, fontface, svgdev, "\u220F"),
            "lim"=mmlBigOp(x, fontfamily, fontface, svgdev),
            "min"=mmlBigOp(x, fontfamily, fontface, svgdev),
            "inf"=mmlBigOp(x, fontfamily, fontface, svgdev),
