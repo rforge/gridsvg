@@ -1,6 +1,5 @@
 \name{gridToSVG}
 \alias{gridToSVG}
-%- Also NEED an '\alias' for EACH other topic documented here.
 \title{ Generate SVG output from a grid graphic }
 \description{
   Produces an SVG version of the current grid page.
@@ -13,13 +12,13 @@ gridToSVG(name = "Rplots.svg",
           indent = TRUE,
           xmldecl = xmlDecl())
 }
-%- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{name}{
     The name of the SVG file to produce.
 
-    If this parameter is \code{NULL} or \code{""}, a character vector
-    containing the SVG document is returned.
+    If this parameter is \code{NULL} or \code{""}, a list
+    containing the SVG document, coordinate information, and JavaScript
+    utility functions are returned.
   }
   \item{export.coords}{
     If this parameter is not \code{none} a coordinates file is exported.
@@ -71,7 +70,8 @@ gridToSVG(name = "Rplots.svg",
   for limitations.
 }
 \value{
-  None. The side effect is to produce an SVG file of the specified name,
+  When \code{name} has a valid filename, nothing is returned.
+  The side effect is to produce an SVG file of the specified name,
   AND a very rudimentary HTML file with the SVG document embedded.
 
   Optionally a JavaScript file containing coordinate transformation
@@ -79,7 +79,14 @@ gridToSVG(name = "Rplots.svg",
 
   Optionally a JavaScript file containing utility JavaScript functions
   is also exported.
+
+  When \code{name} has a filename with zero characters, a named list is
+  returned with three elements. \code{svg} is the SVG root node (and all
+  its children, see the XML package for more information on how to use
+  this. \code{coords} contains the list of coordinate information for
+  exported viewports. \code{utils} is a character vector containing
+  JavaScript code to manipulate gridSVG plots in the browser.
 }
 \author{ Paul Murrell }
 \seealso{ \code{\link{grid.hyperlink}}, \code{\link{grid.animate}} }
-\keyword{ dplot }% at least one, from doc/KEYWORDS
+\keyword{ dplot }

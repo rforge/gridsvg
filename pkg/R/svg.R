@@ -36,8 +36,6 @@ svgClose <- function(svgdev) {
 }
 
 svgJSUtils <- function(export.js, svgfile, svgroot) {
-  if (export.js == "none")
-    return()
   utilsFn <- paste0(svgfile, ".convert.js")
   utilsFile <- file(system.file("js/convert.js", package = "gridSVG"))
   utilsLines <- readLines(utilsFile)
@@ -56,11 +54,13 @@ svgJSUtils <- function(export.js, svgfile, svgroot) {
                attrs = list(type = "application/ecmascript"),
                newXMLCDataNode(paste0(c("", utilsLines, ""), collapse = "\n")))
   }
+
+  # When we don't want to write to a file we might want to retain some
+  # info, thus just return the JS quietly
+  invisible(paste(utilsLines, collapse = "\n"))
 }
 
 svgCoords <- function(export.coords, svgfile, svgroot) {
-  if (export.coords == "none")
-    return()
   coordsJSON <- toJSON(get("vpCoords", envir = .gridSVGEnv))
   coordsJSON <- paste("var gridSVGCoords = ", coordsJSON, ";", sep = "")
 
@@ -79,6 +79,10 @@ svgCoords <- function(export.coords, svgfile, svgroot) {
                attrs = list(type = "application/ecmascript"),
                newXMLCDataNode(paste0(c("", coordsJSON, ""), collapse = "\n")))
   }
+
+  # When we don't want to write to a file we might want to retain some
+  # info, thus return coords info quietly
+  invisible(get("vpCoords", envir = .gridSVGEnv))
 }
 
 svgClipPath <- function(id, vpx, vpy, vpw,

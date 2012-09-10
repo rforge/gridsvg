@@ -57,8 +57,8 @@ gridToSVG <- function(name="Rplots.svg",
     svgroot <- devClose(svgdev)
     # Adding in JS if necessary, always write coords *first*
     # Not strictly necessary but may avoid potential issues
-    svgCoords(export.coords, name, svgroot)
-    svgJSUtils(export.js, name, svgroot)
+    coords <- svgCoords(export.coords, name, svgroot)
+    jsutils <- svgJSUtils(export.js, name, svgroot)
     doctxt <- saveXML(svgroot, indent = indent)
 
     # In an on-screen device, we can be left with a blank device
@@ -76,7 +76,9 @@ gridToSVG <- function(name="Rplots.svg",
 
     # Return SVG vector when an inadequate filename is supplied
     if (is.null(name) || ! nzchar(name))
-        return(doctxt)
+        return(list(svg = xmlParse(doctxt),
+                    coords = coords,
+                    utils = jsutils))
 
     # Save SVG
     cat(doctxt, file = name)
