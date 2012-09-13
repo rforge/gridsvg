@@ -419,7 +419,29 @@ setMethod("devStartGroup", signature(device="svgDevice"),
 
 setMethod("devEndGroup", signature(device="svgDevice"),
           function(name, device) {
-              svgEndGroup(name, device@links, device@dev)
+            svgEndGroup(name, device@links, device@dev)
+          })
+
+setMethod("devStartSymbol", signature(device="svgDevice"),
+          function(pch, device) {
+            svgStartSymbol(pch, device@dev)
+          })
+
+setMethod("devPoint", signature(device="svgDevice"),
+          function(pch, device) {
+            svgPoint(pch, device@dev)
+          })
+
+setMethod("devEndSymbol", signature(device="svgDevice"),
+          function(device) {
+            svgEndSymbol(device@dev)
+          })
+
+setMethod("devUseSymbol", signature(device="svgDevice"),
+          function(point, gp, device) {
+            svgUseSymbol(point$name, point$x, point$y, point$size, point$pch,
+                         device@attrs, device@links,
+                         devParToSVGStyle(gp, device), device@dev)
           })
 
 setMethod("devClose", signature(device="svgDevice"),

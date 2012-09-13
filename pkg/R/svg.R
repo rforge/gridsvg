@@ -148,6 +148,22 @@ svgEndGroup <- function(id=NULL, links=NULL, svgdev=svgDevice()) {
   svgDevChangeParent(xmlParent(svgDevParent(svgdev)), svgdev)
 }
 
+svgStartSymbol <- function(pch, svgdev = svgDevice()) {
+  defs <- newXMLNode("defs", parent = svgDevParent(svgdev))
+  symbol <- newXMLNode("symbol", parent = defs,
+                       attrs = list(id = paste0("gridSVG.pch", pch),
+                                    viewBox = "-5 -5 10 10",
+                                    overflow = "visible"))
+  svgDevChangeParent(symbol, svgdev)
+}
+
+svgEndSymbol <- function(svgdev = svgDevice()) {
+  # Close symbol and defs
+  svgDevChangeParent(xmlParent(
+                         xmlParent(
+                             svgDevParent(svgdev))), svgdev)
+}
+
 svgStartLink <- function(href="", svgdev=svgDevice()) {
   link <- newXMLNode("a",
                      parent = svgDevParent(svgdev),
@@ -174,6 +190,40 @@ svgAnimate <- function(attrib, values,
                           values = values,
                           repeatCount = if (is.numeric(rep)) rep else if (rep) "indefinite" else 1,
                           fill = if (revert) "remove" else "freeze"))
+}
+
+# Special case just for stroke-width
+# values here is a vector of *numeric* values, not just
+# a single element character vector (e.g. 'svgAnimate')
+svgAnimatePointSW <- function(values,
+                              begin, interp, duration, rep, revert,
+                              id=NULL, svgdev=svgDevice()) {
+  n <- if (is.null(id)) 1 else length(unique(id))
+  keyTimes <- round(seq(from = 0, to = 1, length.out = length(values)), 2)
+  # Change the spline depending on whether we're increasing
+  # the "size" of the stroke width or decreasing
+  keySplines <- -diff(values)
+  keySplines <- sapply(keySplines, function(x) {
+                         if (x >= 0)
+                           "0 1" # point is growing
+                         else
+                           "1 0" # point is shrinking
+                       })
+  keySplines <- paste(keySplines, "1 1", collapse = ";")
+  keyTimes <- paste(round(keyTimes, 2), collapse = ";")
+  values <- paste0(round(values, 2), "px", collapse = ";")
+
+  newXMLNode("animate", parent = svgDevParent(svgdev),
+             attrs = list("xlink:href" = paste0("#", getid(id, svgdev, n)),
+                          attributeName = "stroke-width",
+                          begin = paste0(begin, "s"),
+                          calcMode = "spline",
+                          dur = paste0(duration, "s"),
+                          values = values,
+                          repeatCount = if (is.numeric(rep)) rep else if (rep) "indefinite" else 1,
+                          fill = if (revert) "remove" else "freeze",
+                          keyTimes = keyTimes,
+                          keySplines = keySplines))
 }
 
 # This and svgAnimateY are untested with id != NULL
@@ -660,6 +710,7 @@ svgText <- function(x, y, text, hjust="left", vjust="bottom", rot=0,
                                  round(x, 2), ", ",
                                  round(y, 2), ")")
     topattrs$`stroke-width` <- "0.1px"
+    topattrs$id <- id
 
     # Flip the y-direction again so that text is drawn "upright"
     # Do the flip in a separate <g> so that can animate the
@@ -731,6 +782,377 @@ svgScript <- function(body, href, type="application/ecmascript",
     newXMLCDataNode(paste0("\n", body, "\n"),
                     parent = script)
   }
+}
+
+# Beginning of definition of all PCH elements
+# Note that these definitions come ported from
+# R's /src/main/engine.c
+# Note in particular that radius is defined to be 0.375 * size
+# so that width is 0.75 of the specified size. Most of the time
+# this means we have a computed radius of 3.75
+
+svgUseSymbol <- function(id, x, y, size, pch,
+                         attributes=svgAttrib(), links=NULL,
+                         style=svgStyle(), svgdev=svgDevice()) {
+
+  has.link <- hasLink(links[id])
+  if (has.link)
+    svgStartLink(links[id], svgdev)
+
+  # Ensure the "dot" is only 1px wide
+  if (pch == ".")
+    size <- 1
+
+  # Ensure we refer to the correct <symbol> id
+  numpch <- if (is.character(pch))
+                as.numeric(charToRaw(pch))
+            else
+                pch
+
+  tmpattr <- list(id = id,
+                  "xlink:href" = paste0("#gridSVG.pch", numpch),
+                  x = round(x, 2),
+                  y = round(y, 2),
+                  width = round(size, 2),
+                  height = round(size, 2),
+                  svgAttribTxt(attributes, id),
+                  svgStyleAttributes(style))
+  tmpattr <- attrList(tmpattr)
+
+  # centering adjustment
+  r <- -size / 2
+  tmpattr$transform <- paste0("translate(",
+                              round(r, 2), ",",
+                              round(r, 2), ")")
+  # Need to scale the stroke width otherwise for large points
+  # we also have large strokes
+  sw <- tmpattr$`stroke-width`
+  sw <- as.numeric(gsub("px", "", sw))
+  scalef <- size / 10 # 10 is the point viewBox size
+  sw <- sw / scalef
+  tmpattr$`stroke-width` <- paste0(round(sw, 2), "px")
+
+  # For pch outside 0-25 or characters
+  if (is.character(pch) || (is.numeric(pch) && pch > 25)) {
+    # When we have a "." we have a special case
+    if ((is.character(pch) && pch == ".") ||
+        (is.numeric(pch) && pch == 46)) {
+      # Strip unnecessary attribs
+      fsind <- which(names(tmpattr) == "font-size")
+      if (length(fsind) > 0)
+        tmpattr <- tmpattr[-fsind]
+    } else {
+      # Make the s-w small so we see a stroke just barely
+      tmpattr$`stroke-width` <- "0.1px"
+      # Set the font-size, otherwise it's going to mess with our scaling.
+      # 10px so it's the size of the point definition
+      tmpattr$`font-size` <- "10px"
+    }
+  }
+
+  newXMLNode("use", parent = svgDevParent(svgdev),
+             attrs = attrList(tmpattr))
+
+  if (has.link)
+    svgEndLink(svgdev)
+}
+
+# Dispatching function, simply following a naming scheme,
+# somewhat nasty but works fine
+svgPoint <- function(pch, svgdev = svgDevice()) {
+  textpch <- FALSE
+  if (is.character(pch)) {
+    if (pch == ".")
+      fnname <- "svgPointDot"
+    else {
+      fnname <- "svgPointChar"
+      textpch <- TRUE
+    }
+  } else {
+    fnname <- paste0("svgPoint", pch)
+  }
+  do.call(fnname, if (textpch) list(pch = pch, svgdev = svgdev)
+                  else list(svgdev = svgdev))
+}
+
+# Special point, the dot
+svgPointDot <- function(svgdev = svgDevice()) {
+  newXMLNode("rect", parent = svgDevParent(svgdev),
+             attrs = list(x = -0.5, y = -0.5,
+                          width = 1, height = 1))
+}
+
+# Actual point character
+svgPointChar <- function(pch, svgdev = svgDevice()) {
+  # Transform to "flip" the text back
+  newXMLNode("text", parent = svgDevParent(svgdev),
+             attrs = list(x = 0, y = 0,
+                          fontsize = 7.5,
+                          transform = "scale(1, -1)",
+                          "text-anchor" = "middle",
+                          "baseline-shift" = "-25%"),
+             newXMLTextNode(pch))
+}
+
+# S square
+svgPoint0 <- function(svgdev = svgDevice()) {
+    newXMLNode("rect", parent = svgDevParent(svgdev),
+               attrs = list(x = -3.75, y = -3.75,
+                            width = 7.5, height = 7.5))
+}
+
+# S octahedron (circle)
+svgPoint1 <- function(svgdev = svgDevice()) {
+    newXMLNode("circle", parent = svgDevParent(svgdev),
+               attrs = list(cx = 0, cy = 0,
+                            r = 3.75))
+}
+
+# S triangle - point up
+svgPoint2 <- function(svgdev = svgDevice()) {
+    TRC0 <- sqrt(4 * pi/(3 * sqrt(3)))
+    TRC1 <- TRC0 * sqrt(3) / 2
+    TRC2 <- TRC0 / 2
+    r <- TRC0 * 3.75
+    xc <- TRC1 * 3.75
+    yc <- TRC2 * 3.75
+    linexs <- round(c(0, xc, -xc, 0), 2)
+    lineys <- round(c(r, -yc, -yc, r), 2)
+    newXMLNode("polyline", parent = svgDevParent(svgdev),
+               attrs = list(points = paste(linexs, lineys,
+                                           sep = ",", collapse = " ")))
+}
+
+# S plus
+svgPoint3 <- function(svgdev = svgDevice()) {
+    xc <- sqrt(2) * 3.75
+    yc <- sqrt(2) * 3.75
+    l1xs <- round(c(-xc, xc), 2)
+    l1ys <- c(0, 0)
+    l2xs <- c(0, 0)
+    l2ys <- round(c(-yc, yc), 2)
+    # Horizontal
+    newXMLNode("polyline", parent = svgDevParent(svgdev),
+               attrs = list(points = paste(l1xs, l1ys,
+                                           sep = ",", collapse = " ")))
+    # Vertical
+    newXMLNode("polyline", parent = svgDevParent(svgdev),
+               attrs = list(points = paste(l2xs, l2ys,
+                                           sep = ",", collapse = " ")))
+}
+
+# S times
+svgPoint4 <- function(svgdev = svgDevice()) {
+    xc <- 3.75
+    yc <- 3.75
+    l1xs <- c(-xc, xc)
+    l1ys <- c(-yc, yc)
+    l2xs <- c(-xc, xc)
+    l2ys <- c(yc, -yc)
+    # /
+    newXMLNode("polyline", parent = svgDevParent(svgdev),
+               attrs = list(points = paste(l1xs, l1ys,
+                                           sep = ",", collapse = " ")))
+    # \
+    newXMLNode("polyline", parent = svgDevParent(svgdev),
+               attrs = list(points = paste(l2xs, l2ys,
+                                           sep = ",", collapse = " ")))
+}
+
+# S diamond
+svgPoint5 <- function(svgdev = svgDevice()) {
+    xc <- sqrt(2) * 3.75
+    yc <- sqrt(2) * 3.75
+    linexs <- round(c(-xc, 0, xc, 0, -xc), 2)
+    lineys <- round(c(0, yc, 0, -yc, 0), 2)
+    newXMLNode("polygon", parent = svgDevParent(svgdev),
+               attrs = list(points = paste(linexs, lineys,
+                                           sep = ",", collapse = " ")))
+}
+
+# S triangle - point down
+svgPoint6 <- function(svgdev = svgDevice()) {
+    TRC0 <- sqrt(4 * pi/(3 * sqrt(3)))
+    TRC1 <- TRC0 * sqrt(3) / 2
+    TRC2 <- TRC0 / 2
+    r <- TRC0 * 3.75
+    xc <- TRC1 * 3.75
+    yc <- TRC2 * 3.75
+    linexs <- round(c(0, xc, -xc, 0), 2)
+    lineys <- round(c(-r, yc, yc, -r), 2)
+    newXMLNode("polyline", parent = svgDevParent(svgdev),
+               attrs = list(points = paste(linexs, lineys,
+                                           sep = ",", collapse = " ")))
+}
+
+# S square and times superimposed
+svgPoint7 <- function(svgdev = svgDevice()) {
+    svgPoint0(svgdev)
+    svgPoint4(svgdev)
+}
+
+# S plus and times superimposed
+svgPoint8 <- function(svgdev = svgDevice()) {
+    svgPoint3(svgdev)
+    svgPoint4(svgdev)
+}
+
+# S diamond and plus superimposed
+svgPoint9 <- function(svgdev = svgDevice()) {
+    svgPoint3(svgdev)
+    svgPoint5(svgdev)
+}
+
+# S hexagon (circle) and plus superimposed
+svgPoint10 <- function(svgdev = svgDevice()) {
+    newXMLNode("circle", parent = svgDevParent(svgdev),
+               attrs = list(cx = 0, cy = 0,
+                            r = 3.75))
+    l1xs <- c(-3.75, 3.75)
+    l1ys <- c(0, 0)
+    l2xs <- c(0, 0)
+    l2ys <- c(-3.75, 3.75)
+    # Horizontal
+    newXMLNode("polyline", parent = svgDevParent(svgdev),
+               attrs = list(points = paste(l1xs, l1ys,
+                                           sep = ",", collapse = " ")))
+    # Vertical
+    newXMLNode("polyline", parent = svgDevParent(svgdev),
+               attrs = list(points = paste(l2xs, l2ys,
+                                           sep = ",", collapse = " ")))
+}
+
+# S superimposed triangles
+svgPoint11 <- function(svgdev = svgDevice()) {
+    TRC0 <- sqrt(4 * pi/(3 * sqrt(3)))
+    TRC1 <- TRC0 * sqrt(3) / 2
+    TRC2 <- TRC0 / 2
+    xc <- 3.75
+    r <- TRC0 * xc
+    yc <- TRC2 * xc
+    yc <- 0.5 * (yc + r)
+    xc <- TRC1 * xc
+
+    # Pointing down
+    linexs <- round(c(0, xc, -xc, 0), 2)
+    lineys <- round(c(-r, yc, yc, -r), 2)
+    newXMLNode("polyline", parent = svgDevParent(svgdev),
+               attrs = list(points = paste(linexs, lineys,
+                                           sep = ",", collapse = " ")))
+
+    # Pointing up
+    linexs <- round(c(0, xc, -xc, 0), 2)
+    lineys <- round(c(r, -yc, -yc, r), 2)
+    newXMLNode("polyline", parent = svgDevParent(svgdev),
+               attrs = list(points = paste(linexs, lineys,
+                                           sep = ",", collapse = " ")))
+}
+
+# S square and plus superimposed
+svgPoint12 <- function(svgdev = svgDevice()) {
+    svgPoint0(svgdev)
+    l1xs <- c(-3.75, 3.75)
+    l1ys <- c(0, 0)
+    l2xs <- c(0, 0)
+    l2ys <- c(-3.75, 3.75)
+    # Horizontal
+    newXMLNode("polyline", parent = svgDevParent(svgdev),
+               attrs = list(points = paste(l1xs, l1ys,
+                                           sep = ",", collapse = " ")))
+    # Vertical
+    newXMLNode("polyline", parent = svgDevParent(svgdev),
+               attrs = list(points = paste(l2xs, l2ys,
+                                           sep = ",", collapse = " ")))
+}
+
+# S octagon (circle) and times superimposed
+svgPoint13 <- function(svgdev = svgDevice()) {
+    svgPoint1(svgdev)
+    svgPoint4(svgdev)
+}
+
+# S square and point-*down* triangle superimposed
+# Note: R source refers to this as being point-up
+svgPoint14 <- function(svgdev = svgDevice()) {
+    r <- 3.75
+    xs <- c(0, r, -r, 0)
+    ys <- c(-r, r, r, -r)
+    newXMLNode("polyline", parent = svgDevParent(svgdev),
+               attrs = list(points = paste(xs, ys, sep = ",",
+                                           collapse = " ")))
+    newXMLNode("rect", parent = svgDevParent(svgdev),
+               attrs = list(x = -r, y = -r,
+                            width = 2*r, height = 2*r))
+}
+
+# S filled square
+svgPoint15 <- function(svgdev = svgDevice()) {
+    svgPoint0(svgdev)
+}
+
+# S filled octagon (circle)
+svgPoint16 <- function(svgdev = svgDevice()) {
+    svgPoint1(svgdev)
+}
+
+# S filled point-up triangle
+svgPoint17 <- function(svgdev = svgDevice()) {
+    svgPoint2(svgdev)
+}
+
+# S filled diamond
+svgPoint18 <- function(svgdev = svgDevice()) {
+    svgPoint5(svgdev)
+}
+
+# R filled circle
+svgPoint19 <- function(svgdev = svgDevice()) {
+    svgPoint1(svgdev)
+}
+
+# R `Dot' (small circle)
+svgPoint20 <- function(svgdev = svgDevice()) {
+    newXMLNode("circle", parent = svgDevParent(svgdev),
+               attrs = list(cx = 0, cy = 0,
+                            r = 2.5))
+}
+
+# circles
+svgPoint21 <- function(svgdev = svgDevice()) {
+    svgPoint1(svgdev)
+}
+
+# squares
+svgPoint22 <- function(svgdev = svgDevice()) {
+    r <- round(sqrt(pi / 4) * 3.75, 2)
+    newXMLNode("rect", parent = svgDevParent(svgdev),
+               attrs = list(x = -r, y = -r,
+                            width = 2*r, height = 2*r))
+}
+
+# diamonds
+svgPoint23 <- function(svgdev = svgDevice()) {
+    r <- 3.75 * sqrt(pi / 4) * sqrt(2)
+    xs <- round(c(-r, 0, r, 0, -r), 2)
+    ys <- round(c(0, r, 0, -r, 0), 2)
+    newXMLNode("polygon", parent = svgDevParent(svgdev),
+               attrs = list(points = paste(xs, ys,
+                                           sep = ",", collapse = " ")))
+}
+
+# triangle (point up)
+svgPoint24 <- function(svgdev = svgDevice()) {
+    svgPoint2(svgdev)
+}
+
+# triangle (point down)
+svgPoint25 <- function(svgdev = svgDevice()) {
+    svgPoint6(svgdev)
+}
+
+# Should just be for text but not yet implemented
+svgPointHigh <- function(svgdev = svgDevice()) {
+
 }
 
 #############
@@ -879,6 +1301,10 @@ emptyStyle <- function(svgstyle) {
   length(svgstyle) == 0
 }
 
+px <- function(pxs) {
+  paste0(pxs, "px")
+}
+
 svgStyleCSS <- function(svgstyle) {
   if (emptyStyle(svgstyle)) {
     ""
@@ -912,7 +1338,6 @@ svgStyleAttributes <- function(svgstyle) {
         if (any(sapply(svgstyle, length) > 1))
             stop("All SVG style attribute values must have length 1")
         svgstyle
-        #paste(names(svgstyle), "=\"", svgstyle, "\"", sep="", collapse=" ")
     }
 }
 

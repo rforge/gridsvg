@@ -46,6 +46,10 @@ gridToSVG <- function(name="Rplots.svg",
                                count = integer(0),
                                stringsAsFactors=FALSE)
     assign("vpUsageTable", vpUsageTable, envir = .gridSVGEnv)
+    # Emptying point usage table
+    pchUsageTable <- matrix(c(0:127, logical(128)), ncol = 2,
+                            dimnames = list(NULL, c("pch", "used")))
+    assign("pchUsageTable", pchUsageTable, envir = .gridSVGEnv)
     # Because the root viewport is never entered into, we need to set
     # the root vp coordinate information before we start entering into
     # other VPs
