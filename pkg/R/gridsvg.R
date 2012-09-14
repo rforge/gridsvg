@@ -80,7 +80,7 @@ gridToSVG <- function(name="Rplots.svg",
 
     # Return SVG vector when an inadequate filename is supplied
     if (is.null(name) || ! nzchar(name))
-        return(list(svg = xmlParse(doctxt),
+        return(list(svg = svgroot,
                     coords = coords,
                     utils = jsutils))
 
