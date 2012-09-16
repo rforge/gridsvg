@@ -1,3 +1,23 @@
+viewportCreate <- function(vpname) {
+    coords <- gridSVGCoords()
+    if (is.null(coords))
+        stop("gridSVGCoords() must be initialised")
+    rootvp <- coords$ROOT
+    if (is.null(rootvp))
+        stop("the ROOT viewport must have coords info set")
+    targetvp <- coords[[vpname]]
+    if (is.null(vpname))
+        stop(paste("the viewport", sQuote(vpname), "must have coords info set, see", sQuote("gridSVGCoords")))
+    npcx <- targetvp$x / rootvp$width
+    npcy <- targetvp$y / rootvp$height
+    npcw <- targetvp$width / rootvp$width
+    npch <- targetvp$height / rootvp$height
+    viewport(x = unit(npcx, "npc"), y = unit(npcy, "npc"),
+             width = unit(npcw, "npc"), height = unit(npch, "npc"),
+             just = c("left", "bottom"), name = vpname,
+             xscale = targetvp$xscale, yscale = targetvp$yscale)
+}
+
 viewportConvertX <- function(vpname, x, from, to = "svg") {
   currCoords <- validCoordsInfo(vpname)
   offset <- viewportConvertWidth(vpname, currCoords[[vpname]]$x,

@@ -1158,11 +1158,6 @@ svgPoint25 <- function(svgdev = svgDevice()) {
     svgPoint6(svgdev)
 }
 
-# Should just be for text but not yet implemented
-svgPointHigh <- function(svgdev = svgDevice()) {
-
-}
-
 #############
 # Internal functions
 #############

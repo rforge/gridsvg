@@ -47,6 +47,7 @@ export("grid.hyperlink",
 
 export("gridSVGCoords",
        "readCoordsJS",
+       "viewportCreate",
        "viewportConvertX",
        "viewportConvertY",
        "viewportConvertWidth",
