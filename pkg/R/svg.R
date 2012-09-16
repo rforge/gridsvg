@@ -85,6 +85,14 @@ svgCoords <- function(export.coords, svgfile, svgroot) {
   invisible(get("vpCoords", envir = .gridSVGEnv))
 }
 
+svgComment <- function(comment, svgdev=svgDevice()) {
+  # If this is a multi-line comment, to ensure comments have the same
+  # indentation, prefix and suffix the comment with empty lines
+  if (length(comment) > 1)
+    comment <- paste0(c("", comment, ""), collapse="\n")
+  newXMLCommentNode(comment, parent = svgDevParent(svgdev))
+}
+
 svgClipPath <- function(id, vpx, vpy, vpw,
                         vph, svgdev=svgDevice()) {
   splitID <- strsplit(id, ".", fixed = TRUE)[[1]]

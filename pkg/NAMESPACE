@@ -36,6 +36,8 @@ export("grid.hyperlink",
        "hyperlinkGrob",
        "grid.animate",
        "animateGrob",
+       "grid.comment",
+       "commentGrob",
        "grid.garnish",
        "garnishGrob",
        "grid.script",
@@ -84,6 +86,7 @@ S3method("primToDev", "xspline")
 
 S3method("primToDev", "linked.grob")
 S3method("primToDev", "animated.grob")
+S3method("primToDev", "commented.grob")
 S3method("primToDev", "garnished.grob")
 
 S3method("link", "grob")
