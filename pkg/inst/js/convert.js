@@ -6,31 +6,39 @@
 //       is available. In other words, to use this code, load this object first.
 
 /**
- * Returns a unit's x location relative to a viewport, in absolute SVG pixels.
+ * Returns a unit's x location relative to a viewport.
  *
  * @param {string} vpname The name of the viewport that the unit is drawn within
  * @param {number} x The size of the unit, based on 'from'
  * @param {string} from The input unit type
+ * @param {string} to The output unit type (optional, defaults to "svg")
  * @returns {number} A unit in SVG pixels
  */
-var viewportConvertX = function(vpname, x, from) {
-    var offset = gridSVGCoords[vpname].x;
-    var width = viewportConvertWidth(vpname, x, from, "svg");
-    return offset + width;
+var viewportConvertX = function(vpname, x, from, to) {
+    if (!to)
+        to = "svg";
+    var offset = viewportConvertWidth(vpname, gridSVGCoords[vpname].x,
+                                      "svg", to);
+    var width = viewportConvertWidth(vpname, x, from, to);
+    return roundNumber(offset + width, 2);
 };
 
 /**
- * Returns a unit's y location relative to a viewport, in absolute SVG pixels.
+ * Returns a unit's y location relative to a viewport.
  *
  * @param {string} vpname The name of the viewport that the unit is drawn within
  * @param {number} x The size of the unit, based on 'from'
  * @param {string} from The input unit type
+ * @param {string} to The output unit type (optional, defaults to "svg")
  * @returns {number} A unit in SVG pixels
  */
-var viewportConvertY = function(vpname, x, from) {
-    var offset = gridSVGCoords[vpname].y;
-    var height = viewportConvertHeight(vpname, x, from, "svg");
-    return offset + height;
+var viewportConvertY = function(vpname, x, from, to) {
+    if (!to)
+        to = "svg";
+    var offset = viewportConvertHeight(vpname, gridSVGCoords[vpname].y,
+                                       "svg", to);
+    var height = viewportConvertHeight(vpname, x, from, to);
+    return roundNumber(offset + height, 2);
 };
 
 /**

@@ -1,14 +1,16 @@
-viewportConvertX <- function(vpname, x, from) {
+viewportConvertX <- function(vpname, x, from, to = "svg") {
   currCoords <- validCoordsInfo(vpname)
-  offset <- currCoords[[vpname]]$x
-  width <- viewportConvertWidth(vpname, x, from, "svg")
+  offset <- viewportConvertWidth(vpname, currCoords[[vpname]]$x,
+                                 "svg", to)
+  width <- viewportConvertWidth(vpname, x, from, to)
   offset + width
 }
 
-viewportConvertY <- function(vpname, x, from) {
+viewportConvertY <- function(vpname, x, from, to = "svg") {
   currCoords <- validCoordsInfo(vpname)
-  offset <- currCoords[[vpname]]$y
-  height <- viewportConvertHeight(vpname, x, from, "svg")
+  offset <- viewportConvertHeight(vpname, currCoords[[vpname]]$y,
+                                  "svg", to)
+  height <- viewportConvertHeight(vpname, x, from, to)
   offset + height
 }
 
