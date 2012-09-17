@@ -339,3 +339,28 @@ var baseViewportPath = function(vppath) {
 var escapeViewportPath = function(vppath) {
     return vppath.replace(/:/g, "\\:");
 }
+
+/**
+ * Creates a URL for a GET/POST request. Automatically inserts separators
+ * such as ?, & and =.
+ *
+ * @param {string} loc The location of the script to query.
+ * @param {Object} params An object with keys representing GET/POST params,
+ *                        and associated with their values.
+ * @returns {string} The complete URL to request with.
+ */
+var queryBuilder = function(loc, params) {
+    if (!params)
+        return loc;
+
+   var query = [];
+   for (var k in params)
+      query.push(encodeURIComponent(k) + "=" + encodeURIComponent(params[k]));
+   var queryText = query.join("&"); 
+
+   // If params is an object of length 0 we end up with ""
+   if (!queryText)
+       return loc;
+
+   return loc + "?" + queryText;
+}
