@@ -12,8 +12,8 @@
   \code{\link{gridSVGCoords}}.
 }
 \usage{
-viewportConvertX(vpname, x, from)
-viewportConvertY(vpname, x, from)
+viewportConvertX(vpname, x, from, to = "svg")
+viewportConvertY(vpname, x, from, to = "svg")
 viewportConvertWidth(vpname, x, from, to)
 viewportConvertHeight(vpname, x, from, to)
 }

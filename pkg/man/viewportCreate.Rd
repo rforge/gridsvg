@@ -30,7 +30,7 @@ viewportCreate(vpname)
 \author{
   Simon Potter
 }
-\examples{
+\examples{\dontrun{
   grid.newpage()
 
   # Pushing a new VP to draw a rect within
@@ -40,7 +40,6 @@ viewportCreate(vpname)
                         name = "testVP"))
   grid.rect()
   gridToSVG("create-test.svg")
-  dev.off()
 
   # Importing coordinate information
   gridSVGCoords(fromJSON(readCoordsJS("create-test.svg.coords.js")))
@@ -55,4 +54,4 @@ viewportCreate(vpname)
   # yscale: [0, 10]
   current.viewport()$xscale
   current.viewport()$yscale
-}
+}}
