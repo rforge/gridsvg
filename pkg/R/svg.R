@@ -538,19 +538,19 @@ svgPath <- function(x, y, rule, id=NULL,
         svgEndLink(svgdev)
 }
 
-svgRaster <- function(x, y, width, height, id=NULL,
+svgRaster <- function(x, y, width, height, datauri, id=NULL,
                       just, vjust, hjust,
                       attributes=svgAttrib(), links=NULL,
                       style=svgStyle(), svgdev=svgDevice()) {
-  # Need to extract the original grob name in order to link to the image
-  grobname <- baseGrobName(id)
-  fileloc <- paste(grobname, ".png", sep = "")
-
   has.link <- hasLink(links[id])
   if (has.link)
     svgStartLink(links[id], svgdev)
 
   attrlist <- list(id = id,
+                   transform = paste0("translate(",
+                                      round(x, 2), ",",
+                                      round(height + y, 2),
+                                      ")"),
                    svgAttribTxt(attributes, id),
                    svgStyleAttributes(style))
   attrlist <- attrList(attrlist)
@@ -562,11 +562,12 @@ svgRaster <- function(x, y, width, height, id=NULL,
                                                         round(width, 2), ", ",
                                                         round(-height, 2), ")")),
                         newXMLNode("image",
+                                   namespace = "xlink",
                                    attrs = list(x = 0,
                                                 y = 0,
                                                 width = 1,
                                                 height = 1,
-                                                "xlink:href" = fileloc,
+                                                "xlink:href" = datauri,
                                                 preserveAspectRatio = "none"))))
 
   if (has.link)

@@ -359,6 +359,7 @@ setMethod("devPath", signature(device="svgDevice"),
 setMethod("devRaster", signature(device="svgDevice"),
           function(raster, gp, device) {
             svgRaster(raster$x, raster$y, raster$width, raster$height,
+                      raster$datauri,
                       raster$name, raster$just, raster$vjust, raster$hjust,
                       listToSVGAttrib(raster$attributes), device@links,
                       devParToSVGStyle(gp, device), device@dev)

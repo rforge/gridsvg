@@ -376,6 +376,7 @@ devGrob.rastergrob <- function(x, dev) {
        y=cy(lb$y, dev),
        width=cw(dim$w, dev),
        height=ch(dim$h, dev),
+       datauri=x$datauri,
        name=x$name)
 }
 
@@ -925,7 +926,7 @@ primToDev.rastergrob <- function(x, dev) {
   heights <- rep(x$height, length.out = n) 
   
   # Generating the filename of the raster
-  fileloc <- paste(x$name, ".png", sep = "")
+  fileloc <- tempfile(x$name, fileext = "png")
 
   # Because of issues regarding interpolation, it's best just to
   # store the raster with as large a dimension as possible.
@@ -937,6 +938,10 @@ primToDev.rastergrob <- function(x, dev) {
       # the raster occupies the entireity of both the x and y dimensions.
       grid.raster(x$raster, width = 1, height = 1, interpolate = x$interpolate)
   dev.off()
+
+  # base64 encoding the PNG so we can insert the image as a data URI
+  base64Raster <- base64enc(fileloc)
+  file.remove(fileloc)
 
   # Expand the gp such that it fully defines all sub-grobs
   gp <- expandGpar(x$gp, n)
@@ -956,6 +961,7 @@ primToDev.rastergrob <- function(x, dev) {
                        default.units = x$default.units,
                        gp = gp[i], # Will be ignored, keeping anyway
                        name = subGrobName(x$name, i))
+      rg$datauri <- base64Raster
       devRaster(devGrob(rg, dev), gparToDevPars(rg$gp), dev)
   }
 
