@@ -11,6 +11,14 @@
 
 \usepackage{hyperref}
 
+\SweaveOpts{keep.source=TRUE}
+
+% Make it obvious we're dealing with R, not JS
+<<echo = FALSE>>=
+options(prompt = "R> ")
+options(continue = "R+ ")
+@
+
 \title{Working with the gridSVG Coordinate System}
 \author{Simon Potter}
 \begin{document}
@@ -19,11 +27,37 @@
 
 \section*{Introduction}
 
-When exporting \grid{} graphics as \SVG{}, all information about the
-coordinate system used by \grid{} is lost from the image as everything
-is turned into pixels. This document describes how \gridSVG{} exports
-additional information during this process to retain the coordinate
-system.
+\grid{} is an alternative graphics system to the traditional base
+graphics system provided by \R{}. Two key features of \grid{}
+distinguish it from the base graphics system, graphics objects (grobs)
+and viewports.
+
+Viewports are how \grid{} defines a drawing context and plotting
+region. All drawing occurs relative to the coordinate system within a
+viewport. Viewports have a location and dimension and set scales on
+the horizontal and vertical axes. Crucially, they also have a name so
+we know how to refer to them.
+
+Graphics objects store information necessary to describe how a
+particular object is to be drawn. For example, a \grid{}
+\code{circleGrob} contains the information used to describe a circle,
+in particular its location and its radius. As with viewports, graphics
+objects also have names.
+
+The task that \gridSVG{} performs is to translate viewports and
+graphics objects into \SVG{} equivalents. In particular, the exported
+\SVG{} image retains the naming information on viewports and graphics
+objects. The advantage of this is we can still refer to the same
+information in \grid{} and in \SVG{}. In addition, we are able to
+annotate \grid{} grobs to take advantage of \SVG{} features such as
+hyperlinking and animation.
+
+\section*{The \gridSVG{} Coordinate System}
+
+When exporting \grid{} graphics as \SVG{}, instead of positioning
+within a viewport, all drawing occurs within a single pixel-based
+coordinate system. This document describes how \gridSVG{} exports
+additional information during this process to retain the original.
 
 To demonstrate this, we will show how to add points to an exported
 plot, both from within \R{} and also, less permanently, within a \JS{}
@@ -62,11 +96,27 @@ means that in our \SVG{} file, none of the axis scales exist, and the
 locations of points are no longer native coordinates, but absolutely
 positioned pixels.
 
-Recent changes in \gridSVG{} have enabled us to retain this
+
+<<showPointsGrob, echo = FALSE>>=
+svgdoc <- xmlParse("pointsPlot.svg")
+pointsGroup <- getNodeSet(svgdoc,
+                          "//svg:g[@id='datapoints']",
+                          c(svg="http://www.w3.org/2000/svg"))[[1]]
+cat(saveXML(pointsGroup))
+@
+
+The previous \SVG{} fragment shows what \gridSVG{} has translated the
+points to. Note that the locations (\code{x} and \code{y}) and
+dimensions (\code{width} and \code{height}) of each of the points have
+been translated into absolute locations in \SVG{}. They no longer
+relate to the axis scales in their viewport, instead they are \SVG{}
+pixels.
+
+Recent changes in \gridSVG{} have enabled us to keep viewport
 information by exporting viewport metadata in the form of
-\textsf{JSON}. This enables us to be able to retain viewport locations
-and scales so that we can now transform pixel locations to native
-coordinates, and vice versa.
+\textsf{JSON}, a structured data format. This enables us to be able
+to retain viewport locations and scales so that we can now transform
+pixel locations to native coordinates, and vice versa.
 
 The following fragment shows the coordinates file that is exported by
 \gridSVG{}. It is exported in the form of a \JS{} statement that
@@ -78,10 +128,13 @@ jsondata <- paste0(jsondata, collapse = "\n")
 cat(jsondata, "\n")
 @
 
-This shows all of the information available to \gridSVG{}, which
-includes the viewport location and dimensions in terms of \SVG{}
-pixels. Also included are the axis scales and how many pixels
-\gridSVG{} thought an inch was as it was writing out the \SVG{} file.
+This shows all of the information available to \gridSVG{}. This \JS{}
+object contains a list of viewport names, with each viewport name
+associated with its metadata. This metadata includes the viewport
+location and dimensions in terms of \SVG{} pixels. Also included are
+the axis scales, along with the resolution that the viewport was
+exported at. The resolution simply represents the number of pixels
+that span an inch.
 
 \section*{Browser-based Modification}
 
@@ -103,7 +156,7 @@ necessary, if we know the name of the viewport, we can find out which
 viewport path it belonged to by calling \code{grobViewport()}.
 
 \begin{verbatim}
->>> grobViewport("datapoints");
+JS> grobViewport("datapoints");
 "panelvp.1"
 \end{verbatim}
 
@@ -115,7 +168,7 @@ R, or whatever \grid{} assigned it in the case that a name was
 unspecified.
 
 \begin{verbatim}
->>> baseViewportPath("panelvp.1");
+JS> baseViewportPath("panelvp.1");
 "panelvp"
 \end{verbatim}
 
@@ -149,9 +202,9 @@ where the coordinates $(3, 14)$ are in the main panel by running the
 following code:
 
 \begin{verbatim}
->>> viewportConvertX("panelvp", 3, "native");
+JS> viewportConvertX("panelvp", 3, "native");
 110.45
->>> viewportConvertY("panelvp", 14, "native");
+JS> viewportConvertY("panelvp", 14, "native");
 283.1
 \end{verbatim}
 
@@ -188,10 +241,11 @@ panel.appendChild(c);
 
 When running this code in the browser we see the new point. More
 complex demonstrations and usage of \gridSVG{} utility functions are
-possible, but are outside of the scope of this document. However, a
-\JS{} library of particular significance that can assist greatly in
+possible, and will be demonstrated in \textbf{Section XXXXXX}. A \JS{}
+library of particular significance that can assist greatly in
 manipulating \SVG{} images in the browser is
-\href{http://d3js.org/}{\textsf{d3.js}}.
+\href{http://d3js.org/}{\textsf{d3.js}}. \textsf{d3.js} will feature
+prominently in our more complex example.
 
 All changes to an \SVG{} image via \JS{} are lost when the image is
 reloaded. To modify the image programmatically while also saving the
@@ -201,14 +255,11 @@ state we need to use a tool other than \JS{}.
 
 In order to reproduce the effect of the \JS{} example earlier, we will
 be making use of the \textsf{XML} package in order to modify our
-\SVG{} image. The first step is to load the required packages:
+\SVG{} image. As \gridSVG{} automatically loads the \textsf{XML}
+package, all of the functionality from the \textsf{XML} package is
+readily available to us.
 
-<<>>=
-library(gridSVG)
-library(XML)
-@
-
-We then need to parse the image, so that it is represented as a
+We first need to parse the image, so that it is represented as a
 document within \R{}.
 
 <<parseSVG>>=
@@ -275,7 +326,7 @@ representing the viewport group.
 The only thing left to do is write out the new \textsf{XML} file with
 the point added.
 
-<<saveXML>>=
+<<saveXML, results = hide>>=
 # Saving a new file for the modified image
 saveXML(svgdoc, file = "newPointsPlot.svg")
 @
@@ -285,5 +336,10 @@ loaded into the browser shows the new point. The appearance of the
 plot should be identical to the modifications we made using \JS{},
 except these modifications are permanent and are able to be
 distributed to others.
+
+An advantage of being able to modify the image, or even to generate
+the image immediately is that it opens up the possibility of serving
+dynamic \SVG{} images over the web. Such an example is demonstrated in
+\textbf{Section XXXXX} using the \textsf{Rook} package.
 
 \end{document}
