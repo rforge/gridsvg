@@ -276,6 +276,11 @@ devParToSVGStyle <- function(gp, dev) {
                 gp$lty <- devLtyToSVG(gp$lty, 1, dev)
             }
         }
+        # Font is an alias for fontface, set to fontface
+        if ("font" %in% names(gp)) {
+            gp$fontface <- gp$font
+            gp$font <- NULL
+        }
         # Split fontface into fontweight and fontstyle
         if ("fontface" %in% names(gp)) {
             svgFont <- devFontFaceToSVG(gp$fontface)

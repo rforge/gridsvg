@@ -70,6 +70,11 @@ S3method("grobToDev", "recordedGrob")
 # S3method("grobToDev", "linked.grob")
 S3method("grobToDev", "script.grob")
 
+# gtable fixes
+S3method("grobToDev", "gtable")
+S3method("grobToDev", "gTableChild")
+S3method("grobToDev", "gTableParent")
+
 S3method("primToDev", "grob")
 S3method("primToDev", "gTree")
 S3method("primToDev", "move.to")
