@@ -1,15 +1,15 @@
-grid.comment <- function(path, comment) {
-    grid.set(path, commentGrob(grid.get(path), comment), redraw = FALSE)
+grid.comment <- function(name, comment, vp = NULL) {
+    grid.set(name, commentGrob(name, comment, vp), redraw = FALSE)
 }
 
-commentGrob <- function(grob, comment) {
-    grob$comment <- comment
-    cl <- class(grob)
-    class(grob) <- unique(c("commented.grob", cl))
-    grob
+commentGrob <- function(name, comment, vp = NULL) {
+    ng <- nullGrob(name = name, vp = vp)
+    ng$comment <- comment
+    cl <- class(ng)
+    class(ng) <- unique(c("comment.grob", cl))
+    ng
 }
 
-primToDev.commented.grob <- function(x, dev) {
+primToDev.comment.grob <- function(x, dev) {
     svgComment(x$comment, dev@dev)
-    NextMethod()
 }

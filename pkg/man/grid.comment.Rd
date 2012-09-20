@@ -1,28 +1,30 @@
 \name{grid.comment}
 \alias{grid.comment}
 \alias{commentGrob}
-\title{ Annotate a grid grob with a comment }
+\title{ Create a grid grob representing a comment }
 \description{
-  Creates a \code{commented.grob} object which is a normal grid grob,
-  with a comment attached. Useful in conjunction with \code{gridToSVG},
-  to produce an SVG document with comments preceding graphical elements.
+  Creates a \code{comment.grob} object which is a grid
+  \code{\link{nullGrob}}, with a comment attached. Useful in conjunction
+  with \code{gridToSVG}, to produce an SVG document with comments
+  inserted at the point where the grob is \dQuote{drawn}.
 }
 \synopsis{
-grid.comment(path, comment)
-commentGrob(grob, comment)
+grid.comment(name, comment, vp = NULL)
+commentGrob(name, comment, vp = NULL)
 }
 \usage{
-grid.comment(path, comment)
+grid.comment(name, comment, vp = NULL)
 }
 \arguments{
-  \item{path}{ A grob path specifying a drawn grob. }
+  \item{name}{ A character identifier. }
   \item{comment}{
-    A character vector used to annotate the grob. If this has a length
+    A character vector used to write out a comment. If this has a length
     greater than one, each element is assumed to be a line.
   }
+  \item{vp}{ The viewport to which the grob belongs. }
 }
 \value{
-  A \code{commented.grob} object.
+  A \code{comment.grob} object.
 }
 \author{ Simon Potter }
 \seealso{ \code{\link{gridToSVG}} }
