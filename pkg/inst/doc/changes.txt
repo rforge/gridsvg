@@ -53,13 +53,19 @@ Changes from 0.9 to 1.0-0
 16. Reimplement 'pointGrob's as SVG '<symbol>'s, referenced by '<use>'
     elements. Many more 'pch's are now animatable and drawable. (Simon)
 
-17. grobs can now be prepended with comments when exported to SVG. (Simon)
+17. Added "commentGrob" which writes comments when exported to SVG. (Simon)
 
 18. Use data URIs to embed images inline in SVG (for rasterGrobs). Allows
     us to truly create standalone SVG files, rather than SVG & a lot of
     PNGs. Lifted C code from the 'markdown' package (permissive licence)
     to do the job. Just keeping a subset of the C code ('markdown' does a
     lot of cool stuff that we don't need). (Simon)
+
+19. Bug-fix for "gpar()"s, support "font" as an alias for "fontface". In
+    particular it broke on a couple of "ggplot2" plots. (Simon)
+
+20. Adding in support for "gtable" grobs as "ggplot2" uses them. Requires
+    borrowing code from "gtable" to keep package checker happy. (Simon)
 
 
 Changes from 0.9-0 to 0.9-4

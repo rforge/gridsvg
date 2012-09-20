@@ -1,5 +1,5 @@
 grid.comment <- function(name, comment, vp = NULL) {
-    grid.set(name, commentGrob(name, comment, vp), redraw = FALSE)
+    grid.draw(commentGrob(name, comment, vp))
 }
 
 commentGrob <- function(name, comment, vp = NULL) {
