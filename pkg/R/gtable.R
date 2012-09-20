@@ -21,13 +21,13 @@ grobToDev.gTableParent <- function(x, dev) {
 gTableGrob <- function(x) {
   if (length(x$grobs) == 0) return(invisible())
 
-  children_vps <- mapply(gtable:::child_vp,
-    vp_name = gtable:::vpname(x$layout),
+  children_vps <- mapply(child_vp,
+    vp_name = vpname(x$layout),
     t = x$layout$t, r = x$layout$r, b = x$layout$b, l = x$layout$l,
     clip = x$layout$clip,
     SIMPLIFY = FALSE)
 
-  x$grobs <- mapply(gtable:::wrap_gtableChild, x$grobs, children_vps,
+  x$grobs <- mapply(wrap_gtableChild, x$grobs, children_vps,
     SIMPLIFY = FALSE)
 
   if (inherits(x, "gTableChild")) {
@@ -35,12 +35,12 @@ gTableGrob <- function(x) {
       cl = c("gTableChild", "gTableParent"),
       vp = x$vp,
       wrapvp = x$wrapvp,
-      layoutvp = viewport(layout = gtable:::gtable_layout(x), name = x$name))
+      layoutvp = viewport(layout = gtable_layout(x), name = x$name))
   } else {
     gt <- gTree(children = do.call("gList", x$grobs[order(x$layout$z)]),
       cl = "gTableParent",
       vp = x$vp,
-      layoutvp = viewport(layout = gtable:::gtable_layout(x), name = x$name))
+      layoutvp = viewport(layout = gtable_layout(x), name = x$name))
   }
 
   gt
@@ -48,4 +48,33 @@ gTableGrob <- function(x) {
 
 grobToDev.gtable <- function(x, dev) {
   grobToDev(gTableGrob(x), dev)
+}
+
+
+# Functions borrowed from 'gtable' to keep the package checker happy.
+gtable_layout <- function(x) {
+  # Commenting out because we won't be here if it's not a gtable
+  # stopifnot(is.gtable(x))
+
+  grid.layout(
+    nrow = nrow(x), heights = x$heights,
+    ncol = ncol(x), widths = x$widths,
+    respect = x$respect
+  )
+}
+
+vpname <- function(row) {
+  paste(row$name, ".", row$t, "-", row$r, "-", row$b, "-", row$l, sep = "")
+}
+
+child_vp <- function(vp_name, t, r, b, l, clip) {
+  viewport(name = vp_name, layout.pos.row = t:b,
+           layout.pos.col = l:r, clip = clip)
+}
+
+wrap_gtableChild <- function(grob, vp) {
+  grob$wrapvp <- vp
+  grob$name <- vp$name
+  class(grob) <- c("gTableChild", class(grob))
+  grob
 }

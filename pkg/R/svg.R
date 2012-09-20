@@ -95,12 +95,7 @@ svgComment <- function(comment, svgdev=svgDevice()) {
 
 svgClipPath <- function(id, vpx, vpy, vpw,
                         vph, svgdev=svgDevice()) {
-  splitID <- strsplit(id, ".", fixed = TRUE)[[1]]
-  usageNumber <- as.numeric(tail(splitID, 1))
-  if (usageNumber > 1)
-    return()
-
-  clipPathID <- paste(baseGrobName(id), "clipPath", sep=".")
+  clipPathID <- paste(id, "clipPath", sep=".")
   newXMLNode("defs", parent = svgDevParent(svgdev),
              newXMLNode("clipPath",
                         attrs = list(id = clipPathID),
@@ -115,7 +110,7 @@ svgClipPath <- function(id, vpx, vpy, vpw,
 
 svgClipAttr <- function(id, clip) {
   if (clip)
-    list("clip-path" = paste0("url(#", baseGrobName(id), ".clipPath)"))
+    list("clip-path" = paste0("url(#", id, ".clipPath)"))
   else
     list()
 }
@@ -127,7 +122,7 @@ svgStartGroup <- function(id=NULL, clip=FALSE,
   # we will have coordinate information, otherwise don't bother.
   if (! is.null(coords)) {
     currVpCoords <- get("vpCoords", envir = .gridSVGEnv)
-    currId <- baseGrobName(getid(id, svgdev))
+    currId <- getid(id, svgdev)
     currVpCoords[[currId]] <- coords
     assign("vpCoords", currVpCoords, envir = .gridSVGEnv)
   }

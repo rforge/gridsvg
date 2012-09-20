@@ -161,23 +161,12 @@ JS> grobViewport("datapoints");
 \end{verbatim}
 
 We see that the viewport name is not exactly what we chose in \R{},
-but suffixed with a numeric index. To drop the suffix, we can call
-\code{baseViewportPath()} to get the original name of the viewport
-path. This will be identical to the viewport name that we assigned in
-R, or whatever \grid{} assigned it in the case that a name was
-unspecified.
-
-\begin{verbatim}
-JS> baseViewportPath("panelvp.1");
-"panelvp"
-\end{verbatim}
-
-Now that we can query the viewport name, we know which viewport to
-draw into and the \SVG{} element that we can add elements to.
-However, the issue remains that we really want to be able to use
-\code{native} units in the browser, rather than \SVG{} pixels. To
-remedy this, unit conversion functions have been created. These
-functions are:
+but suffixed with a numeric index. Now that we can query the viewport
+name, we know which viewport to draw into and the \SVG{} element that
+we can add elements to.  However, the issue remains that we really
+want to be able to use \code{native} units in the browser, rather than
+\SVG{} pixels. To remedy this, unit conversion functions have been
+created. These functions are:
 
 \begin{itemize}
 \item \code{viewportConvertX}
@@ -202,9 +191,9 @@ where the coordinates $(3, 14)$ are in the main panel by running the
 following code:
 
 \begin{verbatim}
-JS> viewportConvertX("panelvp", 3, "native");
+JS> viewportConvertX("panelvp.1", 3, "native");
 110.45
-JS> viewportConvertY("panelvp", 14, "native");
+JS> viewportConvertY("panelvp.1", 14, "native");
 283.1
 \end{verbatim}
 
@@ -307,8 +296,8 @@ coordinates into \SVG{} pixels. This means we can create a
 # that is red, and at (3, 14)
 circ <- newXMLNode("circle",
                    parent = panel,
-                   attrs = list(cx = viewportConvertX("panelvp", 3, "native"),
-                                cy = viewportConvertY("panelvp", 14, "native"),
+                   attrs = list(cx = viewportConvertX("panelvp.1", 3, "native"),
+                                cy = viewportConvertY("panelvp.1", 14, "native"),
                                 r = 4,
                                 stroke = "red",
                                 fill = "red",

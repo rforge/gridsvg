@@ -247,7 +247,7 @@ var grobViewport = function(grobName) {
         var grobParent = grob.parentNode;
         while (! foundViewport) {
             var vpPath = grob.getAttribute("id");
-            var testVP = gridSVGCoords[baseViewportPath(vpPath)];
+            var testVP = gridSVGCoords[vpPath];
             // If we have found a match in our VP coordinate list we
             // have a candidate viewport path, but a grob might have
             // the same name as a viewport path... 
