@@ -57,7 +57,8 @@ hyperlinking and animation.
 When exporting \grid{} graphics as \SVG{}, instead of positioning
 within a viewport, all drawing occurs within a single pixel-based
 coordinate system. This document describes how \gridSVG{} exports
-additional information during this process to retain the original.
+additional information during this process to retain the original
+\grid{} coordinate systems.
 
 To demonstrate this, we will show how to add points to an exported
 plot, both from within \R{} and also, less permanently, within a \JS{}
@@ -73,7 +74,7 @@ using native units. We then write this out to \SVG{} in a file called
 library(gridSVG)
 @
 
-<<pointsPlot, fig=TRUE, include=FALSE>>=
+<<pointsPlot, fig=TRUE>>=
 panelvp <- plotViewport(xscale = c(0, 20),
                         yscale = c(0, 20),
                         name = "panelvp")
@@ -90,12 +91,14 @@ gridToSVG("pointsPlot.svg")
 @
 
 The challenge is to now modify this plot so that we can add extra
-information, such as new data points. As the \SVG{} file was exported,
-all of the locations on the plot were transformed into pixels. This
-means that in our \SVG{} file, none of the axis scales exist, and the
-locations of points are no longer native coordinates, but absolutely
-positioned pixels.
-
+information, such as new data points. The important point is that we
+want to add new data points relative to the axis coordinate
+systems. As the \SVG{} file was exported, all of the locations on the
+plot were transformed into pixels. This means that in our \SVG{} file,
+none of the axis scales exist, and the locations of points are no
+longer native coordinates, but absolutely positioned pixels. See the
+\code{x} and \code{y} attributes in the \code{<use>} elements below as
+a demonstration of this process.
 
 <<showPointsGrob, echo = FALSE>>=
 svgdoc <- xmlParse("pointsPlot.svg")
@@ -104,13 +107,6 @@ pointsGroup <- getNodeSet(svgdoc,
                           c(svg="http://www.w3.org/2000/svg"))[[1]]
 cat(saveXML(pointsGroup))
 @
-
-The previous \SVG{} fragment shows what \gridSVG{} has translated the
-points to. Note that the locations (\code{x} and \code{y}) and
-dimensions (\code{width} and \code{height}) of each of the points have
-been translated into absolute locations in \SVG{}. They no longer
-relate to the axis scales in their viewport, instead they are \SVG{}
-pixels.
 
 Recent changes in \gridSVG{} have enabled us to keep viewport
 information by exporting viewport metadata in the form of
@@ -136,23 +132,27 @@ the axis scales, along with the resolution that the viewport was
 exported at. The resolution simply represents the number of pixels
 that span an inch.
 
+This coordinate information is also important for use with \JS{}
+functions which are also exported by \gridSVG{}. Examples of such
+functions are shown in the next section.
+
 \section*{Browser-based Modification}
 
 We can modify the plot using the information described earlier by
 executing \JS{} code to insert \SVG{} elements representing points
 into the plot. To start off we first load the image into the
-browser. What this does is loads the \SVG{} image, and executes any
-\JS{} code that is referenced or included by the image. By default
-\gridSVG{} exports coordinate information to a \JS{} file, along with
-a utility \JS{} file that contains functions useful for working with
-\gridSVG{} graphics. In particular, the utility code includes
-functions that enable us to do unit conversion in the browser,
-e.g. from \code{native} to \code{npc} or to \code{inches}.
+browser. This loads the \SVG{} image, and executes any \JS{} code that
+is referenced or included by the image. By default \gridSVG{} exports
+coordinate information to a \JS{} file, along with a utility \JS{}
+file that contains functions useful for working with \gridSVG{}
+graphics. In particular, the utility code includes functions that
+enable us to do unit conversion in the browser, e.g. from
+\code{native} to \code{npc} or to \code{inches}.
 
 Because \gridSVG{} must perform some name manipulation to ensure that
 \SVG{} element \code{id}s are unique, a couple of \JS{} utility
 functions require introduction. Firstly, although not stricly
-necessary, if we know the name of the viewport, we can find out which
+necessary, if we know the name of the grob, we can find out which
 viewport path it belonged to by calling \code{grobViewport()}.
 
 \begin{verbatim}
@@ -175,20 +175,22 @@ created. These functions are:
 \item \code{viewportConvertHeight}
 \end{itemize}
 
-The first two conversion functions take three parameters, the viewport
-you want the location of, the size of the unit, and what type of unit
-it is. These functions return a number which represents the location
-in terms of \SVG{} pixels.
+The first two conversion functions take 3 mandatory parameters, the
+viewport you want the location of, the size of the unit, and what type
+of unit it is. Optionally a fourth parameter can be specified to
+determine what the unit is converted to, by default this is \SVG{}
+pixels. The value returned from this function is a number representing
+the location in the new unit.
 
-The second two conversion functions take an additional parameter which
-is the type of unit that you want to convert to. This means we can
+The second two conversion functions are the same but the fourth
+parameter, the new type of unit, is mandatory. This means we can
 convert between \code{inches}, \code{native} and \code{npc} in the
 browser without requiring an instance of \R{} available, so long as we
 stick to our existing viewports.
 
 As an example of how we might use these functions, we can find out
-where the coordinates $(3, 14)$ are in the main panel by running the
-following code:
+where the coordinates $(3, 14)$ are in the viewport \code{panelvp}
+(the main plot region) by running the following code:
 
 \begin{verbatim}
 JS> viewportConvertX("panelvp.1", 3, "native");
@@ -199,10 +201,20 @@ JS> viewportConvertY("panelvp.1", 14, "native");
 
 We now know that the location of $(3, 14)$ in \SVG{} pixels is
 $(110.45, 283.1)$. Using this information we can insert a new point
-into our plot at that location. To do this requires a bit of knowledge
-of \JS{}, and knowledge of the \SVG{} DOM. To demonstrate this, a red
-\SVG{} circle is going to be inserted at $(3, 14)$, in the plot using
-\JS{}.
+into our plot at that location. We also want the the radius of this
+point to be 2mm, so we can work out how big the point is going to be
+in a similar manner. The following code shows that a radius of 2mm
+will translate to 5.67 \SVG{} pixels.
+
+\begin{verbatim}
+JS> viewportConvertWidth("panelvp.1", 2, "mm", "svg");
+5.67
+\end{verbatim}
+
+To insert this new point this requires some knowledge of \JS{}, and
+knowledge of the \SVG{} DOM. To demonstrate this, a red \SVG{} circle
+is going to be inserted into the plot at $(3, 14)$ with a radius of
+2mm using \JS{}.
 
 \begin{verbatim}
 // Getting the element that contains all existing points
@@ -216,25 +228,22 @@ var c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
 c.setAttribute("stroke", "rgb(255,0,0)");
 c.setAttribute("fill", "rgb(255,0,0)");
 c.setAttribute("fill-opacity", 1);
-c.setAttribute("r", 4);
 
-// Setting the location of our points via the gridSVG
-// conversion functions
-c.setAttribute("cx", viewportConvertX("panelvp", 3, "native"));
-c.setAttribute("cy", viewportConvertY("panelvp", 14, "native"));
+// Setting the location and radius of our points
+// via the gridSVG conversion functions
+c.setAttribute("cx", viewportConvertX("panelvp.1", 3, "native"));
+c.setAttribute("cy", viewportConvertY("panelvp.1", 14, "native"));
+c.setAttribute("r", viewportConvertWidth("panelvp.1", 2, "mm", "svg"));
 
 // Adding the point to the same "viewport" as the existing points
 panel.appendChild(c);
-
 \end{verbatim}
 
 When running this code in the browser we see the new point. More
 complex demonstrations and usage of \gridSVG{} utility functions are
-possible, and will be demonstrated in \textbf{Section XXXXXX}. A \JS{}
-library of particular significance that can assist greatly in
-manipulating \SVG{} images in the browser is
-\href{http://d3js.org/}{\textsf{d3.js}}. \textsf{d3.js} will feature
-prominently in our more complex example.
+possible. A \JS{} library of particular significance that can assist
+greatly in manipulating \SVG{} images in the browser is
+\href{http://d3js.org/}{\textsf{d3.js}}.
 
 All changes to an \SVG{} image via \JS{} are lost when the image is
 reloaded. To modify the image programmatically while also saving the
@@ -247,6 +256,12 @@ be making use of the \textsf{XML} package in order to modify our
 \SVG{} image. As \gridSVG{} automatically loads the \textsf{XML}
 package, all of the functionality from the \textsf{XML} package is
 readily available to us.
+
+We can run this example in an entirely new \R{} session, even on a
+different machine. All we need to perform this task are the \gridSVG{}
+and \textsf{XML} packages. It is not necessary to have the packages
+that were required to produce the original plot, or indeed any code
+that was used to produce it.
 
 We first need to parse the image, so that it is represented as a
 document within \R{}.
@@ -280,7 +295,10 @@ jsonData <- readCoordsJS("pointsPlot.svg.coords.js")
 
 We now have valid \textsf{JSON} in the form of a character
 vector. Using this, we can initialise a coordinate system in \R{} by
-utilising both \code{gridSVGCoords} and \code{fromJSON}.
+utilising both \code{gridSVGCoords} and \code{fromJSON}. Nothing is
+returned from this function because we are setting coordinate
+information. If we call this function with no parameters we can get
+the coordinate information back.
 
 <<initCoords>>=
 gridSVGCoords(fromJSON(jsonData))
@@ -293,20 +311,21 @@ coordinates into \SVG{} pixels. This means we can create a
 
 <<createCircle>>=
 # Creating an SVG circle element to insert into our image
-# that is red, and at (3, 14)
+# that is red, and at (3, 14), with a radius of 2mm
 circ <- newXMLNode("circle",
                    parent = panel,
                    attrs = list(cx = viewportConvertX("panelvp.1", 3, "native"),
                                 cy = viewportConvertY("panelvp.1", 14, "native"),
-                                r = 4,
+                                r = viewportConvertWidth("panelvp.1", 2, "mm", "svg"),
                                 stroke = "red",
                                 fill = "red",
                                 "fill-opacity" = 1))
 @
 
 Note that we have used the \code{viewportConvert*} functions to
-position the circle at the correct locations. This is because the same
-functions that are available in \JS{} are also available in \SVG{}.
+position the circle at the correct locations and radius. This is
+because the same functions that are available in \JS{} are also
+available in \R{}.
 
 This point has been inserted into the same \SVG{} group as the rest of
 the points by setting the \code{"parent"} parameter to the object
@@ -328,7 +347,6 @@ distributed to others.
 
 An advantage of being able to modify the image, or even to generate
 the image immediately is that it opens up the possibility of serving
-dynamic \SVG{} images over the web. Such an example is demonstrated in
-\textbf{Section XXXXX} using the \textsf{Rook} package.
+dynamic \SVG{} images over the web.
 
 \end{document}
