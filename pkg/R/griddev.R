@@ -140,6 +140,11 @@ justTohjust <- function(just) {
   if (is.numeric(just)) {
     # Rounding to nearest of 0, 0.5, 1
     roundedJust <- round(2 * just) / 2
+    # and clamped to 0 to 1
+    if (roundedJust < 0)
+        roundedJust <- 0
+    if (roundedJust > 1)
+        roundedJust <- 1
     switch(as.character(roundedJust),
            "0" = "left",
            "0.5" = "centre",
@@ -159,6 +164,11 @@ justTovjust <- function(just) {
   if (is.numeric(just)) {
     # Rounding to nearest of 0, 0.5, 1
     roundedJust <- round(2 * just) / 2
+    # and clamped to 0 to 1
+    if (roundedJust < 0)
+        roundedJust <- 0
+    if (roundedJust > 1)
+        roundedJust <- 1
     switch(as.character(roundedJust),
            "0" = "bottom",
            "0.5" = "centre",
