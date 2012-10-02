@@ -25,49 +25,46 @@ Changes from 0.9 to 1.0-0
 7.  Adding in a call to 'grid.refresh' when running 'gridToSVG' in order
     to avoid seeing a blank page. (Simon)
 
-8.  New vignette describing how to use the new coordinate system
-    functionality. (Simon)
+8.  Axis sub-grobs now adhere to the common gridSVG naming scheme. (Simon)
 
-9.  Axis sub-grobs now adhere to the common gridSVG naming scheme. (Simon)
+9. All markup-based output is now written using the XML package. (Simon)
 
-10. All markup-based output is now written using the XML package. (Simon)
-
-11. Added a new option to 'gridToSVG', 'res'. This sets the device
+10. Added a new option to 'gridToSVG', 'res'. This sets the device
     resolution so that we can reproduce plots regardless of the source
     device that 'gridToSVG' grabs a grid scene from. (Simon)
 
-12. Added a new option to 'gridSVG', 'indent'. This either exports SVG
+11. Added a new option to 'gridSVG', 'indent'. This either exports SVG
     with hierarchical indentation, or none at all. All output occurs in
     one line in the case that the 'indent' option is 'FALSE'. (Simon)
 
-13. Making the XML declaration optional. This means that inserting SVG
+12. Making the XML declaration optional. This means that inserting SVG
     straight into an HTML5 document is more easily done because the
     declaration is not necessary with inline SVG. (Simon)
 
-14. When the filename is set to 'NULL' or '""' return the SVG document
+13. When the filename is set to 'NULL' or '""' return the SVG document
     as a list containing the root SVG node reference, coordinate data,
     and JS utility functions (as a character vector). (Simon)
 
-15. Use "person" in the DESCRIPTION file. (Simon)
+14. Use "person" in the DESCRIPTION file. (Simon)
 
-16. Reimplement 'pointGrob's as SVG '<symbol>'s, referenced by '<use>'
+15. Reimplement 'pointGrob's as SVG '<symbol>'s, referenced by '<use>'
     elements. Many more 'pch's are now animatable and drawable. (Simon)
 
-17. Added "commentGrob" which writes comments when exported to SVG. (Simon)
+16. Added "commentGrob" which writes comments when exported to SVG. (Simon)
 
-18. Use data URIs to embed images inline in SVG (for rasterGrobs). Allows
+17. Use data URIs to embed images inline in SVG (for rasterGrobs). Allows
     us to truly create standalone SVG files, rather than SVG & a lot of
     PNGs. Lifted C code from the 'markdown' package (permissive licence)
     to do the job. Just keeping a subset of the C code ('markdown' does a
     lot of cool stuff that we don't need). (Simon)
 
-19. Bug-fix for "gpar()"s, support "font" as an alias for "fontface". In
+18. Bug-fix for "gpar()"s, support "font" as an alias for "fontface". In
     particular it broke on a couple of "ggplot2" plots. (Simon)
 
-20. Adding in support for "gtable" grobs as "ggplot2" uses them. Requires
+19. Adding in support for "gtable" grobs as "ggplot2" uses them. Requires
     borrowing code from "gtable" to keep package checker happy. (Simon)
 
-21. Small fix to avoid error from text justification outside the 0 to 1
+20. Small fix to avoid error from text justification outside the 0 to 1
     range (by clamping justifications to the 0 to 1 range).
 
 
