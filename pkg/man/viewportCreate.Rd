@@ -11,10 +11,21 @@
   later manipulation.
 }
 \usage{
-viewportCreate(vpname)
+viewportCreate(vpname, newname = NULL)
 }
 \arguments{
-  \item{vpname}{ The name of the viewport to be recreated. }
+
+  \item{vpname}{
+    The name of the viewport to be recreated, as stored in
+    coordinate information. This is most likely a viewport path.
+  }
+  \item{newname}{
+    The name that is going to be assigned to the viewport as it is
+    re-created. If this parameter is \code{NULL}, then the name is taken
+    to be the last viewport in listed in \code{vpname} (because it is
+    usually a viewport path).
+  }
+
 }
 \details{
   In order to use this function, coordinate information must be
