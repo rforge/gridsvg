@@ -2,6 +2,36 @@
 \title{NEWS file for the gridSVG package}
 \encoding{UTF-8}
 
+\section{Changes in version 1.1-0}{
+  \itemize{
+    \item  The main  change in this version involves taking
+    advantage of changes in R version 2.16.0, which introduced
+    a \code{grid.force()} function.  This reduces the need for
+    special methods in this package to draw custom grobs.
+
+    \item Bumped R version dependency to R >= 2.16.0  because
+    \code{gridToSVG()} now calls \code{grid.force()} before export
+
+    \item Removed several \code{primToDev()} methods:
+    \itemize{
+      \item \code{primToDev.xaxis()}
+      \item \code{primToDev.yaxis()}
+      \item \code{grobToDev.roundrect()}
+      \item \code{grobToDev.frame()}
+      \item \code{grobToDev.cellGrob()}
+    }
+
+    \item Removed several \code{grobToDev()} methods:
+    \itemize{
+      \item \code{grobToDev.gtable()}
+      \item \code{grobToDev.gtableChild()}
+      \item \code{grobToDev.gtableParent()}
+    }
+
+    \item Bug fix for multi-line text when cex != 1
+  }
+}
+
 \section{Changes in version 1.0-0}{
   \itemize{
 

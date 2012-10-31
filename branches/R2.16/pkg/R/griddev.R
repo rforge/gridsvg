@@ -408,7 +408,8 @@ devGrob.text <- function(x, dev) {
   # determine line height.  This does WAAAAY back so we just
   # have to swallow and follow along.
   # textLineHeight <-  ch(charHeight * gp$lineheight, dev)
-  textLineHeight <- ch(unit(gp$lineheight * gp$cex *
+  xcex <- if (is.null(x$gp$cex)) 1 else x$gp$cex
+  textLineHeight <- ch(unit(gp$lineheight * gp$cex * xcex *
                             graphics::par("cin")[2], "inches"), dev)
   charHeight <- ch(charHeight, dev)
   
@@ -419,7 +420,6 @@ devGrob.text <- function(x, dev) {
   #   comment in row for 'baseline-shift' in the 'percentages' column
   # This is needed for positioning plotmath expressions
   # to anything close to the right place
-  xcex <- if (is.null(x$gp$cex)) 1 else x$gp$cex
   fontHeight <- ch(unit(gp$fontsize * gp$cex * xcex/ 72, "inches"), dev)
 
   # Width of the text/expression
@@ -1195,84 +1195,6 @@ primToDev.points <- function(x, dev) {
     devEndGroup(x$name, dev) 
 }
   
-primToDev.xaxis <- function(x, dev) {
-    devStartGroup(devGrob(x, dev), gparToDevPars(x$gp), dev)
-  # If the at is NULL then the axis will have no
-  # children;  need to be calculated on-the-fly
-  if (is.null(x$at)) {
-    at <- grid.pretty(current.viewport()$xscale)
-    major <- grid:::make.xaxis.major(at, x$main) 
-    major$name <- paste(x$name, major$name, sep = ".")
-    ticks <- grid:::make.xaxis.ticks(at, x$main)
-    ticks$name <- paste(x$name, ticks$name, sep = ".")
-    grobToDev(major, dev)
-    grobToDev(ticks, dev)
-    if (x$label) {
-      label <- grid:::make.xaxis.labels(at, x$label, x$main)
-      label$name <- paste(x$name, label$name, sep = ".")
-      grobToDev(label, dev)
-    }
-  } 
-    devEndGroup(x$name, dev)
-}
-
-primToDev.yaxis <- function(x, dev) {
-    devStartGroup(devGrob(x, dev), gparToDevPars(x$gp), dev)
-  # If the at is NULL then the axis will have no
-  # children;  need to be calculated on-the-fly
-  if (is.null(x$at)) {
-    at <- grid.pretty(current.viewport()$yscale)
-    major <- grid:::make.yaxis.major(at, x$main) 
-    major$name <- paste(x$name, major$name, sep = ".")
-    ticks <- grid:::make.yaxis.ticks(at, x$main)
-    ticks$name <- paste(x$name, ticks$name, sep = ".")
-    grobToDev(major, dev)
-    grobToDev(ticks, dev)
-    if (x$label) {
-      label <- grid:::make.yaxis.labels(at, x$label, x$main)
-      label$name <- paste(x$name, label$name, sep = ".")
-      grobToDev(label, dev)
-    }
-  } 
-    devEndGroup(x$name, dev)
-}
-
-grobToDev.frame <- function(x, dev) {
-    depth <- enforceVP(x$vp, dev)
-
-    if (!is.null(x$framevp)) {
-        frameDepth <- enforceVP(x$framevp, dev)
-    } 
-    
-    devStartGroup(devGrob(x, dev), gparToDevPars(x$gp), dev)
-    lapply(x$children, grobToDev, dev)
-    devEndGroup(x$name, dev)
-    
-    if (!is.null(x$framevp)) {
-        unwindVP(x$framevp, frameDepth, dev)
-    }
-    
-    unwindVP(x$vp, depth, dev)
-}
-
-grobToDev.cellGrob <- function(x, dev) {
-    depth <- enforceVP(x$vp, dev)
-
-    if (!is.null(x$cellvp)) {
-        cellDepth <- enforceVP(x$cellvp, dev)
-    }
-
-    devStartGroup(devGrob(x, dev), gparToDevPars(x$gp), dev)
-    lapply(x$children, grobToDev, dev)
-    devEndGroup(x$name, dev)
-  
-    if (!is.null(x$cellvp)) {
-        unwindVP(x$cellvp, cellDepth, dev)
-    }
-
-    unwindVP(x$vp, depth, dev)
-}
-
 grobToDev.gTree <- function(x, dev) {
   depth <- enforceVP(x$vp, dev)
   if (!is.null(x$childrenvp)) {
