@@ -216,13 +216,7 @@ unwindVP <- function(vp, depth, dev) {
     if (depth > 0) {
         for (i in 1:depth)
             devEndGroup("", dev)
-        if (is.null(vp)) { # recorded pops or ups
-            upViewport(depth)
-        } else if (!inherits(vp, "vpPath")) {
-            popViewport(depth)
-        } else {
-            upViewport(depth)
-        }
+        upViewport(depth)
     }
 }
 
