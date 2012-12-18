@@ -5,7 +5,7 @@
 \section{Changes in version 1.0-0}{
   \itemize{
 
-    \item Bumped the SVG version number to 1.1. (Simon)
+    \item Bumped the SVG version number to 1.0. (Simon)
 
     \item Initial implementation of viewport coordinate information
     exporting. (Simon)
@@ -79,6 +79,7 @@
     \item Small fix to avoid error from text justification outside the 0
     to 1 range (by clamping justifications to the 0 to 1 range).
 
+    \item Added 'viewBox' attribute to top-level <svg> element.
   }
 }
 
