@@ -99,6 +99,8 @@ S3method("primToDev", "garnished.grob")
 
 S3method("link", "grob")
 S3method("link", "gTree")
+S3method("linkShow", "grob")
+S3method("linkShow", "gTree")
 
 S3method("animate", "grob")
 S3method("animate", "gTree")

@@ -116,7 +116,7 @@ svgClipAttr <- function(id, clip) {
 }
 
 svgStartGroup <- function(id=NULL, clip=FALSE,
-                          attributes=svgAttrib(), links=NULL,
+                          attributes=svgAttrib(), links=NULL, show=NULL,
                           style=svgStyle(), coords=NULL, svgdev=svgDevice()) {
   # If this is a viewport that we're starting a group for
   # we will have coordinate information, otherwise don't bother.
@@ -129,7 +129,7 @@ svgStartGroup <- function(id=NULL, clip=FALSE,
 
   has.link <- hasLink(links[id])
   if (has.link)
-    svgStartLink(links[id], svgdev)
+    svgStartLink(links[id], show[id], svgdev)
 
   attrlist <- list(id = getid(id, svgdev),
                    svgAttribTxt(attributes, id),
@@ -167,10 +167,14 @@ svgEndSymbol <- function(svgdev = svgDevice()) {
                              svgDevParent(svgdev))), svgdev)
 }
 
-svgStartLink <- function(href="", svgdev=svgDevice()) {
+svgStartLink <- function(href="", show="", svgdev=svgDevice()) {
+  linkAttrs <- list("xlink:href" = href)
+  if (! is.null(show) && ! is.na(show) && nchar(show))
+      linkAttrs$`xlink:show` <- show
+
   link <- newXMLNode("a",
                      parent = svgDevParent(svgdev),
-                     attrs = list("xlink:href" = href))
+                     attrs = linkAttrs) 
   svgDevChangeParent(link, svgdev)
 }
 
@@ -345,7 +349,7 @@ svgAnimateScale <- function(xvalues, yvalues,
 }
 
 svgLines <- function(x, y, id=NULL, arrow = NULL,
-                     attributes=svgAttrib(), links=NULL,
+                     attributes=svgAttrib(), links=NULL, show=NULL,
                      style=svgStyle(), svgdev=svgDevice()) {
   # Grabbing arrow info for marker element references
   if (! is.null(arrow$ends))
@@ -358,7 +362,7 @@ svgLines <- function(x, y, id=NULL, arrow = NULL,
 
   has.link <- hasLink(links[id])
   if (has.link)
-    svgStartLink(links[id], svgdev)
+    svgStartLink(links[id], show[id], svgdev)
 
   attrlist <- list(svgAttribTxt(attributes, id),
                    lineMarkerTxt,
@@ -468,14 +472,14 @@ markerName <- function(ends, name) {
 }
 
 svgPolygon <- function(x, y, id=NULL,
-                       attributes=svgAttrib(), links=NULL,
+                       attributes=svgAttrib(), links=NULL, show=NULL,
                        style=svgStyle(), svgdev=svgDevice()) {
   if (length(x) != length(y))
     stop("x and y must be same length")
 
   has.link <- hasLink(links[id])
   if (has.link)
-    svgStartLink(links[id], svgdev)
+    svgStartLink(links[id], show[id], svgdev)
 
   tmpattr <- list(svgAttribTxt(attributes, id),
                   svgStyleAttributes(style),
@@ -493,7 +497,7 @@ svgPolygon <- function(x, y, id=NULL,
 
 # Differs from polygon because it can have sub-paths
 svgPath <- function(x, y, rule, id=NULL,
-                    attributes=svgAttrib(), links=NULL,
+                    attributes=svgAttrib(), links=NULL, show=NULL,
                     style=svgStyle(), svgdev=svgDevice()) {
     if (length(x) != length(y))
         stop("x and y must be same length")
@@ -524,7 +528,7 @@ svgPath <- function(x, y, rule, id=NULL,
 
     has.link <- hasLink(links[id])
     if (has.link)
-        svgStartLink(links[id], svgdev)
+        svgStartLink(links[id], show[id], svgdev)
 
     newXMLNode("path", parent = svgDevParent(svgdev),
                attrs = tmpattr)
@@ -535,11 +539,11 @@ svgPath <- function(x, y, rule, id=NULL,
 
 svgRaster <- function(x, y, width, height, datauri, id=NULL,
                       just, vjust, hjust,
-                      attributes=svgAttrib(), links=NULL,
+                      attributes=svgAttrib(), links=NULL, show=NULL,
                       style=svgStyle(), svgdev=svgDevice()) {
   has.link <- hasLink(links[id])
   if (has.link)
-    svgStartLink(links[id], svgdev)
+    svgStartLink(links[id], show[id], svgdev)
 
   attrlist <- list(id = id,
                    transform = paste0("translate(",
@@ -569,11 +573,11 @@ svgRaster <- function(x, y, width, height, datauri, id=NULL,
 }
 
 svgRect <- function(x, y, width, height, id=NULL,
-                    attributes=svgAttrib(), links=NULL,
+                    attributes=svgAttrib(), links=NULL, show=NULL,
                     style=svgStyle(), svgdev=svgDevice()) {
   has.link <- hasLink(links[id])
   if (has.link)
-    svgStartLink(links[id], svgdev)
+    svgStartLink(links[id], show[id], svgdev)
 
   attrlist <- list(id = id,
                    x = round(x, 2),
@@ -702,11 +706,11 @@ svgText <- function(x, y, text, hjust="left", vjust="bottom", rot=0,
                     width=1, height=1, ascent=1, descent=0,
                     lineheight=1, charheight=.8, fontheight=1,
                     fontfamily="sans", fontface="plain",
-                    id=NULL, attributes=svgAttrib(), links=NULL,
+                    id=NULL, attributes=svgAttrib(), links=NULL, show=NULL,
                     style=svgStyle(), svgdev=svgDevice()) {
     has.link <- hasLink(links[id])
     if (has.link)
-        svgStartLink(links[id], svgdev)
+        svgStartLink(links[id], show[id], svgdev)
 
     topattrs <- svgAttribTxt(attributes, id)
     topattrs$transform <- paste0("translate(",
@@ -748,11 +752,11 @@ svgText <- function(x, y, text, hjust="left", vjust="bottom", rot=0,
 }
 
 svgCircle <- function(x, y, r, id=NULL,
-                      attributes=svgAttrib(), links=NULL,
+                      attributes=svgAttrib(), links=NULL, show=NULL,
                       style=svgStyle(), svgdev=svgDevice()) {
   has.link <- hasLink(links[id])
   if (has.link)
-    svgStartLink(links[id], svgdev)
+    svgStartLink(links[id], show[id], svgdev)
 
   tmpattr <- list(id = id,
                   cx = round(x, 2),
@@ -795,12 +799,12 @@ svgScript <- function(body, href, type="application/ecmascript",
 # this means we have a computed radius of 3.75
 
 svgUseSymbol <- function(id, x, y, size, pch,
-                         attributes=svgAttrib(), links=NULL,
+                         attributes=svgAttrib(), links=NULL, show=NULL,
                          style=svgStyle(), svgdev=svgDevice()) {
 
   has.link <- hasLink(links[id])
   if (has.link)
-    svgStartLink(links[id], svgdev)
+    svgStartLink(links[id], show[id], svgdev)
 
   # Ensure the "dot" is only 1px wide
   if (pch == ".")
