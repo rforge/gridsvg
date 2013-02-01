@@ -35,12 +35,14 @@ cd <- function(x, dev) {
 }
 
 # Create a full name for a sub-grob based on the name of a parent grob
-subGrobName <- function(baseGrobName, subGrobName, separator = ".") {
+subGrobName <- function(baseGrobName, subGrobName,
+                        separator = getSVGoption("id.sep")) {
     paste(baseGrobName, subGrobName, sep=separator)
 }
 
 # Return the base grob name given the full name of a sub-grob
-baseGrobName <- function(subGrobName, separator = ".") {
+baseGrobName <- function(subGrobName, 
+                         separator = getSVGoption("id.sep")) {
   splitName <- unlist(strsplit(subGrobName, separator, fixed = TRUE))
   grobName <- paste(splitName[-length(splitName)], collapse = separator)
 

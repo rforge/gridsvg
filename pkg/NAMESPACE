@@ -45,6 +45,10 @@ export("grid.hyperlink",
        "gridToSVG"
        )
 
+export("getSVGoption",
+       "getSVGoptions",
+       "setSVGoptions")
+
 export("gridSVGCoords",
        "readCoordsJS",
        "viewportCreate",

@@ -84,6 +84,10 @@
     \item Adding 'show' argument to 'grid.hyperlink()'. Allows links to
     opened in another window/tab rather than the current
     window/tab. (Simon).
+
+    \item Added new functions to support global package options, plus
+    created a global option to control the separator used when
+    appending a number suffix to grob names for SVG element ids.
   }
 }
 
