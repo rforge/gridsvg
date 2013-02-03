@@ -11,10 +11,10 @@
 }
 \synopsis{
 hyperlinkGrob(x, href, show=NULL, group=TRUE)
-grid.hyperlink(path, href, show=NULL, group=TRUE)
+grid.hyperlink(path, href, show=NULL, group=TRUE, grep=FALSE)
   }
 \usage{
-grid.hyperlink(path, href, show, group)
+grid.hyperlink(path, href, show, group, grep)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -31,6 +31,8 @@ grid.hyperlink(path, href, show, group)
   \item{group}{ A logical indicating whether the hyperlinks
     should be attached to the overall parent group for the
     relevant SVG element, or to individual SVG elements. }
+  \item{grep}{ Whether the \code{path} should be treated as a regular
+    expression. }
 }
 \value{
   A linked.grob object.

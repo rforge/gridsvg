@@ -15,10 +15,10 @@ hyperlinkGrob <- function(x, href, show=NULL, group=TRUE) {
     x
 }
 
-grid.hyperlink <- function(path, href, show=NULL, group=TRUE) {
-    x <- grid.get(path)
+grid.hyperlink <- function(path, href, show=NULL, group=TRUE, grep=FALSE) {
+    x <- grid.get(path, grep=grep)
     x <- hyperlinkGrob(x, href, show, group)
-    grid.set(path, x, redraw=FALSE)
+    grid.set(path, x, grep=grep, redraw=FALSE)
 }
 
 link <- function(x) {

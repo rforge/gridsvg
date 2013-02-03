@@ -88,6 +88,9 @@
     \item Added new functions to support global package options, plus
     created a global option to control the separator used when
     appending a number suffix to grob names for SVG element ids.
+
+    \item Added 'grep' argument to grid.hyperlink()
+    (suggestion by Oscar Perpignan Lamigueiro).
   }
 }
 
