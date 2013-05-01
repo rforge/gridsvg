@@ -133,6 +133,9 @@
     element that provides information on how 'gridToSVG' was called,
     along with metadata about gridSVG itself. Potentially useful for
     debugging. (Simon)
+
+    \item Including support for 'clipGrob's. (Simon).
+
   }
 }
 
