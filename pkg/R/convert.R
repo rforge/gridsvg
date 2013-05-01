@@ -44,7 +44,7 @@ viewportConvertY <- function(vpname, x, from, to = "svg") {
   height <- viewportConvertHeight(vpname, x, from, to)
   if (to == "svg")
     height <- height + currCoords[[vpname]]$y
-  offset + height
+  height
 }
 
 viewportConvertWidth <- function(vpname, x, from, to) {
