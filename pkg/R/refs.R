@@ -86,8 +86,12 @@ flushDefinitions <- function(dev) {
     # Now try drawing
     for (i in 1:n) {
         def <- refDefinitions[[i]]
+        upViewport(0)
+        if (! is.null(def$vp))
+            pushViewport(def$vp)
         if (isLabelUsed(def$label))
             drawDef(def, dev)
+        upViewport(0)
     }
 
     # Resetting to original values
@@ -250,3 +254,31 @@ getLabelID <- function(label) {
     prefixName(paste0(label, getSVGoption("id.sep"), suffix))
 }
 
+
+# This function allows us to collect a viewport that, when pushed into
+# from the ROOT viewport, should allow us to draw in the same drawing
+# environment that we called this function from.
+getAbsoluteVp <- function(vp = current.viewport(),
+                          tm = current.transform()) {
+  transloc <- c(0, 0, 1) %*% tm
+  loc <- (transloc / transloc[3])[-3]
+
+  viewport(x = unit(loc[1], "inches"),
+           y = unit(loc[2], "inches"),
+           width = convertWidth(unit(1, "npc"), "inches"),
+           height = convertHeight(unit(1, "npc"), "inches"),
+           xscale = vp$xscale,
+           yscale = vp$yscale,
+           gp = get.gpar(),
+           just = c("left", "bottom"),
+           angle = vp$angle)
+}
+
+# Used for the case where we want to work out locations in absolute units
+# *but* do not want to leave the current viewport. Useful when flattening
+# locations for things such as mask areas.
+getAbsoluteOffset <- function(tm = current.transform()) {
+    transloc <- c(0, 0, 1) %*% tm
+    loc <- (transloc / transloc[3])[-3]
+    unit(loc, "inches")
+}

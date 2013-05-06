@@ -187,10 +187,11 @@ print.gradient <- function(x, ...) {
 flattenLinearGradient <- function(gradient) {
     # Flatten all locations here
     if (gradient$gradientUnits == "userSpaceOnUse") {
-        gradient$x1 <- convertX(gradient$x1, "inches")
-        gradient$x2 <- convertX(gradient$x2, "inches")
-        gradient$y1 <- convertY(gradient$y1, "inches")
-        gradient$y2 <- convertY(gradient$y2, "inches")
+        offsets <- getAbsoluteOffset()
+        gradient$x1 <- convertX(gradient$x1, "inches") + offsets[1]
+        gradient$x2 <- convertX(gradient$x2, "inches") + offsets[1]
+        gradient$y1 <- convertY(gradient$y1, "inches") + offsets[2]
+        gradient$y2 <- convertY(gradient$y2, "inches") + offsets[2]
     }
     gradient
 }
@@ -198,11 +199,12 @@ flattenLinearGradient <- function(gradient) {
 flattenRadialGradient <- function(gradient) {
     # Flatten all locations here
     if (gradient$gradientUnits == "userSpaceOnUse") {
-        gradient$cx <- convertX(gradient$cx, "inches")
-        gradient$cy <- convertX(gradient$cy, "inches")
+        offsets <- getAbsoluteOffset()
+        gradient$cx <- convertX(gradient$cx, "inches") + offset[1]
+        gradient$cy <- convertY(gradient$cy, "inches") + offset[2]
         gradient$r <- dToInches(gradient$r, NULL)
-        gradient$fx <- convertX(gradient$fx, "inches")
-        gradient$fy <- convertY(gradient$fy, "inches")
+        gradient$fx <- convertX(gradient$fx, "inches") + offset[1]
+        gradient$fy <- convertY(gradient$fy, "inches") + offset[2]
     }
     gradient
 }

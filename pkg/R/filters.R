@@ -179,6 +179,7 @@ registerFilter <- function(label, filter) {
 
     filter$label <- label
     filter$id <- getID(label, "ref")
+    filter$vp <- getAbsoluteVp()
     class(filter) <- "filterDef"
 
     refDefinitions <- get("refDefinitions", envir = .gridSVGEnv)
@@ -281,8 +282,9 @@ flatten.filter.effect <- function(x, coords = TRUE) {
     loc <- leftbottom(x$x, x$y, x$width, x$height,
                       x$just, x$hjust, x$vjust, NULL)
     if (coords) {
-        x$x <- loc$x
-        x$y <- loc$y
+        offsets <- getAbsoluteOffset()
+        x$x <- loc$x + offsets[1]
+        x$y <- loc$y + offsets[2]
         x$width <- convertWidth(x$width, "inches")
         x$height <- convertHeight(x$height, "inches")
     } else {
@@ -348,7 +350,7 @@ flatten.fe.point.light <- function(x, coords = TRUE) {
 filterSVG.fe.point.light <- function(x, dev) {
     svgdev <- dev@dev
     if (x$coords)
-        x$z <- if (x$zdim == "x") cw(x$z, dev) else cy(x$z, dev)
+        x$z <- if (x$zdim == "x") cx(x$z, dev) else cy(x$z, dev)
     attrList <- cleanAttrs(x, c("coords", "zdim"))
     newXMLNode("fePointLight",
                attrs = roundAttribs(attrList),
@@ -366,12 +368,13 @@ fePointLight <- function(z = unit(0, "npc"), default.units = "npc",
 
 flatten.fe.spot.light <- function(x, coords = TRUE) {
     if (coords) {
+        offsets <- getAbsoluteOffset()
         x$z <- if (x$zdim == "x") convertX(x$z, "inches")
                else convertY(x$z, "inches")
         x$pointsAtZ <- if (x$zdim == "x") convertX(x$pointsAtZ, "inches")
                        else convertY(x$pointsAtZ, "inches")
-        x$pointsAtX <- convertX(x$pointsAtX, "inches")
-        x$pointsAtY <- convertY(x$pointsAtY, "inches")
+        x$pointsAtX <- convertX(x$pointsAtX, "inches") + offsets[1]
+        x$pointsAtY <- convertY(x$pointsAtY, "inches") + offsets[2]
     } else {
         x$z <- if (x$dzim == "x") convertX(x$z, "npc", valueOnly = TRUE)
                else convertY(x$z, "npc", valueOnly = TRUE)
@@ -827,21 +830,21 @@ filterSVG.fe.morphology <- function(x, dev) {
 flatten.fe.morphology <- function(x, coords = TRUE) {
     if (coords) {
         if (length(x$radius) > 1) {
-            rx <- convertX(x$radius[1], "inches")
-            ry <- convertY(x$radius[2], "inches")
+            rx <- convertWidth(x$radius[1], "inches")
+            ry <- convertHeight(x$radius[2], "inches")
             x$radius <- unit.c(rx, ry)
         } else {
             x$radius <- dToInches(x$radius, NULL)
         }
     } else {
         if (length(x$radius) > 1) {
-            rx <- convertX(x$radius[1], "npc", valueOnly = TRUE)
-            ry <- convertY(x$radius[2], "npc", valueOnly = TRUE)
+            rx <- convertWidth(x$radius[1], "npc", valueOnly = TRUE)
+            ry <- convertHeight(x$radius[2], "npc", valueOnly = TRUE)
             x$radius <- unit.c(rx, ry)
         } else {
-            # Just use X for radius
-            x$radius <- convertX(dToInches(x$radius, NULL), "npc",
-                                 valueOnly = TRUE)
+            # Just use Width for radius
+            x$radius <- convertWidth(dToInches(x$radius, NULL), "npc",
+                                     valueOnly = TRUE)
         }
     }
     x$coords <- coords

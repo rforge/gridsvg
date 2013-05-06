@@ -141,7 +141,8 @@ registerClipPath <- function(label, clippath) {
 
     defList <- list(label = label,
                     id = getID(label, "ref"),
-                    grob = clippath$grob)
+                    grob = clippath$grob,
+                    vp = getAbsoluteVp())
     class(defList) <- "clipPathDef"
     refDefinitions[[label]] <- defList
     assign("refDefinitions", refDefinitions, envir = .gridSVGEnv)
@@ -381,13 +382,17 @@ registerMask <- function(label, mask = NULL, ...) {
     width <- convertWidth(mask$width, "inches")
     height <- convertHeight(mask$height, "inches")
 
+    # Need location on page, not just within the current vp
+    offsets <- getAbsoluteOffset()
+
     defList <- list(label = label,
                     id = getID(label, "ref"),
-                    x = x,
-                    y = y,
+                    x = x + offsets[1],
+                    y = y + offsets[2],
                     width = width,
                     height = height,
-                    grob = mask$grob)
+                    grob = mask$grob,
+                    vp = getAbsoluteVp())
     class(defList) <- "maskDef"
 
     refDefinitions[[label]] <- defList
