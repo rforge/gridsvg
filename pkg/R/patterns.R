@@ -88,11 +88,10 @@ registerPatternFill <- function(label, pattern = NULL, ...) {
         stop("A grob must be given for a fill pattern definition")
 
     # Now convert *at time of definition* to absolute units (inches)
-    offsets <- getAbsoluteOffset()
     loc <- leftbottom(pattern$x, pattern$y, pattern$width, pattern$height,
                       pattern$just, pattern$hjust, pattern$vjust, NULL)
-    x <- loc$x + offsets[1]
-    y <- loc$y + offsets[2]
+    x <- loc$x
+    y <- loc$y
     width <- convertWidth(pattern$width, "inches")
     height <- convertHeight(pattern$height, "inches")
 

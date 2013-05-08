@@ -282,9 +282,8 @@ flatten.filter.effect <- function(x, coords = TRUE) {
     loc <- leftbottom(x$x, x$y, x$width, x$height,
                       x$just, x$hjust, x$vjust, NULL)
     if (coords) {
-        offsets <- getAbsoluteOffset()
-        x$x <- loc$x + offsets[1]
-        x$y <- loc$y + offsets[2]
+        x$x <- loc$x
+        x$y <- loc$y
         x$width <- convertWidth(x$width, "inches")
         x$height <- convertHeight(x$height, "inches")
     } else {
@@ -368,13 +367,12 @@ fePointLight <- function(z = unit(0, "npc"), default.units = "npc",
 
 flatten.fe.spot.light <- function(x, coords = TRUE) {
     if (coords) {
-        offsets <- getAbsoluteOffset()
         x$z <- if (x$zdim == "x") convertX(x$z, "inches")
                else convertY(x$z, "inches")
         x$pointsAtZ <- if (x$zdim == "x") convertX(x$pointsAtZ, "inches")
                        else convertY(x$pointsAtZ, "inches")
-        x$pointsAtX <- convertX(x$pointsAtX, "inches") + offsets[1]
-        x$pointsAtY <- convertY(x$pointsAtY, "inches") + offsets[2]
+        x$pointsAtX <- convertX(x$pointsAtX, "inches")
+        x$pointsAtY <- convertY(x$pointsAtY, "inches")
     } else {
         x$z <- if (x$dzim == "x") convertX(x$z, "npc", valueOnly = TRUE)
                else convertY(x$z, "npc", valueOnly = TRUE)

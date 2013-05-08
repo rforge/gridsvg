@@ -382,13 +382,10 @@ registerMask <- function(label, mask = NULL, ...) {
     width <- convertWidth(mask$width, "inches")
     height <- convertHeight(mask$height, "inches")
 
-    # Need location on page, not just within the current vp
-    offsets <- getAbsoluteOffset()
-
     defList <- list(label = label,
                     id = getID(label, "ref"),
-                    x = x + offsets[1],
-                    y = y + offsets[2],
+                    x = x,
+                    y = y,
                     width = width,
                     height = height,
                     grob = mask$grob,
