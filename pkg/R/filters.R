@@ -149,18 +149,20 @@ flatten <- function(x, coords) {
 }
 
 flatten.filter <- function(x, coords = TRUE) {
-    loc <- leftbottom(x$x, x$y, x$width, x$height,
-                      x$just, x$hjust, x$vjust, NULL)
     if (coords) {
+        loc <- leftbottom(x$x, x$y, x$width, x$height,
+                          x$just, x$hjust, x$vjust, NULL)
         x$x <- loc$x
         x$y <- loc$y
         x$width <- convertWidth(x$width, "inches")
         x$height <- convertHeight(x$height, "inches")
     } else {
-        x$x <- convertX(loc$x, "npc", valueOnly = TRUE)
-        x$y <- convertY(loc$y, "npc", valueOnly = TRUE)
-        x$width <- convertWidth(x$width, "npc", valueOnly = TRUE)
-        x$height <- convertHeight(x$height, "npc", valueOnly = TRUE)
+        # location and width are relative to the object bounding box
+        # (i.e., NOT grid units)
+        hjust <- grid:::resolveHJust(x$just, x$hjust)
+        vjust <- grid:::resolveVJust(x$just, x$vjust)
+        x$x <- x$x - hjust*x$width
+        x$y <- x$y - vjust*x$height
     }
 
     # Now flatten all children
