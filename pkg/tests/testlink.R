@@ -28,8 +28,8 @@ pushViewport(dataViewport(iris$Sepal.Length, iris$Sepal.Width))
 grid.rect()
 grid.xaxis(name="xaxis")
 grid.yaxis(name="yaxis")
-grid.hyperlink("xaxis", "linkdotx.svg.html")
-grid.hyperlink("yaxis", "linkdoty.svg.html")
+grid.hyperlink("xaxis", "linkdotx.svg")
+grid.hyperlink("yaxis", "linkdoty.svg")
 grid.points(iris$Sepal.Length[iris$Species == "setosa"],
             iris$Sepal.Width[iris$Species == "setosa"],
             gp=gpar(col="red"))
@@ -70,7 +70,7 @@ grid.text(name="returnlink",
           "Return to Scatterplot",
           y=unit(1, "npc") + unit(1, "lines"),
           gp=gpar(col="grey"))
-grid.hyperlink("returnlink", "linkscatter.svg.html")
+grid.hyperlink("returnlink", "linkscatter.svg")
 popViewport(3)
 grid.export("linkdotx.svg")
 dev.off()
@@ -100,7 +100,7 @@ grid.text(name="returnlink",
           "Return to Scatterplot",
           y=unit(1, "npc") + unit(1, "lines"),
           gp=gpar(col="grey"))
-grid.hyperlink("returnlink", "linkscatter.svg.html")
+grid.hyperlink("returnlink", "linkscatter.svg")
 popViewport(3)
 grid.export("linkdoty.svg")
 dev.off()
