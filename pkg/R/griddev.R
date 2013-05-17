@@ -58,11 +58,15 @@ prefixName <- function(name) {
 gparToDevPars <- function(gp) {
     # Split up col into col plus colAlpha
     if (!is.null(gp$col)) {
+        if (is.numeric(gp$col) && gp$col == 0)
+            gp$col <- "transparent"
         rgba <- col2rgb(gp$col, alpha=TRUE)
         gp$colAlpha <- rgba[4]
     }
     # Ditto fill
     if (!is.null(gp$fill)) {
+        if (is.numeric(gp$fill) && gp$fill == 0)
+            gp$fill <- "transparent"
         rgba <- col2rgb(gp$fill, alpha=TRUE)
         gp$fillAlpha <- rgba[4]
     }

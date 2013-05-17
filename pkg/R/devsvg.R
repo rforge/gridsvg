@@ -69,14 +69,13 @@ devLtyToSVG <- function(lty, lwd, dev) {
 devColToSVG <- function(col) {
   if (length(col) > 1)
     warning("Only first colour used")
+  if (is.numeric(col) && col == 0)
+      col <- "transparent"
   # Handle "transparent" as a special case
   if (col == "transparent")
       "none"
-  else {
-      rgbaCol <- col2rgb(col)
-      rgbCol <- rgbaCol
-      paste("rgb(", paste(rgbCol, collapse=","), ")", sep="")
-  }
+  else
+      paste("rgb(", paste(col2rgb(col), collapse=","), ")", sep="")
 }
 
 devColAlphaToSVG <- function(colAlpha) {
