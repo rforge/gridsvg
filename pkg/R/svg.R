@@ -261,10 +261,10 @@ svgStartGroup <- function(id=NULL, clip=FALSE, mask=FALSE,
     svgStartLink(links[id], show[id], svgdev)
 
   attrlist <- list(id = prefixName(id),
-                   svgAttribTxt(attributes, id),
                    svgClipAttr(id, clip),
                    svgMaskAttr(id, mask),
-                   svgStyleAttributes(style))
+                   svgStyleAttributes(style),
+                   svgAttribTxt(attributes, id))
   attrlist <- attrList(attrlist)
 
   # Avoid clobbering "class" attribute if it exists
@@ -531,13 +531,13 @@ svgLines <- function(x, y, id=NULL, arrow = NULL,
   if (has.link)
     svgStartLink(links[id], show[id], svgdev)
 
-  attrlist <- list(svgAttribTxt(attributes, id),
-                   lineMarkerTxt,
+  attrlist <- list(lineMarkerTxt,
                    svgStyleAttributes(style),
                    id = prefixName(id),
                    points = paste0(round(x, 2), ",",
                                    round(y, 2),
-                                   collapse=" "))
+                                   collapse=" "),
+                   svgAttribTxt(attributes, id))
   attrlist <- attrList(attrlist)
   newXMLNode("polyline", parent = svgDevParent(svgdev),
              attrs = attrlist)
@@ -648,12 +648,12 @@ svgPolygon <- function(x, y, id=NULL,
   if (has.link)
     svgStartLink(links[id], show[id], svgdev)
 
-  tmpattr <- list(svgAttribTxt(attributes, id),
-                  svgStyleAttributes(style),
-                  id = prefixName(id),
+  tmpattr <- list(id = prefixName(id),
                   points = paste0(round(x, 2), ",",
                                   round(y, 2),
-                                  collapse = " "))
+                                  collapse = " "),
+                  svgStyleAttributes(style),
+                  svgAttribTxt(attributes, id))
   tmpattr <- attrList(tmpattr)
   newXMLNode("polygon", parent = svgDevParent(svgdev),
              attrs = tmpattr)
@@ -685,11 +685,11 @@ svgPath <- function(x, y, rule, id=NULL,
                           "Z")
                 }, x, y)
 
-    tmpattr <- list(svgAttribTxt(attributes, id),
-                    svgStyleAttributes(style),
-                    id = prefixName(id),
+    tmpattr <- list(id = prefixName(id),
                     d = paste(unlist(d), collapse = " "),
-                    "fill-rule" = switch(rule, winding="nonzero", "evenodd"))
+                    "fill-rule" = switch(rule, winding="nonzero", "evenodd"),
+                    svgStyleAttributes(style),
+                    svgAttribTxt(attributes, id))
     tmpattr <- attrList(tmpattr)
 
 
@@ -717,8 +717,8 @@ svgRaster <- function(x, y, width, height, datauri, id=NULL,
                                       round(x, 2), ",",
                                       round(height + y, 2),
                                       ")"),
-                   svgAttribTxt(attributes, id),
-                   svgStyleAttributes(style))
+                   svgStyleAttributes(style),
+                   svgAttribTxt(attributes, id))
   attrlist <- attrList(attrlist)
   newXMLNode("g", parent = svgDevParent(svgdev),
              attrs = attrlist,
@@ -751,8 +751,8 @@ svgRect <- function(x, y, width, height, id=NULL,
                    y = round(y, 2),
                    width = round(width, 2),
                    height = round(height, 2),
-                   svgAttribTxt(attributes, id),
-                   svgStyleAttributes(style))
+                   svgStyleAttributes(style),
+                   svgAttribTxt(attributes, id))
   attrlist <- attrList(attrlist)
   newXMLNode("rect", parent = svgDevParent(svgdev),
              attrs = attrlist)
@@ -879,12 +879,13 @@ svgText <- function(x, y, text, hjust="left", vjust="bottom", rot=0,
     if (has.link)
         svgStartLink(links[id], show[id], svgdev)
 
-    topattrs <- svgAttribTxt(attributes, id)
+    topattrs <- list()
+    topattrs$id <- prefixName(id)
     topattrs$transform <- paste0("translate(",
                                  round(x, 2), ", ",
                                  round(y, 2), ")")
     topattrs$`stroke-width` <- "0.1"
-    topattrs$id <- prefixName(id)
+    topattrs <- c(topattrs, svgAttribTxt(attributes, id))
 
     # Flip the y-direction again so that text is drawn "upright"
     # Do the flip in a separate <g> so that can animate the
@@ -929,8 +930,8 @@ svgCircle <- function(x, y, r, id=NULL,
                   cx = round(x, 2),
                   cy = round(y, 2),
                   r = round(r, 2),
-                  svgAttribTxt(attributes, id),
-                  svgStyleAttributes(style))
+                  svgStyleAttributes(style),
+                  svgAttribTxt(attributes, id))
   tmpattr <- attrList(tmpattr)
   has.link <- hasLink(links[id])
   newXMLNode("circle", parent = svgDevParent(svgdev),
@@ -989,10 +990,7 @@ svgUseSymbol <- function(id, x, y, size, pch,
                   x = round(x, 2),
                   y = round(y, 2),
                   width = round(size, 2),
-                  height = round(size, 2),
-                  svgAttribTxt(attributes, id),
-                  svgStyleAttributes(style))
-  tmpattr <- attrList(tmpattr)
+                  height = round(size, 2))
 
   # centering adjustment
   r <- -size / 2
@@ -1005,6 +1003,11 @@ svgUseSymbol <- function(id, x, y, size, pch,
   scalef <- size / 10 # 10 is the point viewBox size
   sw <- sw / scalef
   tmpattr$`stroke-width` <- round(sw, 2)
+
+  # Preserve order
+  tmpattr <- c(tmpattr,
+               svgStyleAttributes(style),
+               svgAttribTxt(attributes, id))
 
   # For pch outside 0-25 or characters
   if (is.character(pch) || (is.numeric(pch) && pch > 25)) {

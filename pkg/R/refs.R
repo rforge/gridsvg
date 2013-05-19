@@ -163,7 +163,7 @@ labelsUsed.gTree <- function(x) {
 # definition.
 isLabelUsed <- function(label) {
     rut <- get("refUsageTable", envir = .gridSVGEnv)
-    rut[rut$label == label, "used"]
+    any(rut[rut$label %in% label, "used"])
 }
 
 setLabelUsed <- function(label) {
@@ -223,14 +223,13 @@ listSVGDefinitions <- function(print = TRUE) {
 }
 
 checkForDefinition <- function(label) {
-    if (! label %in% names(get("refDefinitions", envir = .gridSVGEnv)))
-        stop("A reference definition must be created before using this label")
+    if (! all(label %in% names(get("refDefinitions", envir = .gridSVGEnv))))
+        stop("A reference definition must be created before using its label")
 }
 
 checkExistingDefinition <- function(label) {
-    if (label %in% names(get("refDefinitions", envir = .gridSVGEnv)))
-        stop(paste("label", sQuote(label),
-                   "already exists as a reference definition")) 
+    if (any(label %in% names(get("refDefinitions", envir = .gridSVGEnv))))
+        stop(paste("A label already exists as a reference definition")) 
 }
 
 # When we need to generate a temporary label (i.e. when specifying a
@@ -250,7 +249,7 @@ getNewLabel <- function(prefix) {
 
 getLabelID <- function(label) {
     ut <- get("usageTable", envir = .gridSVGEnv)
-    suffix <- ut[ut$name == label & ut$type == "ref", "suffix"]
+    suffix <- ut[ut$name %in% label & ut$type == "ref", "suffix"]
     prefixName(paste0(label, getSVGoption("id.sep"), suffix))
 }
 
