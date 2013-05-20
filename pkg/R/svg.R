@@ -531,12 +531,12 @@ svgLines <- function(x, y, id=NULL, arrow = NULL,
   if (has.link)
     svgStartLink(links[id], show[id], svgdev)
 
-  attrlist <- list(lineMarkerTxt,
-                   svgStyleAttributes(style),
-                   id = prefixName(id),
+  attrlist <- list(id = prefixName(id),
                    points = paste0(round(x, 2), ",",
                                    round(y, 2),
                                    collapse=" "),
+                   lineMarkerTxt,
+                   svgStyleAttributes(style),
                    svgAttribTxt(attributes, id))
   attrlist <- attrList(attrlist)
   newXMLNode("polyline", parent = svgDevParent(svgdev),
