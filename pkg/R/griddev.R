@@ -1234,9 +1234,12 @@ primToDev.gTree <- function(x, dev) {
     if (x$name != "gridSVG") {
         x$name <- getID(x$name, "grob")
         x$classes <- class(x)
+        children <- x$children[x$childrenOrder]
+    } else {
+        children <- x$children
     }
     devStartGroup(devGrob(x, dev), gparToDevPars(x$gp), dev)
-    lapply(x$children, function(child) {
+    lapply(children, function(child) {
         # 'gridSVG' is a special case because it is just a wrapping gTree.
         # It is not useful for us to track the entire gPath as a result,
         # only the path *after* 'gridSVG'
