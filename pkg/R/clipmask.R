@@ -181,7 +181,7 @@ drawDef.clipPathDef <- function(x, dev) {
     # Start clipPath
     devStartClipPath(list(name = x$id), NULL, dev)
     # Draw grob
-    grobToDev(grob, dev)
+    grobToDev(grid:::force(grob), dev)
     # Close clipPath, open group
     devEndClipPath(list(name = x$id), NULL, dev)
 }
@@ -436,7 +436,7 @@ drawDef.maskDef <- function(x, dev) {
     # Start mask
     devStartMask(devGrob(x, dev), NULL, dev)
     # Draw grob
-    grobToDev(grob, dev)
+    grobToDev(grid:::force(grob), dev)
     # Close mask
     devEndMask(devGrob(x, dev), NULL, dev)
 }
