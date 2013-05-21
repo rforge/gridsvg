@@ -61,19 +61,18 @@ primToDev.filtered.grob <- function(x, dev) {
     primToDev(fg, dev)
 }
 
-filterEffect <- function(filterUnits = c("coords", "bbox"),
+filterEffect <- function(feList = NULL, filterUnits = c("coords", "bbox"),
                          x = unit(0.5, "npc"), y = unit(0.5, "npc"),
                          width = unit(1, "npc"), height = unit(1, "npc"),
                          just = "centre", hjust = NULL, vjust = NULL,
                          default.units = "npc",
-                         primitiveUnits = c("coords", "bbox"),
-                         filterEffects = NULL) {
+                         primitiveUnits = c("coords", "bbox")) {
     filterUnits <- match.arg(filterUnits)
     primitiveUnits <- match.arg(primitiveUnits)
-    if (is.null(filterEffects))
-        filterEffects <- list()
-    if (inherits(filterEffects, "filter.effect"))
-        filterEffects <- list(filterEffects)
+    if (is.null(feList))
+        feList <- list()
+    if (inherits(feList, "filter.effect"))
+        feList <- list(feList)
     
     if (! is.unit(x))
         x <- unit(x, default.units)
@@ -106,7 +105,7 @@ filterEffect <- function(filterUnits = c("coords", "bbox"),
                    x = x, y = y,
                    width = width, height = height,
                    just = just, hjust = hjust, vjust = vjust,
-                   children = filterEffects)
+                   children = feList)
     class(filter) <- "filter"
     filter
 }

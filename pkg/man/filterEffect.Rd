@@ -11,16 +11,19 @@
   may be used multiple times.
 }
 \usage{
-filterEffect(filterUnits = c("coords", "bbox"),
+filterEffect(feList = NULL, filterUnits = c("coords", "bbox"),
              x = unit(0.5, "npc"), y = unit(0.5, "npc"),
              width = unit(1, "npc"), height = unit(1, "npc"),
              just = "centre", hjust = NULL, vjust = NULL,
              default.units = "npc",
-             primitiveUnits = c("coords", "bbox"),
-             filterEffects = NULL)
+             primitiveUnits = c("coords", "bbox"))
 addFilterEffect(filter, filterEffect, after = NA)
 }
 \arguments{
+  \item{feList}{
+    A list of filter effect primitives. For example a list containing a
+    gaussian blur primitive created by \code{\link{feGaussianBlur}}.
+  }
   \item{filterUnits}{
     If \code{"bbox"}, the filter effect itself is positioned relative to
     the bounding box of the referring grob. All units attempt to be
@@ -69,10 +72,6 @@ addFilterEffect(filter, filterEffect, after = NA)
     "npc" coordinates.
 
     If \code{"coords"}, uses grid coordinates to determine positioning.
-  }
-  \item{filterEffects}{
-    A list of filter effect primitives. For example a list containing a
-    gaussian blur primitive created by \code{\link{feGaussianBlur}}.
   }
   \item{filter}{
     A filter effect container object, as created by \code{filterEffect}.

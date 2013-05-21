@@ -13,9 +13,9 @@ grid.text("hello, world!", gp = gpar(fontsize = 96, col = "white"),
           name = "foretext")
 
 # We want to create a filter that takes the text thicker, and then blurs it
-f <- filterEffect(filterEffects = list(feMorphology(operator = "dilate",
-                                                    radius = unit(1, "mm")),
-                                       feGaussianBlur(sd = 1)))
+f <- filterEffect(list(feMorphology(operator = "dilate",
+                                    radius = unit(1, "mm")),
+                       feGaussianBlur(sd = 1)))
 # Apply the filter
 grid.filter("backtext", f)
 
