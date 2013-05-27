@@ -1,6 +1,9 @@
 # Functions for generating arbitrary SVG elements
 
-elementGrob <- function(el, name = NULL, attrs = NULL, children = NULL,
+elementGrob <- function(el, name = NULL, attrs = NULL, 
+                        namespace = NULL,
+                        namespaceDefinitions = NULL,
+                        children = NULL,
                         vp = NULL, childrenvp = NULL,
                         asis = FALSE) {
     eg <- gTree(name = name, vp = vp,
@@ -15,15 +18,22 @@ elementGrob <- function(el, name = NULL, attrs = NULL, children = NULL,
 
     eg$el <- el
     eg$attrs <- if (is.null(attrs)) list() else attrs
+    eg$namespace <- namespace
+    eg$namespaceDefinitions <- namespaceDefinitions
     cl <- class(eg)
     class(eg) <- unique(c("element.grob", cl))
     eg
 }
 
-grid.element <- function(el, name = NULL, attrs = NULL, children = NULL,
+grid.element <- function(el, name = NULL, attrs = NULL, 
+                         namespace = NULL,
+                         namespaceDefinitions = NULL,
+                         children = NULL,
                          vp = NULL, childrenvp = NULL,
                          asis = FALSE) {
-    grid.draw(elementGrob(el, name, attrs, children, vp, childrenvp, asis))
+    grid.draw(elementGrob(el, name, attrs, namespace,
+                          namespaceDefinitions, children,
+                          vp, childrenvp, asis))
 }
 
 devGrob.element.grob <- function(x, dev) {
@@ -31,7 +41,9 @@ devGrob.element.grob <- function(x, dev) {
             else getID(x$name, "grob"),
        name = x$el,
        classes = x$classes,
-       attrs = x$attrs)
+       attrs = x$attrs,
+       namespace = x$namespace,
+       namespaceDefinitions = x$namespaceDefinitions)
 }
 
 # Unlike gTrees, we don't need a group for children because it

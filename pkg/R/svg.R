@@ -202,6 +202,7 @@ svgMaskAttr <- function(id, mask) {
 }
 
 svgStartElement <- function(id = NULL, classes = NULL, element = NULL, attrs = NULL,
+                            namespace = NULL, namespaceDefinitions = NULL,
                             attributes=svgAttrib(), links=NULL, show = NULL,
                             svgdev = svgDevice()) {
   has.link <- hasLink(links[id])
@@ -228,6 +229,16 @@ svgStartElement <- function(id = NULL, classes = NULL, element = NULL, attrs = N
 
   attrs <- attrList(attrs)
   element <- newXMLNode(element, attrs = attrs,
+                        namespace =
+                            if (is.null(namespace))
+                                character()
+                            else 
+                                namespace,
+                        namespaceDefinitions =
+                            if (is.null(namespaceDefinitions))
+                                character()
+                            else
+                                namespaceDefinitions,
                         parent = svgDevParent(svgdev))
   svgDevChangeParent(element, svgdev)
 }
