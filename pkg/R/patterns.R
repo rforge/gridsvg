@@ -39,6 +39,11 @@ patternFillGrob <- function(x, pattern = NULL, label = NULL,
         registerPatternFill(label, pattern)
     }
 
+    if (length(alpha) < length(label))
+        alpha <- rep(alpha, length.out = length(label))
+    if (length(alpha) > length(label))
+        alpha <- alpha[1:length(label)]
+
     x$referenceLabel <- c(x$referenceLabel, label)
     # Attribs to be garnished *at draw time*. In particular needs to be
     # done because the label ID is not known until then, because of things
