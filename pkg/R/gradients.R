@@ -40,10 +40,8 @@ gradientFillGrob <- function(x, gradient = NULL, label = NULL,
         registerGradientFill(label, gradient)
     }
 
-    if (length(alpha) < length(label))
+    if (length(alpha) != length(label))
         alpha <- rep(alpha, length.out = length(label))
-    if (length(alpha) > length(label))
-        alpha <- alpha[1:length(label)]
 
     x$referenceLabel <- c(x$referenceLabel, label)
     x$gradientFillLabel <- label
