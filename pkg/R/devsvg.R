@@ -329,21 +329,22 @@ setMethod("inchToDevY", signature(device="svgDevice"),
 setMethod("devArrow", signature(device="svgDevice"),
           function(arrow, gp, device) {
             # Angle is specified for the arrowhead in degrees, need radians
-            ratAngle <- arrow$angle
-            ratAngle <- ratAngle * (pi / 180)
+            ratAngle <- (pi / 180) * arrow$angle
 
-            # We know the length, it is the adjacent line, need to find the
+            # We know the length, it is the hypotenuse, need to find the
             # length of the opposite line for the entire arrowhead, not
             # just one half
-            midpoint <- tan(ratAngle) * arrow$length
+            midpoint <- sin(ratAngle) * arrow$length
             arrowWidth <- midpoint * 2
-            
-            xs <- unit.c(unit(0, "inches"), arrow$length, unit(0, "inches"))
+            xmult <- cos(ratAngle)
+            arrowX <- xmult * arrow$length
+
+            xs <- unit.c(unit(0, "inches"), arrowX, unit(0, "inches"))
             ys <- unit.c(unit(0, "inches"), midpoint, arrowWidth)
             x <- cx(xs, device)
             y <- cy(ys, device)
 
-            svgMarker(x, y, arrow$type, arrow$ends, arrow$name,
+            svgMarker(x, y, arrow$type, arrow$ends, sign(xmult), arrow$name,
                       devParToSVGStyle(gp, device), device@dev)
           })
           

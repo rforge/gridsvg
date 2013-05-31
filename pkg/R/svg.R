@@ -557,10 +557,10 @@ svgLines <- function(x, y, id=NULL, arrow = NULL,
     svgEndLink(svgdev)
 }
 
-svgMarker <- function(x, y, type, ends, name,
+svgMarker <- function(x, y, type, ends, direction, name,
                       style=svgStyle(), svgdev=svgDevice()) {
-    width <- max(x)
-    height <- max(y)
+    width <- abs(max(x) - min(x))
+    height <- abs(max(y) - min(y))
     if (length(x) != length(y))
         stop("x and y must be same length")
     if (is.atomic(x)) {
@@ -594,10 +594,14 @@ svgMarker <- function(x, y, type, ends, name,
     # is a list that we can simply pass in as attrs
     # to newXMLNode
     ids <- markerName("both", name)
-    refXs <- round(c(-width, width), 2)
+    refXs <- direction * round(c(-width, width), 2)
     refYs <- round(c(-height / 2, height / 2), 2)
-    pathlist <- attrList(list(svgStyleAttributes(style),
-                              d = d))
+    pathlist <- attrList(list(d = d, svgStyleAttributes(style)))
+    # It is possible for width to be 0, i.e. when angle=90.
+    # Ensure that the marker is always at least as wide as the
+    # stroke width that it is given.
+    mwidth <- max(as.numeric(pathlist$`stroke-width`), width)
+    mheight <- max(as.numeric(pathlist$`stroke-width`), height)
     pathattrs <- list(pathlist,
                       pathlist)
     pathattrs[[1]]$transform <- "rotate(180)"
@@ -609,8 +613,8 @@ svgMarker <- function(x, y, type, ends, name,
                                        refY = refYs[1],
                                        overflow = "visible",
                                        markerUnits = "userSpaceOnUse",
-                                       markerWidth = round(width, 2),
-                                       markerHeight = round(height, 2),
+                                       markerWidth = round(mwidth, 2),
+                                       markerHeight = round(mheight, 2),
                                        orient = "auto"),
                           newXMLNode("path", attrs = pathattrs[[1]])),
                newXMLNode("marker",
@@ -619,8 +623,8 @@ svgMarker <- function(x, y, type, ends, name,
                                        refY = refYs[2],
                                        overflow = "visible",
                                        markerUnits = "userSpaceOnUse",
-                                       markerWidth = round(width, 2),
-                                       markerHeight = round(height, 2),
+                                       markerWidth = round(mwidth, 2),
+                                       markerHeight = round(mheight, 2),
                                        orient = "auto"),
                           newXMLNode("path", attrs = pathattrs[[2]])))
 }
