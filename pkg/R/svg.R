@@ -1008,17 +1008,17 @@ svgUseSymbol <- function(id, x, y, size, pch,
   tmpattr$transform <- paste0("translate(",
                               round(r, 2), ",",
                               round(r, 2), ")")
+  # Preserve order
+  tmpattr <- c(tmpattr,
+               svgStyleAttributes(style),
+               svgAttribTxt(attributes, id))
+
   # Need to scale the stroke width otherwise for large points
   # we also have large strokes
   sw <- as.numeric(tmpattr$`stroke-width`)
   scalef <- size / 10 # 10 is the point viewBox size
   sw <- sw / scalef
   tmpattr$`stroke-width` <- round(sw, 2)
-
-  # Preserve order
-  tmpattr <- c(tmpattr,
-               svgStyleAttributes(style),
-               svgAttribTxt(attributes, id))
 
   # For pch outside 0-25 or characters
   if (is.character(pch) || (is.numeric(pch) && pch > 25)) {

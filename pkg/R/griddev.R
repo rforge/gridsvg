@@ -723,6 +723,7 @@ primToDev.polyline <- function(x, dev) {
   # Each line has an id, grab corresponding positions
   listX <- split(x$x, id)
   listY <- split(x$y, id)
+  n <- length(listX)
 
   # Gp needs to be defined for each sub-grob, as does arrow
   gp <- expandGpar(x$gp, n)
@@ -803,6 +804,8 @@ primToDev.polygon <- function(x, dev) {
   # Each polygon has an id, grab corresponding positions
   listX <- split(x$x, id)
   listY <- split(x$y, id)
+  # May have id.length == 0 so use # of groups
+  n <- length(listX)
 
   # Gp needs to be defined for each sub-grob
   gp <- expandGpar(x$gp, n)
@@ -871,6 +874,7 @@ primToDev.xspline <- function(x, dev) {
   # Each xspline has an id, grab corresponding positions
   listX <- split(x$x, id)
   listY <- split(x$y, id)
+  n <- length(listX)
 
   # If x$shape is not defined for each point, repeat it for all points
   pointShapes <- rep(x$shape, length.out = length(x$x))
@@ -1201,11 +1205,38 @@ primToDev.points <- function(x, dev) {
             }
         }
 
-        # Need to force size to be fontsize for character pch
-        if (pchs[i] >= 32) {
-            psize <- if (is.null(pgp$fontsize)) get.gpar()$fontsize
-                     else pgp$fontsize 
-            pointSize <- unit(psize, "points")
+        # Size is now relative to text so use text grob
+        if (pchs[i] >= 32)
+            pointSize <- grobWidth(textGrob(asciipch))
+
+        # Points are affected by cex and fontsize but only if they are
+        # char or lines, etc
+        # Solution: push a viewport with new gps from the grob and can
+        # therefore can convert unit safely to inches because grid's unit
+        # conversion routines can handle when the *viewport* has the cex or
+        # fontsize information but not when the *grob* has it.
+        # Also, not recording on the DL because this viewport wasn't part
+        # of the original vp tree.
+        if (! is.null(pgp$cex) || ! is.null(pgp$fontsize)) {
+            xscale <- current.viewport()$xscale
+            yscale <- current.viewport()$yscale
+            if (! (is.null(pgp$cex) & is.null(pgp$fontsize))) {
+                pushViewport(viewport(xscale = xscale, yscale = yscale,
+                                      gp = gpar(cex = pgp$cex,
+                                                fontsize = pgp$fontsize)),
+                             recording = FALSE)
+            } else if (! is.null(pgp$cex)) {
+                pushViewport(viewport(xscale = xscale, yscale = yscale,
+                                      gp = gpar(cex = pgp$cex)),
+                             recording = FALSE)
+            } else {
+                # if (! is.null(pgp$fontsize))
+                pushViewport(viewport(xscale = xscale, yscale = yscale,
+                                      gp = gpar(fontsize = pgp$fontsize)),
+                             recording = FALSE)
+            }
+            pointSize <- convertWidth(pointSize, "inches") # Use width, matches grid
+            popViewport(recording = FALSE)
         }
 
         devUseSymbol(devGrob(pointsGrob(x$x[i], x$y[i],
