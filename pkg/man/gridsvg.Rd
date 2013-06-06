@@ -14,6 +14,8 @@ gridsvg(name = "Rplots.svg",
         exportMappings = c("none", "inline", "file"),
         exportJS = c("none", "inline", "file"),
         res = NULL,
+        prefix = "",
+        addClasses = FALSE,
         indent = TRUE,
         htmlWrapper = FALSE,
         usePaths = c("vpPaths", "gPaths", "none", "both"),
@@ -23,7 +25,8 @@ gridsvg(name = "Rplots.svg",
 dev.off(which = dev.cur())
 }
 \arguments{
-  \item{name, exportCoords, exportMappings, exportJS, res, indent,
+  \item{name, exportCoords, exportMappings, exportJS, res, prefix,
+    addClasses, indent,
     htmlWrapper, usePaths, uniqueNames, annotate, xmldecl}{
     These parameters are passed onto \code{\link{grid.export}}.
   }
