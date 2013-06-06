@@ -254,7 +254,7 @@ svgLinearGradient <- function(def, dev) {
 
     gradient <- newXMLNode("linearGradient",
         parent = svgDevParent(svgdev),
-        attrs = list(id = prefixName(def$id),
+        attrs = list(id = def$id,
                      x1 = round(def$x1, 2), x2 = round(def$x2, 2),
                      y1 = round(def$y1, 2), y2 = round(def$y2, 2),
                      gradientUnits = def$gradientUnits,
@@ -278,7 +278,7 @@ svgRadialGradient <- function(def, dev) {
 
     gradient <- newXMLNode("radialGradient",
         parent = svgDevParent(svgdev),
-        attrs = list(id = prefixName(def$id),
+        attrs = list(id = def$id,
                      cx = round(def$cx, 2), cy = round(def$cy, 2),
                      r = round(def$r, 2),
                      fx = round(def$fx, 2), fy = round(def$fy, 2),
