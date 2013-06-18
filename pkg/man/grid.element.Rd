@@ -1,13 +1,16 @@
 \name{grid.element}
 \alias{grid.element}
 \alias{elementGrob}
+\alias{grid.textNode}
+\alias{textNodeGrob}
 \title{ Create a grid grob representing an SVG element }
 \description{
   Creates a \code{element.grob} object which is a grid
   \code{\link{gTree}}, representing an SVG element. Useful in
   conjunction with \code{grid.export}, to produce an SVG document with
   elements inserted at particular points. The element (and its children)
-  are inserted at the point where the grob is \dQuote{drawn}.
+  are inserted at the point where the grob is \dQuote{drawn}. Text can
+  be inserted in a similar manner with \code{grid.textNode}.
 }
 \usage{
 grid.element(el, name = NULL, attrs = NULL,
@@ -18,10 +21,16 @@ elementGrob(el, name = NULL, attrs = NULL,
             namespace = NULL, namespaceDefinitions = NULL,
             children = NULL, vp = NULL,
             childrenvp = NULL, asis = FALSE)
+grid.textNode(text, name = NULL, vp = NULL)
+textNodeGrob(text, name = NULL, vp = NULL)
 }
 \arguments{
   \item{el}{
     The name of the SVG element to create, e.g. "rect".
+  }
+  \item{text}{
+    A single element character vector of text directly into insert into
+    the SVG image.
   }
   \item{name}{
     A character identifier.
@@ -56,7 +65,8 @@ elementGrob(el, name = NULL, attrs = NULL,
   }
 }
 \value{
-  An \code{element.grob} object.
+  An \code{element.grob} object. For \code{grid.textNode} a
+  \code{textnode.grob} object.
 }
 \author{ Simon Potter }
 \seealso{ \code{\link{grid.export}} }

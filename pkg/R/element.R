@@ -57,3 +57,25 @@ primToDev.element.grob <- function(x, dev) {
     })
     devEndElement(x$name, dev)
 }
+
+devGrob.textnode.grob <- function(x, dev) {
+    list(text = x$text)
+}
+
+primToDev.textnode.grob <- function(x, dev) {
+    devTextNode(devGrob(x, dev), dev)
+}
+
+textNodeGrob <- function(text, name = NULL, vp = NULL) {
+    if (length(text) > 1)
+        stop("'text' must be a single element character vector")
+    tng <- grob(name = name, vp = vp, cl = "textNode")
+    tng$text <- text
+    cl <- class(tng)
+    class(tng) <- unique(c("textnode.grob", cl))
+    tng
+}
+
+grid.textNode <- function(text, name = NULL, vp = NULL) {
+    grid.draw(textNodeGrob(text, name, vp))
+}

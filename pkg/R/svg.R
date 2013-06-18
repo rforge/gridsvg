@@ -254,6 +254,10 @@ svgEndElement <- function(id=NULL, links=NULL, svgdev=svgDevice()) {
   svgDevChangeParent(xmlParent(svgDevParent(svgdev)), svgdev)
 }
 
+svgTextNode <- function(text, svgdev = svgDevice()) {
+  newXMLTextNode(text, parent = svgDevParent(svgdev))
+}
+
 svgStartGroup <- function(id=NULL, clip=FALSE, mask=FALSE,
                           attributes=svgAttrib(), links=NULL, show=NULL,
                           style=svgStyle(), coords=NULL, classes = NULL,

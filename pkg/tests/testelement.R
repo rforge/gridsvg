@@ -8,5 +8,8 @@ grid.element("testParent",
                               rectGrob(),
                               elementGrob("thirdChild",
                                           attrs = list(anAttrib = "value"))))
+# Create a 'title' element with descriptive text
+grid.element("title", children = gList(
+             textNodeGrob("A gridSVG image with customised SVG content")))
 grid.export("element-test.svg")
 dev.off()

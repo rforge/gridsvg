@@ -39,6 +39,11 @@ setGeneric("devEndElement",
              standardGeneric("devEndElement")
            })
 
+setGeneric("devTextNode",
+           function(text, device) {
+             standardGeneric("devTextNode")
+           })
+
 setGeneric("devStartClip",
            function(clip, gp, device) {
              standardGeneric("devStartClip")

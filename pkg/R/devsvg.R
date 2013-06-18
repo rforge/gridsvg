@@ -432,6 +432,11 @@ setMethod("devEndElement", signature(device="svgDevice"),
             svgEndElement(name, device@links, device@dev)
           })
 
+setMethod("devTextNode", signature(device="svgDevice"),
+          function(text, device) {
+            svgTextNode(text$text, device@dev)
+          })
+
 setMethod("devStartClip", signature(device="svgDevice"),
           function(clip, gp, device) {
             svgClipPath(clip$name, clip$x, clip$y,
