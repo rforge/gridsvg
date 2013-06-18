@@ -169,8 +169,12 @@ isLabelUsed <- function(label) {
 setLabelUsed <- function(label) {
     if (! is.null(label)) {
         rut <- get("refUsageTable", envir = .gridSVGEnv)
-        rut[rut$label %in% label, "used"] <- TRUE
-        assign("refUsageTable", rut, envir = .gridSVGEnv)
+        if (any(rut$label %in% label)) {
+            rut[rut$label %in% label, "used"] <- TRUE
+            assign("refUsageTable", rut, envir = .gridSVGEnv)
+        } else {
+            stop("An attempt was made to reference content that no longer exists.")
+        }
     }
 }
 
