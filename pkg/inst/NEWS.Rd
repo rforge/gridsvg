@@ -65,7 +65,7 @@
     to apply gradient fills to grobs. (Simon)
 
     \item Bug fix for pointsGrobs. 'size' units were unnecessarily being
-    manipulated. (Simon & Paul)
+    manipulated. They should now be sized more accurately. (Simon & Paul)
 
     \item Added support for non-rectangular clipping paths. Use
     'grid.clipPath' and 'clipPathGrob' for applying clipping paths to
@@ -95,6 +95,24 @@
 
     \item Bugfix for unit conversion functions. "svg" was not being
     handled correctly. (Simon)
+
+    \item Bugfix for arrows. Definition now matches 'grid'. Now also
+    handles the case when an arrow's line width is greater than its
+    width/height (Firefox would not show the arrow prior to this
+    fix). (Simon)
+
+    \item Bugfix for polygons and xsplines. They should now handle the
+    case where an 'id.length' is 0. (Simon)
+
+    \item Plain SVG text can now be inserted into the image (in a
+    similar manner to 'grid.element') using 'grid.textNode'. (Simon)
+
+    \item Bugfix 'childrenOrder' is now respected for gTrees.
+
+    \item Bugfix for colours. 0 is now valid (but transparent). (Simon)
+
+    \item Fix for garnishing. They should now always be applied over the
+    top of existing SVG attributes. (Simon)
 
   }
 }
