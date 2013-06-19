@@ -114,6 +114,12 @@
     \item Fix for garnishing. They should now always be applied over the
     top of existing SVG attributes. (Simon)
 
+    \item Bug fix for fill in arrow heads on xsplines (was being
+    forced to transparent)
+
+    \item Bug fix to trim identical values from start and end of
+    xspline points (otherwise auto calculation of arrow orientation
+    can get confused)
   }
 }
 

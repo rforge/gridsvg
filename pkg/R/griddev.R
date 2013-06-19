@@ -830,21 +830,32 @@ primToDev.polygon <- function(x, dev) {
   devEndGroup(x$name, FALSE, dev)
 }
 
+trim <- function(points) {
+    n <- length(points$x)
+    if (n > 2) {
+        remove <- 1
+        while (remove < n &&
+               points$x[1] == points$x[1 + remove] &&
+               points$y[1] == points$y[1 + remove]) {
+            remove <- remove + 1
+        }
+        if (remove > 1) {
+            points$x <- points$x[-(1:(remove - 1))]
+            points$y <- points$y[-(1:(remove - 1))]            
+        }
+    }
+    points
+}
+
 primToDev.xspline <- function(x, dev) {
   # Setting up function that turns an xspline into a series of points
   # which is then used to define a line or path
   splineToGrob <- function(spline) {
     splinePoints <- xsplinePoints(spline)
     if (spline$open) {
-        # Treating as a line because unclosed paths are not filled.
-        # svgPath() assumes all paths are closed to allow for filling
-        # but we are unable to supply parameters to it to allow for 
-        # open paths
-        splineGp <- spline$gp
-        splineGp$fill <- "transparent"
         linesGrob(x = splinePoints$x,
                   y = splinePoints$y,
-                  gp = splineGp,
+                  gp = spline$gp,
                   arrow = spline$arrow,
                   default.units = spline$default.units,
                   name = spline$name)
@@ -909,9 +920,22 @@ primToDev.xspline <- function(x, dev) {
       if (inherits(sg, "pathgrob")) {
           devPath(devGrob(sg, dev), gparToDevPars(sg$gp), dev)
       } else {
-          if (! is.null(sg$arrow))
-              devArrow(arrowAddName(sg$arrow, sg$name), gparToDevPars(sg$gp), dev)
-          devLines(devGrob(sg, dev), gparToDevPars(sg$gp), dev)
+          dg <- devGrob(sg, dev)
+          if (! is.null(sg$arrow)) {
+              devArrow(arrowAddName(sg$arrow, sg$name),
+                       gparToDevPars(sg$gp), dev)
+              # The arrow orientation is determined "auto"matically by
+              # the SVG renderer, so we need to avoid identical values
+              # at start or end of points (this has been done in
+              # xsplinePoints(), but we need to do it again here because
+              # we will be rounding to 2 dp for SVG output!)
+              dgTrimFront <- trim(list(x=round(dg$x, 2), y=round(dg$y, 2)))
+              dgTrimBack <- trim(list(x=rev(dgTrimFront$x),
+                                      y=rev(dgTrimFront$y)))
+              dg$x <- rev(dgTrimBack$x)
+              dg$y <- rev(dgTrimBack$y)
+          }
+          devLines(dg, gparToDevPars(sg$gp), dev)
       }
   }
 
