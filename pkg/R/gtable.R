@@ -3,6 +3,12 @@
 # parse. To support the ggplot2 package, these compatibility features have
 # been created.
 
+# NOTE that the check for a makeContent.gtable() method will
+# bail out back to normal processing;  this is because there
+# exists a fork of 'gtable' that does NOT need this special
+# case handling (and one day that fork may be merged back
+# into the 'gtable' trunk)
+
 grobToDev.gTableChild <- function(x, dev) {
   if (is.null(getS3method("makeContent", "gtable", TRUE))) {
     depth <- enforceVP(x$wrapvp, dev)
