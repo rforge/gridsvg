@@ -4,17 +4,25 @@
 # been created.
 
 grobToDev.gTableChild <- function(x, dev) {
-  depth <- enforceVP(x$wrapvp, dev)
-  NextMethod()
-  unwindVP(x$wrapvp, depth, dev)
+  if (is.null(getS3method("makeContent", "gtable", TRUE))) {
+    depth <- enforceVP(x$wrapvp, dev)
+    NextMethod()
+    unwindVP(x$wrapvp, depth, dev)
+  } else {
+    NextMethod()
+  }
 }
 
 
 grobToDev.gTableParent <- function(x, dev) {
-  depth <- enforceVP(x$layoutvp, dev)
-  x$classes <- class(x)
-  primToDev(x, dev)
-  unwindVP(x$layoutvp, depth, dev)
+  if (is.null(getS3method("makeContent", "gtable", TRUE))) {
+    depth <- enforceVP(x$layoutvp, dev)
+    x$classes <- class(x)
+    primToDev(x, dev)
+    unwindVP(x$layoutvp, depth, dev)
+  } else {
+    NextMethod()
+  }
 }
 
 # Ripped from gtable package's grid.draw.gtable method in grid.r.
@@ -48,7 +56,11 @@ gTableGrob <- function(x) {
 }
 
 grobToDev.gtable <- function(x, dev) {
-  grobToDev(gTableGrob(x), dev)
+  if (is.null(getS3method("makeContent", "gtable", TRUE))) {
+    grobToDev(gTableGrob(x), dev)
+  } else {
+    NextMethod()
+  }
 }
 
 
