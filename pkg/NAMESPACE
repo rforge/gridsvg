@@ -68,8 +68,10 @@ export("gridSVGCoords",
        "viewportCreate",
        "viewportConvertX",
        "viewportConvertY",
+       "viewportConvertPos",
        "viewportConvertWidth",
-       "viewportConvertHeight")
+       "viewportConvertHeight",
+       "viewportConvertDim")
 
 useDynLib("gridSVG")
 

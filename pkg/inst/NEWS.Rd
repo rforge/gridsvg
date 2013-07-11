@@ -2,6 +2,20 @@
 \title{NEWS file for the gridSVG package}
 \encoding{UTF-8}
 
+\section{Changes in version 1.3-0}{
+  \itemize{
+    \item Added support for rotated viewports
+    (previously, rectangles, text, rasters, and clipping rects
+    did not export properly, if drawn within a rotated viewport)
+
+    Includes changes to rendering, animation, and coordinate system
+    export and conversion.
+
+    \item Fixed bug in viewportConvertWidth() and
+    viewportConvertHeight() when converting from "native".
+  }
+}
+
 \section{Changes in version 1.2-0}{
   \itemize{
 

@@ -372,7 +372,7 @@ setMethod("devPath", signature(device="svgDevice"),
 setMethod("devRaster", signature(device="svgDevice"),
           function(raster, gp, device) {
             svgRaster(raster$x, raster$y, raster$width, raster$height,
-                      raster$datauri,
+                      raster$angle, raster$datauri,
                       raster$name, raster$just, raster$vjust, raster$hjust,
                       listToSVGAttrib(raster$attributes), device@links,
                       device@show, devParToSVGStyle(gp, device), device@dev)
@@ -380,29 +380,24 @@ setMethod("devRaster", signature(device="svgDevice"),
 
 setMethod("devRect", signature(device="svgDevice"),
           function(rect, gp, device) {
-            svgRect(rect$x, rect$y, rect$width, rect$height, rect$name,
+            svgRect(rect$x, rect$y, rect$width, rect$height, rect$angle,
+                    rect$name,
                     device@attrs, device@links, device@show,
                     devParToSVGStyle(gp, device), device@dev)
           })
 
 setMethod("devText", signature(device="svgDevice"),
           function(text, gp, device) {
-            # Draw SVG text with fill = col
-            if (is.null(gp$col)) {
-              gp$fill <- "black"
-              gp$fillAlpha <- 255
-            } else {
-              gp$fill <- gp$col
-              gp$fillAlpha <- gp$colAlpha
-            }
-
-            svgText(text$x, text$y, text$text,
-                    text$hjust, text$vjust, text$rot,
-                    text$width, text$height, text$ascent, text$descent,
-                    text$lineheight, text$charheight, text$fontheight,
-                    text$fontfamily, text$fontface, text$name,
-                    device@attrs, device@links, device@show,
-                    devParToSVGStyle(gp, device), device@dev)
+              # SVG text will use fill, but fill has already been
+              # set to col back in primToDev.text() in griddev.R
+              svgText(text$x, text$y, text$text,
+                      text$hjust, text$vjust, text$rot,
+                      text$width, text$height, text$angle,
+                      text$ascent, text$descent,
+                      text$lineheight, text$charheight, text$fontheight,
+                      text$fontfamily, text$fontface, text$name,
+                      device@attrs, device@links, device@show,
+                      devParToSVGStyle(gp, device), device@dev)
           })
 
 setMethod("devCircle", signature(device="svgDevice"),
@@ -527,14 +522,15 @@ setMethod("devStartMaskGroup", signature(device="svgDevice"),
 
 setMethod("devStartGroup", signature(device="svgDevice"),
           function(group, gp, device) {
-            clip <- FALSE
-            if (! is.null(group$clip)) {
-              if (group$clip) {
-                clip <- TRUE
-                svgClipPath(group$name, group$vpx, group$vpy,
-                            group$vpw, group$vph, device@dev)
+              clip <- FALSE
+              if (! is.null(group$clip)) {
+                  if (group$clip) {
+                      clip <- TRUE
+                      svgClipPath(group$name, group$vpx, group$vpy,
+                                  group$vpw, group$vph, group$angle,
+                                  device@dev)
+                  }
               }
-            }
 
             # If we're starting a VP, then allow for "contexts" to be
             # added to children of this VP. A context is a clip path
@@ -579,6 +575,7 @@ setMethod("devEndSymbol", signature(device="svgDevice"),
 setMethod("devUseSymbol", signature(device="svgDevice"),
           function(point, gp, device) {
             svgUseSymbol(point$name, point$x, point$y, point$size, point$pch,
+                         point$angle,
                          device@attrs, device@links, device@show,
                          devParToSVGStyle(gp, device), device@dev)
           })

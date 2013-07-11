@@ -3,6 +3,12 @@ vpError <- function() {
   stop("vp should only be path")
 }
 
+# Wrapper for accessing cumulative rotation from current viewport
+# (Ideally this should be in 'grid')
+current.angle <- function() {
+    grid:::grid.Call("L_currentViewport")$rotation
+}
+
 # Functions to take a grid grob and call appropriate
 # functions from dev.R to produce output on a device
 
@@ -332,6 +338,7 @@ devGrob.points <- function(x, dev) {
        x = cx(loc$x, dev),
        y = cy(loc$y, dev),
        size = cd(dToInches(x$size), dev),
+       angle = current.angle(),
        classes = x$classes,
        pch = x$pch)
 }
@@ -385,6 +392,7 @@ devGrob.rastergrob <- function(x, dev) {
        y=cy(lb$y, dev),
        width=cw(dim$w, dev),
        height=ch(dim$h, dev),
+       angle=current.angle(),
        datauri=x$datauri,
        classes=x$classes,
        name=x$name)
@@ -397,6 +405,7 @@ devGrob.rect <- function(x, dev) {
        y=cy(lb$y, dev),
        width=cw(dim$w, dev),
        height=ch(dim$h, dev),
+       angle=current.angle(),
        classes=x$classes,
        name=x$name)
 }
@@ -457,6 +466,7 @@ devGrob.text <- function(x, dev) {
        rot=x$rot,
        width=width,
        height=height,
+       angle=current.angle(),
        ascent=ascent,
        descent=descent,
        lineheight=textLineHeight,
@@ -541,6 +551,7 @@ getCoordsInfo <- function(vp, tm, dev) {
                  y = round(cy(unit(loc[2], "inches"), dev), 2),
                  width = round(cw(unit(1, "npc"), dev), 2),
                  height = round(ch(unit(1, "npc"), dev), 2),
+                 angle = current.angle(),
                  xscale = vp$xscale,
                  yscale = vp$yscale,
                  inch = round(cw(unit(1, "inches"), dev), 2))
@@ -579,6 +590,7 @@ devGrob.viewport <- function(x, dev) {
            vpy=coords$y,
            vpw=coords$width,
            vph=coords$height,
+           angle=current.angle(),
            name=getID(vpname, "vp"),
            clip=clip,
            classes=x$classes,
@@ -1087,6 +1099,8 @@ primToDev.text <- function(x, dev) {
     textLabel <- rep(x$label, length.out = n)
   }
 
+  # Force fill to be col for text
+  x$gp$fill <- x$gp$col
   
   # Expand the gp such that it fully defines all sub-grobs
   gp <- expandGpar(x$gp, n)
@@ -1144,9 +1158,39 @@ primToDev.circle <- function(x, dev) {
   devEndGroup(x$name, FALSE, dev)
 }
 
-# Quick fix for now
-# Add device method eventually?
-# Could get tricky to do all symbol types here ... (?)
+adjustSymbolSize <- function(pointSize, pgp) {
+    # Points are affected by cex and fontsize but only if they are
+    # char or lines, etc
+    # Solution: push a viewport with new gps from the grob and can
+    # therefore can convert unit safely to inches because grid's unit
+    # conversion routines can handle when the *viewport* has the cex or
+    # fontsize information but not when the *grob* has it.
+    # Also, not recording on the DL because this viewport wasn't part
+    # of the original vp tree.
+    if (! is.null(pgp$cex) || ! is.null(pgp$fontsize)) {
+        xscale <- current.viewport()$xscale
+        yscale <- current.viewport()$yscale
+        if (! (is.null(pgp$cex) & is.null(pgp$fontsize))) {
+            pushViewport(viewport(xscale = xscale, yscale = yscale,
+                                  gp = gpar(cex = pgp$cex,
+                                      fontsize = pgp$fontsize)),
+                         recording = FALSE)
+        } else if (! is.null(pgp$cex)) {
+            pushViewport(viewport(xscale = xscale, yscale = yscale,
+                                  gp = gpar(cex = pgp$cex)),
+                         recording = FALSE)
+        } else {
+            # if (! is.null(pgp$fontsize))
+            pushViewport(viewport(xscale = xscale, yscale = yscale,
+                                  gp = gpar(fontsize = pgp$fontsize)),
+                         recording = FALSE)
+        }
+        pointSize <- convertWidth(pointSize, "inches") # Use width, matches grid
+        popViewport(recording = FALSE)
+    }
+    pointSize
+}
+
 primToDev.points <- function(x, dev) {
     # Finding out how many grobs we're going to be dealing with
     # length of x and y already checked in grid.points
@@ -1233,36 +1277,9 @@ primToDev.points <- function(x, dev) {
         if (pchs[i] >= 32)
             pointSize <- grobWidth(textGrob(asciipch))
 
-        # Points are affected by cex and fontsize but only if they are
-        # char or lines, etc
-        # Solution: push a viewport with new gps from the grob and can
-        # therefore can convert unit safely to inches because grid's unit
-        # conversion routines can handle when the *viewport* has the cex or
-        # fontsize information but not when the *grob* has it.
-        # Also, not recording on the DL because this viewport wasn't part
-        # of the original vp tree.
-        if (! is.null(pgp$cex) || ! is.null(pgp$fontsize)) {
-            xscale <- current.viewport()$xscale
-            yscale <- current.viewport()$yscale
-            if (! (is.null(pgp$cex) & is.null(pgp$fontsize))) {
-                pushViewport(viewport(xscale = xscale, yscale = yscale,
-                                      gp = gpar(cex = pgp$cex,
-                                                fontsize = pgp$fontsize)),
-                             recording = FALSE)
-            } else if (! is.null(pgp$cex)) {
-                pushViewport(viewport(xscale = xscale, yscale = yscale,
-                                      gp = gpar(cex = pgp$cex)),
-                             recording = FALSE)
-            } else {
-                # if (! is.null(pgp$fontsize))
-                pushViewport(viewport(xscale = xscale, yscale = yscale,
-                                      gp = gpar(fontsize = pgp$fontsize)),
-                             recording = FALSE)
-            }
-            pointSize <- convertWidth(pointSize, "inches") # Use width, matches grid
-            popViewport(recording = FALSE)
-        }
-
+        # Enforce gp$cex or gp$fontsize
+        pointSize <- adjustSymbolSize(pointSize, pgp)
+        
         devUseSymbol(devGrob(pointsGrob(x$x[i], x$y[i],
                                         pch = asciipch,
                                         size = pointSize,

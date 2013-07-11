@@ -169,13 +169,25 @@ svgComment <- function(comment, svgdev=svgDevice()) {
   newXMLCommentNode(comment, parent = svgDevParent(svgdev))
 }
 
-svgClipPath <- function(id, vpx, vpy, vpw,
-                        vph, svgdev=svgDevice()) {
+# <clipPath>, <rect>, <raster>, and <text> elements MAY
+# have a rotation angle
+svgAngleTransform <- function(x, y, angle) {
+    if (!is.null(angle) && angle != 0) {
+        paste0("rotate(", round(angle, 2), " ",
+               round(x, 2), " ", round(y, 2), ")")
+    } else {
+        NULL
+    }
+}
+
+svgClipPath <- function(id, vpx, vpy, vpw, vph, vpa,
+                        svgdev=svgDevice()) {
   clipPathID <- prefixName(paste(id, "clipPath",
                                  sep = getSVGoption("id.sep")))
   newXMLNode("defs", parent = svgDevParent(svgdev),
              newXMLNode("clipPath",
-                        attrs = list(id = clipPathID),
+                        attrs = list(id = clipPathID,
+                            transform=svgAngleTransform(vpx, vpy, vpa)),
                         newXMLNode("rect",
                                    attrs = list(x = round(vpx, 2),
                                                 y = round(vpy, 2),
@@ -493,6 +505,7 @@ svgAnimatePath <- function(xvalues, yvalues, pathid, timeid,
 
 svgAnimateTransform <- function(attrib, values,
                                 begin, interp, duration, rep, revert,
+                                additive = "replace",
                                 id=NULL,
                                 svgdev=svgDevice()) {
   n <- if (is.null(id)) 1 else length(unique(id))
@@ -504,30 +517,49 @@ svgAnimateTransform <- function(attrib, values,
                           calcMode = interp,
                           dur = paste0(duration, "s"),
                           values = values,
+                          additive = additive,
                           repeatCount = if (is.numeric(rep)) rep else if (rep) "indefinite" else 1,
                           fill = if (revert) "remove" else "freeze"))
 }
 
 svgAnimateTranslation <- function(xvalues, yvalues,
                                   begin, interp, duration, rep, revert,
+                                  additive = "replace",
                                   id=NULL,
                                   svgdev=svgDevice()) {
   svgAnimateTransform("translate",
                       paste(round(xvalues, 2),
                             round(yvalues, 2),
                             sep=",", collapse=';'),
-                      begin, interp, duration, rep, revert, id, svgdev)
+                      begin, interp, duration, rep, revert,
+                      additive, id, svgdev)
+}
+
+svgAnimateRotation <- function(angle, xvalues, yvalues,
+                               begin, interp, duration, rep, revert,
+                               additive = "replace",
+                               id=NULL,
+                               svgdev=svgDevice()) {
+  svgAnimateTransform("rotate",
+                      paste(round(angle, 2),
+                            round(xvalues, 2),
+                            round(yvalues, 2),
+                            sep=" ", collapse=';'),
+                      begin, interp, duration, rep, revert,
+                      additive, id, svgdev)
 }
 
 svgAnimateScale <- function(xvalues, yvalues,
                             begin, interp, duration, rep, revert,
+                            additive = "replace",
                             id=NULL,
                             svgdev=svgDevice()) {
   svgAnimateTransform("scale",
                       paste(round(xvalues, 2),
                             round(yvalues, 2),
                             sep=",", collapse=';'),
-                      begin, interp, duration, rep, revert, id, svgdev)
+                      begin, interp, duration, rep, revert,
+                      additive, id, svgdev)
 }
 
 svgLines <- function(x, y, id=NULL, arrow = NULL,
@@ -723,53 +755,63 @@ svgPath <- function(x, y, rule, id=NULL,
         svgEndLink(svgdev)
 }
 
-svgRaster <- function(x, y, width, height, datauri, id=NULL,
+svgRaster <- function(x, y, width, height, angle=0, datauri, id=NULL,
                       just, vjust, hjust,
                       attributes=svgAttrib(), links=NULL, show=NULL,
                       style=svgStyle(), svgdev=svgDevice()) {
-  has.link <- hasLink(links[id])
-  if (has.link)
-    svgStartLink(links[id], show[id], svgdev)
+    has.link <- hasLink(links[id])
+    if (has.link)
+        svgStartLink(links[id], show[id], svgdev)
 
-  attrlist <- list(id = prefixName(id),
-                   transform = paste0("translate(",
-                                      round(x, 2), ",",
-                                      round(height + y, 2),
-                                      ")"),
-                   svgStyleAttributes(style),
-                   svgAttribTxt(attributes, id))
-  attrlist <- attrList(attrlist)
-  newXMLNode("g", parent = svgDevParent(svgdev),
-             attrs = attrlist,
-             newXMLNode("g",
-                        attrs = list(id = paste(prefixName(id), "scale", sep = getSVGoption("id.sep")),
-                                     transform = paste0("scale(",
-                                                        round(width, 2), ", ",
-                                                        round(-height, 2), ")")),
-                        newXMLNode("image",
-                                   attrs = list(x = 0,
-                                                y = 0,
-                                                width = 1,
-                                                height = 1,
-                                                "xlink:href" = datauri,
-                                                preserveAspectRatio = "none"))))
+    rx <- round(x, 2)
+    ry <- round(y, 2)
 
-  if (has.link)
-    svgEndLink(svgdev)
+    transform <- paste0("translate(", rx, ",", round(height + y, 2), ")")
+    angleTransform <- svgAngleTransform(rx, ry, angle)
+    if (!is.null(angleTransform)) {
+        transform <- paste(angleTransform, transform)
+    }
+    attrlist <- list(id = prefixName(id),
+                     transform = transform,
+                     svgStyleAttributes(style),
+                     svgAttribTxt(attributes, id))
+    attrlist <- attrList(attrlist)
+    newXMLNode("g", parent = svgDevParent(svgdev),
+               attrs = attrlist,
+               newXMLNode("g",
+                          attrs = list(id = paste(prefixName(id), "scale",
+                                           sep = getSVGoption("id.sep")),
+                              transform = paste0("scale(",
+                                  round(width, 2), ", ",
+                                  round(-height, 2), ")")),
+                          newXMLNode("image",
+                                     attrs = list(x = 0,
+                                         y = 0,
+                                         width = 1,
+                                         height = 1,
+                                         "xlink:href" = datauri,
+                                         preserveAspectRatio = "none"))))
+
+    if (has.link)
+        svgEndLink(svgdev)
 }
 
-svgRect <- function(x, y, width, height, id=NULL,
+svgRect <- function(x, y, width, height, angle=0, id=NULL,
                     attributes=svgAttrib(), links=NULL, show=NULL,
                     style=svgStyle(), svgdev=svgDevice()) {
   has.link <- hasLink(links[id])
   if (has.link)
     svgStartLink(links[id], show[id], svgdev)
 
+  rx <- round(x, 2)
+  ry <- round(y, 2)
+  
   attrlist <- list(id = prefixName(id),
-                   x = round(x, 2),
-                   y = round(y, 2),
+                   x = rx,
+                   y = ry,
                    width = round(width, 2),
                    height = round(height, 2),
+                   transform = svgAngleTransform(rx, ry, angle), 
                    svgStyleAttributes(style),
                    svgAttribTxt(attributes, id))
   attrlist <- attrList(attrlist)
@@ -780,7 +822,7 @@ svgRect <- function(x, y, width, height, id=NULL,
     svgEndLink(svgdev)
 }
 
-svgTextSplitLines <- function(text, lineheight, charheight,
+svgTextSplitLines <- function(text, id, lineheight, charheight,
                               vjust, svgdev) {
     # Splitting based on linebreaks
     splitText <- strsplit(text, "\n")
@@ -807,13 +849,15 @@ svgTextSplitLines <- function(text, lineheight, charheight,
     # is worked out automatically from there
     for (i in 1:n) {
         newXMLNode("tspan", parent = svgDevParent(svgdev),
-                   attrs = list(dy = round(lineheight[i], 2),
-                                x = 0),
+                   attrs = list(id = paste(id, "tspan", i,
+                                    sep=getSVGoption("id.sep")),
+                       dy = round(lineheight[i], 2),
+                       x = 0),
                    newXMLTextNode(textContent[i]))
     }
 }
 
-svgTextElement <- function(text, rot, hjust, vjust,
+svgTextElement <- function(text, id, rot, hjust, vjust,
                            lineheight, charheight, style, svgdev=svgDevice()) {
     # Rotation in SVG goes clockwise from +ve x=axis
     transform <- if (rot != 0)
@@ -822,6 +866,7 @@ svgTextElement <- function(text, rot, hjust, vjust,
                    NULL
     attrlist <- list(x = 0,
                      y = 0,
+                     id = paste(id, "text", sep=getSVGoption("id.sep")),
                      transform,
                      textAnchor(hjust),
                      svgStyleAttributes(style))
@@ -831,7 +876,7 @@ svgTextElement <- function(text, rot, hjust, vjust,
     # Set parent of all <tspan>s to be the <text> el
     svgDevChangeParent(newpar, svgdev)
     # Write each of the lines here
-    svgTextSplitLines(text, lineheight, charheight, vjust, svgdev)
+    svgTextSplitLines(text, id, lineheight, charheight, vjust, svgdev)
     # Resetting parent
     svgDevChangeParent(xmlParent(newpar), svgdev)
 }
@@ -849,7 +894,7 @@ svgTextElement <- function(text, rot, hjust, vjust,
 # The code below tries to do something rational by making use
 # of finer detail metric information for the formula
 # to mimic R's vertical justification.
-svgMathElement <- function(text, rot, hjust, vjust,
+svgMathElement <- function(text, id, rot, hjust, vjust,
                            width, height, ascent, descent,
                            lineheight, charheight, fontheight,
                            fontfamily, fontface, style,
@@ -874,6 +919,7 @@ svgMathElement <- function(text, rot, hjust, vjust,
 
     tmpattr <- list(x = round(x, 2),
                     y = round(y, 2),
+                    id = paste(id, "mathtext", sep=getSVGoption("id.sep")),
                     width = round(3*width, 2),
                     height = round(3*height, 2),
                     svgStyleAttributes(style))
@@ -889,7 +935,7 @@ svgMathElement <- function(text, rot, hjust, vjust,
 }
 
 svgText <- function(x, y, text, hjust="left", vjust="bottom", rot=0,
-                    width=1, height=1, ascent=1, descent=0,
+                    width=1, height=1, angle=0, ascent=1, descent=0,
                     lineheight=1, charheight=.8, fontheight=1,
                     fontfamily="sans", fontface="plain",
                     id=NULL, attributes=svgAttrib(), links=NULL, show=NULL,
@@ -898,11 +944,16 @@ svgText <- function(x, y, text, hjust="left", vjust="bottom", rot=0,
     if (has.link)
         svgStartLink(links[id], show[id], svgdev)
 
+    rx <- round(x, 2)
+    ry <- round(y, 2)
+    
     topattrs <- list()
     topattrs$id <- prefixName(id)
-    topattrs$transform <- paste0("translate(",
-                                 round(x, 2), ", ",
-                                 round(y, 2), ")")
+    angleTransform <- svgAngleTransform(rx, ry, angle)
+    topattrs$transform <- paste0("translate(", rx, ", ", ry, ")")
+    if (!is.null(angleTransform)) {
+        topattrs$transform <- paste(angleTransform, topattrs$transform)
+    }
     topattrs$`stroke-width` <- "0.1"
     topattrs <- c(topattrs, svgAttribTxt(attributes, id))
 
@@ -913,20 +964,22 @@ svgText <- function(x, y, text, hjust="left", vjust="bottom", rot=0,
     topg <- newXMLNode("g", parent = svgDevParent(svgdev),
                        attrs = topattrs)
     sec <- newXMLNode("g", parent = topg,
-                      attrs = list(transform = "scale(1, -1)"))
+                      attrs = list(id = paste(prefixName(id), "scale",
+                                       sep = getSVGoption("id.sep")),
+                          transform = "scale(1, -1)"))
 
     # Let all child <tspan> elements or MathML fragments be
     # located under the *second* <g>
     svgDevChangeParent(sec, svgdev)
 
     if (is.language(text)) {
-        svgMathElement(text, rot, hjust, vjust,
+        svgMathElement(text, prefixName(id), rot, hjust, vjust,
                        width, height, ascent, descent,
                        lineheight, charheight, fontheight,
                        fontfamily, fontface, style,
                        svgdev)
     } else {
-        svgTextElement(text, rot, hjust, vjust,
+        svgTextElement(text, prefixName(id), rot, hjust, vjust,
                        lineheight, charheight, style,
                        svgdev)
     }
@@ -985,7 +1038,7 @@ svgScript <- function(body, href, type="application/ecmascript",
 # so that width is 0.75 of the specified size. Most of the time
 # this means we have a computed radius of 3.75
 
-svgUseSymbol <- function(id, x, y, size, pch,
+svgUseSymbol <- function(id, x, y, size, pch, angle=0,
                          attributes=svgAttrib(), links=NULL, show=NULL,
                          style=svgStyle(), svgdev=svgDevice()) {
 
@@ -1003,19 +1056,24 @@ svgUseSymbol <- function(id, x, y, size, pch,
             else
                 pch
 
+  rx <- round(x, 2)
+  ry <- round(y, 2)
+  
   tmpattr <- list(id = prefixName(id),
                   "xlink:href" =
                     paste0("#", prefixName(paste0("gridSVG.pch", numpch))),
-                  x = round(x, 2),
-                  y = round(y, 2),
+                  x = rx, y = ry,
                   width = round(size, 2),
                   height = round(size, 2))
 
   # centering adjustment
-  r <- -size / 2
-  tmpattr$transform <- paste0("translate(",
-                              round(r, 2), ",",
-                              round(r, 2), ")")
+  r <- round(-size / 2, 2)
+  tmpattr$transform <- paste0("translate(", r, ",", r, ")")
+  angleTransform <- svgAngleTransform(rx, ry, angle)
+  if (!is.null(angleTransform)) {
+      tmpattr$transform <- paste(angleTransform, tmpattr$transform)
+  }
+  
   # Preserve order
   tmpattr <- c(tmpattr,
                svgStyleAttributes(style),

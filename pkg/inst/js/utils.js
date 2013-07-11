@@ -15,11 +15,13 @@
  * @returns {number} A unit in SVG pixels
  */
 var viewportConvertX = function(vpname, x, from, to) {
+    if (gridSVGCoords[vpname].angle != 0)
+        throw new Error("Viewport angle non-zero; consider using viewportConvertPos()");
     if (!to)
         to = "svg";
     if (from === "svg")
         x -= gridSVGCoords[vpname].x;
-    var width = viewportConvertWidth(vpname, x, from, to);
+    var width = convertx(vpname, x, from, to, true);
     if (to === "svg")
         width += gridSVGCoords[vpname].x;
     return roundNumber(width, 2);
@@ -35,36 +37,95 @@ var viewportConvertX = function(vpname, x, from, to) {
  * @returns {number} A unit in SVG pixels
  */
 var viewportConvertY = function(vpname, x, from, to) {
+    if (gridSVGCoords[vpname].angle != 0)
+        throw new Error("Viewport angle non-zero; consider using viewportConvertPos()");
     if (!to)
         to = "svg";
     if (from == "svg")
         x -= gridSVGCoords[vpname].y;
-    var height = viewportConvertHeight(vpname, x, from, to);
+    var height = converty(vpname, x, from, to, true);
     if (to === "svg")
         height += gridSVGCoords[vpname].y;
     return roundNumber(height, 2);
 };
 
 /**
- * Converts from any unit to any other unit along the horizontal dimension, relative to a viewport.
+ * Returns a unit's (x, y) location relative to a viewport.
  *
  * @param {string} vpname The name of the viewport that the unit is drawn within
- * @param {number} x The size of the unit, based on 'from'
+ * @param {number} x The size of the x unit, based on 'from'
+ * @param {number} y The size of the y unit, based on 'from'
+ * @param {string} from The input unit type
+ * @param {string} to The output unit type (optional, defaults to "svg")
+ * @returns {Array} The converted location in SVG pixels
+ */
+var viewportConvertPos = function(vpname, x, y, from, to) {
+    if (!to)
+        to = "svg";
+    if (from == "svg") {
+        x -= gridSVGCoords[vpname].x;
+        y -= gridSVGCoords[vpname].y;
+    }
+    var width = convertx(vpname, x, from, to, true);
+    var height = converty(vpname, y, from, to, true);
+    if (gridSVGCoords[vpname].angle != 0) {
+        var theta = -gridSVGCoords[vpname].angle/180*Math.PI;
+        w = Math.cos(theta)*width + Math.sin(theta)*height;
+        h = -Math.sin(theta)*width + Math.cos(theta)*height;
+        width = w;
+        height = h;
+    }
+    if (to === "svg") {
+        width += gridSVGCoords[vpname].x;
+        height += gridSVGCoords[vpname].y;
+    }
+    var result = {x: width, y: height};
+    return result;
+};
+
+/*
+ * Helper functions
+ */
+convertx = function(vpname, x, from, to, loc) {
+    var i = toInches(from, x,
+                     gridSVGCoords[vpname].width, 
+                     gridSVGCoords[vpname].xscale, 
+                     gridSVGCoords[vpname].inch, 
+                     loc);
+    var u = toUnit(to, i,
+                   gridSVGCoords[vpname].width, 
+                   gridSVGCoords[vpname].xscale, 
+                   gridSVGCoords[vpname].inch, 
+                   loc);
+    return u;
+}
+
+converty = function(vpname, x, from, to, loc) {
+    var i = toInches(from, x,
+                     gridSVGCoords[vpname].height, 
+                     gridSVGCoords[vpname].yscale, 
+                     gridSVGCoords[vpname].inch, 
+                     loc);
+    var u = toUnit(to, i,
+                   gridSVGCoords[vpname].height, 
+                   gridSVGCoords[vpname].yscale, 
+                   gridSVGCoords[vpname].inch, 
+                   loc);
+    return u;
+}
+
+/**
+ * Converts from any unit to any other unit along the both dimensions, relative to a viewport.
+ *
+ * @param {string} vpname The name of the viewport that the unit is drawn within
+ * @param {number} w The size of the horizontal unit, based on 'from'
+ * @param {number} h The size of the vertical unit, based on 'from'
  * @param {string} from The input unit type
  * @param {string} to The output unit type
- * @returns {number} A unit in SVG pixels
+ * @returns {Array} A unit in SVG pixels
  */
 var viewportConvertWidth = function(vpname, x, from, to) {
-    var vpCoords = gridSVGCoords[vpname];
-    var i = toInches(from, x,
-                     vpCoords.width,
-                     vpCoords.xscale,
-                     vpCoords.inch);
-    var u = toUnit(to, i,
-                   vpCoords.width,
-                   vpCoords.xscale,
-                   vpCoords.inch);
-    return roundNumber(u, 2);
+    return convertx(vpname, x, from, to, false);
 };
 
 /**
@@ -77,17 +138,49 @@ var viewportConvertWidth = function(vpname, x, from, to) {
  * @returns {number} A unit in SVG pixels
  */
 var viewportConvertHeight = function(vpname, x, from, to) {
-    var vpCoords = gridSVGCoords[vpname];
-    var i = toInches(from, x,
-                     vpCoords.height,
-                     vpCoords.yscale,
-                     vpCoords.inch);
-    var u = toUnit(to, i,
-                   vpCoords.height,
-                   vpCoords.yscale,
-                   vpCoords.inch);
-    return roundNumber(u, 2);
+    return converty(vpname, x, from, to, false);
 };
+
+/**
+ * Converts from any unit to any other unit along the vertical dimension, relative to a viewport.
+ *
+ * @param {string} vpname The name of the viewport that the unit is drawn within
+ * @param {number} x The size of the unit, based on 'from'
+ * @param {string} from The input unit type
+ * @param {string} to The output unit type
+ * @returns {Array} The converted dimensions in SVG pixels
+ */
+viewportConvertDim = function(vpname, w, h, from, to) {
+    var wi = toInches(from, w,
+                      gridSVGCoords[vpname].width, 
+                      gridSVGCoords[vpname].xscale, 
+                      gridSVGCoords[vpname].inch, 
+                      false);
+    var hi = toInches(from, h,
+                      gridSVGCoords[vpname].height, 
+                      gridSVGCoords[vpname].yscale, 
+                      gridSVGCoords[vpname].inch, 
+                      false);
+    if (gridSVGCoords[vpname].angle != 0) {
+        var theta = -gridSVGCoords[vpname].angle/180*Math.PI;
+        var w = Math.cos(theta)*wi + Math.sin(theta)*hi;
+        var h = -Math.sin(theta)*wi + Math.cos(theta)*hi;
+        wi = w;
+        hi = h;
+    }
+    var wu = toUnit(to, wi,
+                    gridSVGCoords[vpname].width, 
+                    gridSVGCoords[vpname].xscale, 
+                    gridSVGCoords[vpname].inch, 
+                    false);
+    var hu = toUnit(to, hi,
+                    gridSVGCoords[vpname].height, 
+                    gridSVGCoords[vpname].yscale, 
+                    gridSVGCoords[vpname].inch, 
+                    false);
+    var result = {w: wu, h: hu};
+    return result;
+}
 
 /**
  * Converts from any unit to what R thought were inches.
@@ -97,12 +190,21 @@ var viewportConvertHeight = function(vpname, x, from, to) {
  * @param {number} vpDimSize The size of the viewport that the unit belongs in, in SVG pixels
  * @param {Array.<number>} nativeScale For the given dimension that we're converting along (x or y)
  * @param {number} dimInchSize The size of an inch along this dimension
+ * @param {boolean} loc  Is the conversion for a location (or a dimension)? 
  * @returns {number} The input unit in inches
  */
-var toInches = function(from, unitValue, vpDimSize, nativeScale, dimInchSize) {
-    var nativeToInches = function(nativeValue, nativeScale, vpDimSize, dimInchSize) {
-        var dist = nativeValue - nativeScale[0];
-        var nativeUnitSize = vpDimSize / Math.abs(nativeScale[1] - nativeScale[0]);
+var toInches = function(from, unitValue, vpDimSize, nativeScale, 
+                        dimInchSize, loc) {
+    var nativeToInches = function(nativeValue, nativeScale, vpDimSize, 
+                                  dimInchSize, loc) {
+        var dist;
+        if (loc) {
+            dist = nativeValue - nativeScale[0];
+        } else {
+            dist = nativeValue;
+        }
+        var nativeUnitSize = vpDimSize / Math.abs(nativeScale[1] - 
+                                                  nativeScale[0]);
         return dist * nativeUnitSize / dimInchSize;
     };
     
@@ -113,7 +215,8 @@ var toInches = function(from, unitValue, vpDimSize, nativeScale, dimInchSize) {
     var result;
     switch (from) {
         case "native":
-            result = nativeToInches(unitValue, nativeScale, vpDimSize, dimInchSize);
+            result = nativeToInches(unitValue, nativeScale, vpDimSize, 
+                                    dimInchSize, loc);
             break;
         case "npc":
             result = npcToInches(unitValue, vpDimSize, dimInchSize);
@@ -162,13 +265,19 @@ var toInches = function(from, unitValue, vpDimSize, nativeScale, dimInchSize) {
  * @param {number} vpDimSize The size of the viewport that the unit belongs in, in SVG pixels
  * @param {Array.<number>} nativeScale For the given dimension that we're converting along (x or y)
  * @param {number} dimInchSize The size of an inch along this dimension
+ * @param {boolean} loc  Is the conversion for a location (or a dimension)? 
  * @returns {number} The input unit in 'to' units
  */
-var toUnit = function(to, unitValue, vpDimSize, nativeScale, dimInchSize) {
-    var inchesToNative = function(inchesValue, nativeScale, vpDimSize, dimInchSize) {
+var toUnit = function(to, unitValue, vpDimSize, nativeScale, dimInchSize, loc) {
+    var inchesToNative = function(inchesValue, nativeScale, vpDimSize, 
+                                  dimInchSize, loc) {
         var npc = (inchesValue * dimInchSize) / vpDimSize;
         var vpRange = nativeScale[1] - nativeScale[0];
-        return (npc * vpRange) + nativeScale[0];
+        if (loc) {
+            return (npc * vpRange) + nativeScale[0];
+        } else {
+            return (npc * vpRange);
+        }
     };
     
     var inchesToNpc = function(inchesValue, vpDimSize, dimInchSize) {
@@ -178,7 +287,8 @@ var toUnit = function(to, unitValue, vpDimSize, nativeScale, dimInchSize) {
     var result;
     switch (to) {
         case "native":
-            result = inchesToNative(unitValue, nativeScale, vpDimSize, dimInchSize);
+            result = inchesToNative(unitValue, nativeScale, vpDimSize, 
+                                    dimInchSize, loc);
             break;
         case "npc":
             result = inchesToNpc(unitValue, vpDimSize, dimInchSize);
