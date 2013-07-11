@@ -48,13 +48,13 @@ svgJSUtils <- function(exportJS, svgfile, svgroot) {
     destFile <- file(utilsFn)
     writeLines(utilsLines, destFile)
     close(destFile)
-    newXMLNode("script", parent = svgroot,
+    newXMLNode("script", parent = svgroot, at = 0,
                       attrs = list(type = "application/ecmascript",
                                    "xlink:href" = utilsFn))
   }
 
   if (exportJS == "inline") {
-    newXMLNode("script", parent = svgroot,
+    newXMLNode("script", parent = svgroot, at = 0,
                attrs = list(type = "application/ecmascript"),
                newXMLCDataNode(paste0(c("", utilsLines, ""), collapse = "\n")))
   }
@@ -73,13 +73,13 @@ svgCoords <- function(exportCoords, svgfile, svgroot) {
     coordsFile <- file(coordsFn, "w")
     cat(coordsJSON, "\n", file = coordsFile, sep = "")
     close(coordsFile)
-    newXMLNode("script", parent = svgroot,
+    newXMLNode("script", parent = svgroot, at = 0,
                attrs = list(type = "application/ecmascript",
                             "xlink:href" = coordsFn))
   }
 
   if (exportCoords == "inline") {
-    newXMLNode("script", parent = svgroot,
+    newXMLNode("script", parent = svgroot, at = 0,
                attrs = list(type = "application/ecmascript"),
                newXMLCDataNode(paste0(c("", coordsJSON, ""), collapse = "\n")))
   }
@@ -97,13 +97,13 @@ svgMappings <- function(exportMappings, svgfile, svgroot) {
     mappingsFile <- file(mappingsFn, "w")
     cat(exportMappings(usageTable), file = mappingsFile)
     close(mappingsFile)
-    newXMLNode("script", parent = svgroot,
+    newXMLNode("script", parent = svgroot, at = 0,
                attrs = list(type = "application/ecmascript",
                             "xlink:href" = mappingsFn))
   }
 
   if (exportMappings == "inline") {
-    newXMLNode("script", parent = svgroot,
+    newXMLNode("script", parent = svgroot, at = 0,
                attrs = list(type = "application/ecmascript"),
                newXMLCDataNode(exportMappings(usageTable)))
   }

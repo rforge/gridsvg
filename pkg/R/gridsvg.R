@@ -128,9 +128,11 @@ grid.export <- function(name = "Rplots.svg",
     svgroot <- devClose(svgdev)
     # Adding in JS if necessary, always write utils *last*.
     # Not strictly necessary but may avoid potential issues in JS.
-    coords <- svgCoords(exportCoords, name, svgroot)
-    mappings <- svgMappings(exportMappings, name, svgroot)
+    # NOTE that we call in REVERSE order because each one is added
+    # as FIRST child of the root svg node
     jsutils <- svgJSUtils(exportJS, name, svgroot)
+    mappings <- svgMappings(exportMappings, name, svgroot)
+    coords <- svgCoords(exportCoords, name, svgroot)
     # If we're annotating output with gridSVG call info
     if (annotate) {
         # Realise true values for some arguments
