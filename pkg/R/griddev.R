@@ -1000,11 +1000,22 @@ primToDev.rastergrob <- function(x, dev) {
   # store the raster with as large a dimension as possible.
   rasterDims <- c(ch(max(heights), dev), cw(max(widths), dev))
 
-  png(filename = fileloc, width = rasterDims[2], height = rasterDims[1])
+  png(filename = fileloc, width = abs(rasterDims[2]), height = abs(rasterDims[1]))
+      # Need to ensure that the raster is oriented correctly in the (more rare)
+      # case of an xscale or yscale being big -> small
+      # To do this, position natively in a new (temporary) viewport
+      xscale <- if (rasterDims[2] < 0) 1:0
+                else 0:1
+      yscale <- if (rasterDims[1] < 0) 1:0
+                else 0:1
+      pushViewport(viewport(xscale = xscale, yscale = yscale),
+                   recording = FALSE)
       # The raster stays the same and is only repeated for each appearance.
       # Given that we know the dimensions of the PNG, we can safely say that
       # the raster occupies the entireity of both the x and y dimensions.
-      grid.raster(x$raster, width = 1, height = 1, interpolate = x$interpolate)
+      grid.raster(x$raster, width = 1, height = 1, interpolate = x$interpolate,
+                  default.units = "native")
+      popViewport(recording = FALSE)
   dev.off()
 
   # base64 encoding the PNG so we can insert the image as a data URI

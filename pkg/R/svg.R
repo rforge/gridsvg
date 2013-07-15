@@ -763,6 +763,15 @@ svgRaster <- function(x, y, width, height, angle=0, datauri, id=NULL,
     if (has.link)
         svgStartLink(links[id], show[id], svgdev)
 
+    if (width < 0) {
+        x <- x + width # shifts x to the left
+        width <- abs(width)
+    }
+    if (height < 0) {
+        y <- y + height # shifts y down
+        height <- abs(height)
+    }
+
     rx <- round(x, 2)
     ry <- round(y, 2)
 
@@ -803,9 +812,19 @@ svgRect <- function(x, y, width, height, angle=0, id=NULL,
   if (has.link)
     svgStartLink(links[id], show[id], svgdev)
 
+  if (width < 0) {
+    x <- x + width # shifts x to the left
+    width <- abs(width)
+  }
+
+  if (height < 0) {
+    y <- y + height # shifts y down
+    height <- abs(height)
+  }
+  
   rx <- round(x, 2)
   ry <- round(y, 2)
-  
+
   attrlist <- list(id = prefixName(id),
                    x = rx,
                    y = ry,
@@ -943,6 +962,15 @@ svgText <- function(x, y, text, hjust="left", vjust="bottom", rot=0,
     has.link <- hasLink(links[id])
     if (has.link)
         svgStartLink(links[id], show[id], svgdev)
+
+    if (width < 0) {
+        x <- x + width # shifts x to the left
+        width <- abs(width)
+    }
+    if (height < 0) {
+        y <- y + height # shifts y down
+        height <- abs(height)
+    }
 
     rx <- round(x, 2)
     ry <- round(y, 2)
