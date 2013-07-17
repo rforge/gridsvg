@@ -56,7 +56,7 @@ flushDefinitions <- function(dev) {
     refDefinitions <- get("refDefinitions", envir = .gridSVGEnv)
     if (! length(refDefinitions))
         return()
-    defs <- newXMLNode("defs", parent = svgDevParent(svgdev))
+    defs <- newXMLNode("defs", parent = svgDevParent(svgdev), at = 0)
     svgDevChangeParent(defs, svgdev)
 
     # Check whether we have any dependent references, e.g. have a pattern
