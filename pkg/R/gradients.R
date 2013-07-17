@@ -203,11 +203,11 @@ flattenRadialGradient <- function(gradient) {
     # Flatten all locations here
     if (gradient$gradientUnits == "userSpaceOnUse") {
         offsets <- getAbsoluteOffset()
-        gradient$cx <- convertX(gradient$cx, "inches") + offset[1]
-        gradient$cy <- convertY(gradient$cy, "inches") + offset[2]
+        gradient$cx <- convertX(gradient$cx, "inches") + offsets[1]
+        gradient$cy <- convertY(gradient$cy, "inches") + offsets[2]
         gradient$r <- dToInches(gradient$r, NULL)
-        gradient$fx <- convertX(gradient$fx, "inches") + offset[1]
-        gradient$fy <- convertY(gradient$fy, "inches") + offset[2]
+        gradient$fx <- convertX(gradient$fx, "inches") + offsets[1]
+        gradient$fy <- convertY(gradient$fy, "inches") + offsets[2]
     }
     gradient
 }
