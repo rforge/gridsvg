@@ -13,6 +13,13 @@
 
     \item Fixed bug in viewportConvertWidth() and
     viewportConvertHeight() when converting from "native".
+
+    \item Bug fix for positioning grobs with dimensions when a
+    viewport's x-scale or y-scale is "flipped". (Simon)
+
+    \item Reposition <defs> so that definitions are always available
+    when used. Allows renderers like librsvg to render gridSVG images
+    correctly. (Simon)
   }
 }
 
