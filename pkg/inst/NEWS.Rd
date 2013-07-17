@@ -19,7 +19,8 @@
 
     \item Reposition <defs> so that definitions are always available
     when used. Allows renderers like librsvg to render gridSVG images
-    correctly. (Simon)
+    correctly. For consistency, pch definitions are also pushed into the
+    same <defs> element. (Simon)
   }
 }
 

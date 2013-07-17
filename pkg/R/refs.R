@@ -54,8 +54,9 @@ flushDefinitions <- function(dev) {
                               paste0("//*[@id='", rootID, "']"))[[1]]
     svgDevChangeParent(gridSVGNode, svgdev)
     refDefinitions <- get("refDefinitions", envir = .gridSVGEnv)
-    if (! length(refDefinitions))
-        return()
+    pchUsageTable <- get("pchUsageTable", envir = .gridSVGEnv)
+    if (! length(refDefinitions) && ! any(pchUsageTable[, "used"]))
+        return() # fast path for leaving early, avoids creating a <defs>
     defs <- newXMLNode("defs", parent = svgDevParent(svgdev), at = 0)
     svgDevChangeParent(defs, svgdev)
 
@@ -64,7 +65,7 @@ flushDefinitions <- function(dev) {
     # that both are written out.
     n <- length(refDefinitions)
     rut <- get("refUsageTable", envir = .gridSVGEnv)
-    for (i in 1:n) {
+    for (i in seq_len(n)) {
         def <- refDefinitions[[i]]
         if (isLabelUsed(def$label) &&
             ! is.null(def$refLabel) && ! isLabelUsed(def$refLabel))
@@ -72,7 +73,7 @@ flushDefinitions <- function(dev) {
     }
 
     # Now trying to find out if there are trees of referenced content.
-    for (i in 1:n) {
+    for (i in seq_len(n)) {
         used <- labelsUsed(refDefinitions[[i]])
         if (is.null(used))
             next
@@ -84,7 +85,7 @@ flushDefinitions <- function(dev) {
     assign("refUsageTable", rut, envir = .gridSVGEnv) 
 
     # Now try drawing
-    for (i in 1:n) {
+    for (i in seq_len(n)) {
         def <- refDefinitions[[i]]
         upViewport(0)
         if (! is.null(def$vp))
@@ -100,6 +101,12 @@ flushDefinitions <- function(dev) {
     assign("use.gPaths", use.gPaths, envir = .gridSVGEnv)
     assign("uniqueNames", uniqueNames, envir = .gridSVGEnv)
 
+    # All of the points that have been used in the image will now be flushed.
+    # This is done after any of the other references primarily because
+    # a pattern could use a pch but we want the definition of the pch to
+    # appear beforehand.
+    flushPchs(dev)
+
     # Reset ref usage table
     rut <- get("refUsageTable", envir = .gridSVGEnv)
     rut$used <- logical(nrow(rut))
@@ -109,6 +116,25 @@ flushDefinitions <- function(dev) {
 
     # Get out of defs
     svgDevChangeParent(xmlParent(defs), svgdev)
+}
+
+flushPchs <- function(dev) {
+    pchUsageTable <- get("pchUsageTable", envir = .gridSVGEnv)
+    if (! any(pchUsageTable[, "used"]))
+        return()
+    usedPchs <- pchUsageTable[pchUsageTable[, "used"] > 0, "pch"]
+    # Reversing so that when we insert at the start of the <defs>
+    # the pchs are ordered from small to big, not big to small.
+    # This is purely cosmetic.
+    for (pch in rev(seq_along(usedPchs))) {
+        asciipch <- if (pch %in% 32:127)
+                        rawToChar(as.raw(pch))
+                    else
+                        pch
+        devStartSymbol(pch, dev)
+        devPoint(asciipch, dev)
+        devEndSymbol(dev)
+    }
 }
 
 anyRefsDefined <- function() {

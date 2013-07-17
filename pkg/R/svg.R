@@ -346,8 +346,7 @@ svgEndGroup <- function(id=NULL, links=NULL, vp=FALSE, svgdev=svgDevice()) {
 }
 
 svgStartSymbol <- function(pch, svgdev = svgDevice()) {
-  defs <- newXMLNode("defs", parent = svgDevParent(svgdev))
-  symbol <- newXMLNode("symbol", parent = defs,
+  symbol <- newXMLNode("symbol", parent = svgDevParent(svgdev), at = 0,
                        attrs = list(id = prefixName(paste0("gridSVG.pch", pch)),
                                     viewBox = "-5 -5 10 10",
                                     overflow = "visible"))
@@ -355,10 +354,8 @@ svgStartSymbol <- function(pch, svgdev = svgDevice()) {
 }
 
 svgEndSymbol <- function(svgdev = svgDevice()) {
-  # Close symbol and defs
-  svgDevChangeParent(xmlParent(
-                         xmlParent(
-                             svgDevParent(svgdev))), svgdev)
+  # Close symbol
+  svgDevChangeParent(xmlParent(svgDevParent(svgdev)), svgdev)
 }
 
 svgStartLink <- function(href="", show="", svgdev=svgDevice()) {

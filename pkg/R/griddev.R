@@ -1239,7 +1239,6 @@ primToDev.points <- function(x, dev) {
     for (i in 1:n) {
         # Check whether the point symbol has been used yet
         pchUsageTable <- get("pchUsageTable", envir = .gridSVGEnv)
-        createDef <- ! pchUsageTable[pchs[i] + 1, "used"]
         # Update usages
         pchUsageTable[pchs[i] + 1, "used"] <- TRUE
         assign("pchUsageTable", pchUsageTable, envir = .gridSVGEnv)
@@ -1258,12 +1257,6 @@ primToDev.points <- function(x, dev) {
                         rawToChar(as.raw(pchs[i]))
                     else
                         pchs[i]
-
-        if (createDef) {
-            devStartSymbol(pchs[i], dev)
-            devPoint(asciipch, dev)
-            devEndSymbol(dev)
-        }
 
         # Force a stroke-width
         pgp$lwd <- if (is.null(pgp$lwd)) get.gpar()$lwd
