@@ -126,7 +126,7 @@ flushPchs <- function(dev) {
     # Reversing so that when we insert at the start of the <defs>
     # the pchs are ordered from small to big, not big to small.
     # This is purely cosmetic.
-    for (pch in rev(seq_along(usedPchs))) {
+    for (pch in rev(usedPchs)) {
         asciipch <- if (pch %in% 32:127)
                         rawToChar(as.raw(pch))
                     else
