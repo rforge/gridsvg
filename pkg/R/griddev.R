@@ -81,6 +81,8 @@ gparToDevPars <- function(gp) {
 
 # Repeats all elements in a gpar() so that it is fully defined for n values
 expandGpar <- function(gp, n) {
+    if (is.null(gp))
+        return(gpar())
     # If there are actually gpar elements defined, repeat them
     if (length(gp) > 0) {
         for (i in 1:length(gp)) {
@@ -1111,7 +1113,11 @@ primToDev.text <- function(x, dev) {
   }
 
   # Force fill to be col for text
-  x$gp$fill <- x$gp$col
+  if (is.null(x$gp))
+      x$gp <- gpar(fill = get.gpar()$col)
+  else
+      x$gp$fill <- if (! is.null(x$gp$col)) x$gp$col
+                   else get.gpar()$col
   
   # Expand the gp such that it fully defines all sub-grobs
   gp <- expandGpar(x$gp, n)
