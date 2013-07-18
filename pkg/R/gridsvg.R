@@ -232,6 +232,11 @@ gridsvg <- function(name = "Rplots.svg",
                     annotate = TRUE,
                     xmldecl = xmlDecl(),
                     ...) {
+    # Avoid multiple gridSVG devices (because referenced content can
+    # have side effects across devices
+    deviceNames <- unlist(.Devices)
+    if ("gridsvg" %in% deviceNames)
+        stop("Only one 'gridsvg' device may be used at a time")
     callargs <- as.list(match.call(expand.dots = FALSE))[-1]
     dev.args <- as.list(callargs$`...`) # pairlists...
     if (is.null(dev.args))

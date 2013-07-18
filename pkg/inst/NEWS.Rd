@@ -24,6 +24,10 @@
 
     \item Bug fix for 'lwd'. They are now defined as being 1/96 inches,
     which matches most graphics devices. (Simon)
+
+    \item Only one 'gridsvg' device can now be open at once. This is
+    because referenced content (like gradients, masks, etc) can have
+    side effects across multiple 'gridsvg' devices. (Simon)
   }
 }
 
