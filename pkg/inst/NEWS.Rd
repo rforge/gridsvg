@@ -21,6 +21,9 @@
     when used. Allows renderers like librsvg to render gridSVG images
     correctly. For consistency, pch definitions are also pushed into the
     same <defs> element. (Simon)
+
+    \item Bug fix for 'lwd'. They are now defined as being 1/96 inches,
+    which matches most graphics devices. (Simon)
   }
 }
 

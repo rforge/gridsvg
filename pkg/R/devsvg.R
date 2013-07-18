@@ -38,9 +38,11 @@ devParNameToSVGStyleName <- function(name) {
          NA)
 }
 
-# R lwd is in points
+# R lwd is in points, pixels or 1/96 inches
+# However, most (perhaps all?) devices use 1/96 for their
+# definition of an 'lwd', so use that.
 devLwdToSVG <- function(lwd, dev) {
-    round(lwd/72 * dev@res, 2)
+    round(lwd/96 * dev@res, 2)
 }
 
 # An R lty has to become an SVG stroke-dasharray
