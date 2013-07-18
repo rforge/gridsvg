@@ -168,7 +168,9 @@ grid.export <- function(name = "Rplots.svg",
     # disable asking.
     old.ask <- devAskNewPage(FALSE)
     on.exit(devAskNewPage(old.ask), add = TRUE)
-    grid.refresh()
+    # Sometimes display lists can be large, flush all drawing at once
+    # to speed up redrawing
+    dev.hold() ; grid.refresh() ; dev.flush()
 
     # See if we need an XML declaration added
     if (! is.null(xmldecl))

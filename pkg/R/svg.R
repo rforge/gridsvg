@@ -184,10 +184,22 @@ svgClipPath <- function(id, vpx, vpy, vpw, vph, vpa,
                         svgdev=svgDevice()) {
   clipPathID <- prefixName(paste(id, "clipPath",
                                  sep = getSVGoption("id.sep")))
+
+  # Correct w/h if necessary
+  if (vpw < 0) {
+    vpx <- vpx + vpw # shifts x to the left
+    vpw <- abs(vpw)
+  }
+
+  if (vph < 0) {
+    vpy <- vpy + vph # shifts y down
+    vph <- abs(vph)
+  }
+  
   newXMLNode("defs", parent = svgDevParent(svgdev),
              newXMLNode("clipPath",
-                        attrs = list(id = clipPathID,
-                            transform=svgAngleTransform(vpx, vpy, vpa)),
+                        attrs = attrList(list(id = clipPathID,
+                            transform=svgAngleTransform(vpx, vpy, vpa))),
                         newXMLNode("rect",
                                    attrs = list(x = round(vpx, 2),
                                                 y = round(vpy, 2),
