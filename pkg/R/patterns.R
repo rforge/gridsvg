@@ -203,6 +203,16 @@ drawDef.patternFillDef <- function(def, dev) {
     width <- round(cw(def$width, dev), 2)
     height <- round(ch(def$height, dev), 2)
 
+    # Checking for flipped scales
+    if (width < 0) {
+        x <- x + width # shifts x to the left
+        width <- abs(width)
+    }
+    if (height < 0) {
+        y <- y + height # shifts y down
+        height <- abs(height)
+    }
+
     # Attempt to use a known-safe prefix
     # If the prefix is safe, then it will *always* be safe
     # because the names are known *after* content is drawn
