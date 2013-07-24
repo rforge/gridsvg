@@ -1002,7 +1002,8 @@ primToDev.rastergrob <- function(x, dev) {
   # store the raster with as large a dimension as possible.
   rasterDims <- c(ch(max(heights), dev), cw(max(widths), dev))
 
-  png(filename = fileloc, width = abs(rasterDims[2]), height = abs(rasterDims[1]))
+  png(filename = fileloc, width = round(abs(rasterDims[2])),
+      height = round(abs(rasterDims[1])))
       # Need to ensure that the raster is oriented correctly in the (more rare)
       # case of an xscale or yscale being big -> small
       # To do this, position natively in a new (temporary) viewport

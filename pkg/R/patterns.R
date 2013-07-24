@@ -220,7 +220,7 @@ drawDef.patternFillDef <- function(def, dev) {
     # perform all of this because we just want unique IDs.
     pdf(file = NULL, width = def$dev.width, height = def$dev.height)
         newdev <- openSVGDev("", res = dev@res,
-                             width = par("din")[1], height = par("din")[2])
+                             width = def$dev.width, height = def$dev.height)
         pushViewport(viewport(name = getID(prefix, "vp")))
         grid.draw(gTree(name = getID(prefix, "grob"),
                   children = gList(grid:::force(def$grob)),
@@ -253,6 +253,16 @@ drawDef.patternFillRefDef <- function(def, dev) {
     y <- round(cy(def$y, dev), 2)
     width <- round(cw(def$width, dev), 2)
     height <- round(ch(def$height, dev), 2)
+
+    # Checking for flipped scales
+    if (width < 0) {
+        x <- x + width # shifts x to the left
+        width <- abs(width)
+    }
+    if (height < 0) {
+        y <- y + height # shifts y down
+        height <- abs(height)
+    }
 
     # Creating the pattern element
     pattern <- newXMLNode("pattern",
