@@ -180,7 +180,7 @@ labelsUsed.grob <- function(x) {
 }
 
 labelsUsed.gTree <- function(x) {
-    unlist(lapply(x$children, labelsUsed))
+    c(x$referenceLabel, unlist(lapply(x$children, labelsUsed)))
 }
 
 # Used for knowing whether to write out a definition.
@@ -198,6 +198,14 @@ setLabelUsed <- function(label) {
         if (any(rut$label %in% label)) {
             rut[rut$label %in% label, "used"] <- TRUE
             assign("refUsageTable", rut, envir = .gridSVGEnv)
+            # Need to ensure that nested dependencies are also handled.
+            # e.g. a mask definition that is filtered needs to trigger a
+            #      filter to be drawn.
+            refdefs <- get("refDefinitions", envir = .gridSVGEnv)
+            for (i in seq_along(label)) {
+                def <- refdefs[[label[i]]]
+                setLabelUsed(labelsUsed(def))
+            }
         } else {
             stop("An attempt was made to reference content that no longer exists.")
         }

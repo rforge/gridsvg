@@ -452,12 +452,8 @@ filterSVG.fe.color.matrix <- function(x, dev) {
     attrList <- x
     if (x$type == "luminanceToAlpha")
         attrList <- cleanAttrs(attrList, "values")
-    if (x$type == "matrix") {
-        rows <- apply(x$values, 1, function(x) {
-            paste0(round(x, 2), collapse = " ")
-        })
-        x$values <- paste0(rows, collapse = " ")
-    }
+    if (x$type == "matrix")
+        attrList$values <- paste0(c(attrList$values), collapse = " ")
 
     attrList <- cleanAttrs(attrList, "coords")
     newXMLNode("feColorMatrix",
