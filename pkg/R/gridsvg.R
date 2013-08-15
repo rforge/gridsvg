@@ -31,6 +31,10 @@ grid.export <- function(name = "Rplots.svg",
                         oldNSWarning$suppressXMLNamespaceWarning))
     }
 
+    # grid.force() the scene to resolve high-level grobs
+    # to their standard components
+    dev.hold() ; grid.force() ; dev.flush()
+
     # Important to know if we need to modify vpPaths/gPaths at all
     usePaths <- match.arg(usePaths)
     paths <-
@@ -84,9 +88,6 @@ grid.export <- function(name = "Rplots.svg",
     roottm <- current.transform()
 
     svgdev <- openSVGDev(name, width=par("din")[1], height=par("din")[2], res = res)
-    # grid.force() the scene to resolve high-level grobs
-    # to their standard components
-    grid.force(redraw = FALSE)
     # Create a gTree from the current page
     # NOTE that set the 'gp' slot on this top-level gTree
     # based on ROOT vp

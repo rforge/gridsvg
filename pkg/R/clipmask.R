@@ -139,9 +139,11 @@ registerClipPath <- function(label, clippath) {
     if (! inherits(clippath, "clipPath"))
         stop("'clippath' must be a 'clipPath' object")
 
+    # Note: grob must be forced to fix the definition of the grob
+    #       at the time of registration
     defList <- list(label = label,
                     id = getID(label, "ref"),
-                    grob = clippath$grob,
+                    grob = grid:::force(clippath$grob),
                     vp = getAbsoluteVp())
     class(defList) <- "clipPathDef"
     refDefinitions[[label]] <- defList
@@ -382,13 +384,15 @@ registerMask <- function(label, mask = NULL, ...) {
     width <- convertWidth(mask$width, "inches")
     height <- convertHeight(mask$height, "inches")
 
+    # Note: grob must be forced to fix the definition of the grob
+    #       at the time of registration
     defList <- list(label = label,
                     id = getID(label, "ref"),
                     x = x,
                     y = y,
                     width = width,
                     height = height,
-                    grob = mask$grob,
+                    grob = grid:::force(mask$grob),
                     vp = getAbsoluteVp())
     class(defList) <- "maskDef"
 
