@@ -193,7 +193,7 @@ isLabelUsed <- function(label) {
 }
 
 setLabelUsed <- function(label) {
-    if (! is.null(label)) {
+    if (! is.null(label) && length(label)) {
         rut <- get("refUsageTable", envir = .gridSVGEnv)
         if (any(rut$label %in% label)) {
             rut[rut$label %in% label, "used"] <- TRUE
