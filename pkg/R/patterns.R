@@ -228,6 +228,7 @@ drawDef.patternFillDef <- function(def, dev) {
     # we want paths to be used.
     # We do not care at this point whether it is strictly necessary to
     # perform all of this because we just want unique IDs.
+    olddev <- dev.cur()
     pdf(file = NULL, width = def$dev.width, height = def$dev.height)
         newdev <- openSVGDev("", res = dev@res,
                              width = def$dev.width, height = def$dev.height)
@@ -243,6 +244,7 @@ drawDef.patternFillDef <- function(def, dev) {
         gridSVGNode <- prefixName("gridSVG")
         gridSVGNode <- getNodeSet(newroot, paste0("//*[@id='", gridSVGNode, "']"))[[1]]
     dev.off()
+    dev.set(olddev)
 
     # Creating the pattern element
     pattern <- newXMLNode("pattern",

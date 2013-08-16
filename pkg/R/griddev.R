@@ -1002,6 +1002,7 @@ primToDev.rastergrob <- function(x, dev) {
   # store the raster with as large a dimension as possible.
   rasterDims <- c(ch(max(heights), dev), cw(max(widths), dev))
 
+  olddev <- dev.cur()
   png(filename = fileloc, width = round(abs(rasterDims[2])),
       height = round(abs(rasterDims[1])), bg = "transparent")
       # Need to ensure that the raster is oriented correctly in the (more rare)
@@ -1020,6 +1021,7 @@ primToDev.rastergrob <- function(x, dev) {
                   default.units = "native")
       popViewport(recording = FALSE)
   dev.off()
+  dev.set(olddev)
 
   # base64 encoding the PNG so we can insert the image as a data URI
   base64Raster <- base64enc(fileloc)

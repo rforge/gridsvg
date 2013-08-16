@@ -784,7 +784,7 @@ svgRaster <- function(x, y, width, height, angle=0, datauri, id=NULL,
     rx <- round(x, 2)
     ry <- round(y, 2)
 
-    transform <- paste0("translate(", rx, ",", round(height + y, 2), ")")
+    transform <- paste0("translate(", rx, ", ", round(height + y, 2), ")")
     angleTransform <- svgAngleTransform(rx, ry, angle)
     if (!is.null(angleTransform)) {
         transform <- paste(angleTransform, transform)
