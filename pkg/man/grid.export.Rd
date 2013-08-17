@@ -18,6 +18,7 @@ grid.export(name = "Rplots.svg",
             usePaths = c("vpPaths", "gPaths", "none", "both"),
             uniqueNames = TRUE,
             annotate = TRUE,
+            compression = 0,
             xmldecl = xmlDecl())
 }
 \arguments{
@@ -111,6 +112,12 @@ grid.export(name = "Rplots.svg",
     describes the information that gridSVG used to draw the image
     (mostly arguments to \code{grid.export}). This output may be useful
     for debugging purposes.
+  }
+  \item{compression}{
+    An integer between 0 and 9 indicating the level of (gzip)
+    compression applied to the SVG image when it is saved to a
+    file. Higher values of \code{compression} indicate smaller file
+    sizes at the expense of increased computation.
   }
   \item{xmldecl}{
     This parameter sets the XML declaraction that will be applied to the

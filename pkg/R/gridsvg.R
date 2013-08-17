@@ -21,6 +21,7 @@ grid.export <- function(name = "Rplots.svg",
                         usePaths = c("vpPaths", "gPaths", "none", "both"),
                         uniqueNames = TRUE,
                         annotate = TRUE,
+                        compression = 0,
                         xmldecl = xmlDecl()) {
     # 'XML' can sometimes give us namespace warnings, despite producing
     # valid SVG. Silence any warnings that 'XML' might give us.
@@ -143,7 +144,8 @@ grid.export <- function(name = "Rplots.svg",
             res <- round(par("cra")[1] / par("cin")[1], 2)
         # Ignore annotate in this list, because it will be implied
         # Also ignoring the XML declaration, we can see it in the
-        # output directly.
+        # output directly. Ignoring compression because it is also
+        # implied and does not affect output.
         callAttrs <- list(
             name = name,
             exportCoords = exportCoords,
@@ -160,8 +162,6 @@ grid.export <- function(name = "Rplots.svg",
         svgAnnotate(svgroot, callAttrs)
     }
 
-    doctxt <- saveXML(svgroot, indent = indent)
-
     # In an on-screen device, we can be left with a blank device
     # so refresh just to ensure we can see everything. Also happens
     # with devices like png and pdf so just force a refresh.
@@ -172,10 +172,6 @@ grid.export <- function(name = "Rplots.svg",
     # Sometimes display lists can be large, flush all drawing at once
     # to speed up redrawing
     dev.hold() ; grid.refresh() ; dev.flush()
-
-    # See if we need an XML declaration added
-    if (! is.null(xmldecl))
-        doctxt <- paste0(xmldecl, doctxt)
 
     result <- list(svg = svgroot,
                    coords = coords,
@@ -189,8 +185,17 @@ grid.export <- function(name = "Rplots.svg",
     if (is.null(name) || ! nzchar(name))
         return(result)
 
-    # Save SVG
-    cat(doctxt, file = name)
+    doctxt <- saveXML(svgroot, indent = indent)
+    if (! is.null(xmldecl))
+        doctxt <- paste0(xmldecl, doctxt)
+
+    # Now save the SVG to a file, optionally a compressed file
+    outcon <-
+        if (compression > 0) gzfile(name, "w")
+        else file(name, "w")
+    cat(doctxt, file = outcon)
+    close(outcon)
+
     # Write an HTML wrapper for this
     if (htmlWrapper)
         htmlFile(name, svgdev@dev)
@@ -231,6 +236,7 @@ gridsvg <- function(name = "Rplots.svg",
                     usePaths = c("vpPaths", "gPaths", "none", "both"),
                     uniqueNames = TRUE,
                     annotate = TRUE,
+                    compression = 0,
                     xmldecl = xmlDecl(),
                     ...) {
     # Avoid multiple gridSVG devices (because referenced content can

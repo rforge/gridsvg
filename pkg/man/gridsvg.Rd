@@ -21,13 +21,14 @@ gridsvg(name = "Rplots.svg",
         usePaths = c("vpPaths", "gPaths", "none", "both"),
         uniqueNames = TRUE,
         annotate = TRUE,
+        compression = 0,
         xmldecl = xmlDecl(), ...)
 dev.off(which = dev.cur())
 }
 \arguments{
   \item{name, exportCoords, exportMappings, exportJS, res, prefix,
     addClasses, indent,
-    htmlWrapper, usePaths, uniqueNames, annotate, xmldecl}{
+    htmlWrapper, usePaths, uniqueNames, annotate, compression, xmldecl}{
     These parameters are passed onto \code{\link{grid.export}}.
   }
   \item{\dots}{
