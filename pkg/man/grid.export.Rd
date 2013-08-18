@@ -18,6 +18,7 @@ grid.export(name = "Rplots.svg",
             usePaths = c("vpPaths", "gPaths", "none", "both"),
             uniqueNames = TRUE,
             annotate = TRUE,
+            progress = FALSE,
             compression = 0,
             xmldecl = xmlDecl())
 }
@@ -112,6 +113,12 @@ grid.export(name = "Rplots.svg",
     describes the information that gridSVG used to draw the image
     (mostly arguments to \code{grid.export}). This output may be useful
     for debugging purposes.
+  }
+  \item{progress}{
+    If \code{TRUE}, messages will be displayed in the console that show
+    how quickly gridSVG is progressing when exporting an SVG image. This
+    is particularly useful when there are large images being exported so
+    we have a reasonable estimate of how long exporting will take.
   }
   \item{compression}{
     An integer between 0 and 9 indicating the level of (gzip)

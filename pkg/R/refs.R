@@ -29,6 +29,14 @@ assignRefIDs <- function() {
     assign("usageTable", ut, envir = .gridSVGEnv)
 }
 
+totalDefinitions <- function() {
+    # This function should only be called for calculating progress bar
+    # length. In addition, it will only be called if definitions are
+    # required to be flushed so this should always return a non-zero
+    # result.
+    sum(get("refUsageTable", envir = .gridSVGEnv)[, "used"])
+}
+
 flushDefinitions <- function(dev) {
     svgdev <- dev@dev
 
@@ -83,6 +91,9 @@ flushDefinitions <- function(dev) {
     }
 
     assign("refUsageTable", rut, envir = .gridSVGEnv) 
+    # Now can work out how many defs to flush
+    ndefs <- totalDefinitions()
+    progressInit("defs", ndefs)
 
     # Now try drawing
     for (i in seq_len(n)) {
@@ -93,6 +104,7 @@ flushDefinitions <- function(dev) {
         if (isLabelUsed(def$label))
             drawDef(def, dev)
         upViewport(0)
+        progressStep("defs", ndefs)
     }
 
     # Resetting to original values
@@ -123,6 +135,7 @@ flushPchs <- function(dev) {
     if (! any(pchUsageTable[, "used"]))
         return()
     usedPchs <- pchUsageTable[pchUsageTable[, "used"] > 0, "pch"]
+    progressInit("pch", length(usedPchs))
     # Reversing so that when we insert at the start of the <defs>
     # the pchs are ordered from small to big, not big to small.
     # This is purely cosmetic.
@@ -134,6 +147,7 @@ flushPchs <- function(dev) {
         devStartSymbol(pch, dev)
         devPoint(asciipch, dev)
         devEndSymbol(dev)
+        progressStep("pch")
     }
 }
 

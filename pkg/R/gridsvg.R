@@ -21,6 +21,7 @@ grid.export <- function(name = "Rplots.svg",
                         usePaths = c("vpPaths", "gPaths", "none", "both"),
                         uniqueNames = TRUE,
                         annotate = TRUE,
+                        progress = FALSE,
                         compression = 0,
                         xmldecl = xmlDecl()) {
     # 'XML' can sometimes give us namespace warnings, despite producing
@@ -31,6 +32,10 @@ grid.export <- function(name = "Rplots.svg",
         on.exit(options(suppressXMLNamespaceWarning =
                         oldNSWarning$suppressXMLNamespaceWarning))
     }
+
+    # To avoid having to ask to redraw, temporarily disable asking.
+    old.ask <- devAskNewPage(FALSE)
+    on.exit(devAskNewPage(old.ask), add = TRUE)
 
     # grid.force() the scene to resolve high-level grobs
     # to their standard components
@@ -88,6 +93,12 @@ grid.export <- function(name = "Rplots.svg",
     rootvp <- current.viewport()
     roottm <- current.transform()
 
+    if (progress) {
+        assign("showProgress", TRUE, envir = .gridSVGEnv)
+        ngrobs <- length(grid.ls(print = FALSE)$name)
+        progressInit("grob", ngrobs)
+    }
+
     svgdev <- openSVGDev(name, width=par("din")[1], height=par("din")[2], res = res)
     # Create a gTree from the current page
     # NOTE that set the 'gp' slot on this top-level gTree
@@ -128,6 +139,10 @@ grid.export <- function(name = "Rplots.svg",
     # Flush out any referenced definitions so that grobs can use them
     flushDefinitions(svgdev)
     svgroot <- devClose(svgdev)
+    if (progress) {
+        progressClose()
+        assign("showProgress", FALSE, envir = .gridSVGEnv)
+    }
     # Adding in JS if necessary, always write utils *last*.
     # Not strictly necessary but may avoid potential issues in JS.
     # NOTE that we call in REVERSE order because each one is added
@@ -145,7 +160,8 @@ grid.export <- function(name = "Rplots.svg",
         # Ignore annotate in this list, because it will be implied
         # Also ignoring the XML declaration, we can see it in the
         # output directly. Ignoring compression because it is also
-        # implied and does not affect output.
+        # implied and does not affect output. Progress is also not
+        # useful.
         callAttrs <- list(
             name = name,
             exportCoords = exportCoords,
@@ -165,10 +181,6 @@ grid.export <- function(name = "Rplots.svg",
     # In an on-screen device, we can be left with a blank device
     # so refresh just to ensure we can see everything. Also happens
     # with devices like png and pdf so just force a refresh.
-    # Also, to avoid having to ask to refresh, just temporarily
-    # disable asking.
-    old.ask <- devAskNewPage(FALSE)
-    on.exit(devAskNewPage(old.ask), add = TRUE)
     # Sometimes display lists can be large, flush all drawing at once
     # to speed up redrawing
     dev.hold() ; grid.refresh() ; dev.flush()
@@ -236,6 +248,7 @@ gridsvg <- function(name = "Rplots.svg",
                     usePaths = c("vpPaths", "gPaths", "none", "both"),
                     uniqueNames = TRUE,
                     annotate = TRUE,
+                    progress = FALSE,
                     compression = 0,
                     xmldecl = xmlDecl(),
                     ...) {

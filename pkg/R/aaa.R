@@ -1,6 +1,9 @@
 # Setting up an environment for use within gridSVG
 .gridSVGEnv <- new.env()
 
+# Don't show any progress bars or messages by default
+assign("showProgress", FALSE, envir = .gridSVGEnv)
+
 # Setting a context level for clipGrobs, clipping paths and masks.
 # Allows popping viewports to work correctly if we know many
 # SVG groups we need to "pop".

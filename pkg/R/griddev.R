@@ -255,6 +255,7 @@ grobToDev.grob <- function(x, dev) {
   x$classes <- class(x)
   primToDev(x, dev)
   unwindVP(x$vp, depth, dev)
+  progressStep("grob")
 }
 
 # grob to device grob
@@ -1302,7 +1303,7 @@ primToDev.points <- function(x, dev) {
     }
 
     # Ending the group
-    devEndGroup(x$name, FALSE, dev) 
+    devEndGroup(x$name, FALSE, dev)
 }
 
 grobToDev.gTree <- function(x, dev) {
@@ -1313,6 +1314,9 @@ grobToDev.gTree <- function(x, dev) {
   }
   primToDev(x, dev)
   unwindVP(x$vp, depth, dev)
+  # Ignore wrapping gTree as it was not on the original DL
+  if (x$name != "gridSVG")
+    progressStep("grob")
 }
 
 primToDev.gTree <- function(x, dev) {
