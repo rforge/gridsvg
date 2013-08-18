@@ -28,6 +28,15 @@
     \item Only one 'gridsvg' device can now be open at once. This is
     because referenced content (like gradients, masks, etc) can have
     side effects across multiple 'gridsvg' devices. (Simon)
+
+    \item New argument for 'grid.export()', 'progress'. When this
+    argument is 'TRUE', messages will be printed to the console that
+    show how far gridSVG is through processing an image. Additionally,
+    progress bars are drawn to aid in estimation of progress. (Simon)
+
+    \item New argument for 'grid.export()', 'compression'. This can take
+    an integer value between 0 and 9 that describes the level of (gzip)
+    compression applied to the exported image. (Simon)
   }
 }
 
