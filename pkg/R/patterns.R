@@ -242,7 +242,12 @@ drawDef.patternFillDef <- function(def, dev) {
         newroot <- devClose(newdev)
         viewBox <- xmlGetAttr(newroot, "viewBox")
         gridSVGNode <- prefixName("gridSVG")
-        gridSVGNode <- getNodeSet(newroot, paste0("//*[@id='", gridSVGNode, "']"))[[1]]
+        # Clone this node so that when the pattern definition refers to
+        # namespaces (e.g. rasterGrobs have 'xlink:href'), the namespaces
+        # are not destroyed when this temporary device is closed.
+        gridSVGNode <-
+            xmlClone(getNodeSet(newroot,
+                                paste0("//*[@id='", gridSVGNode, "']"))[[1]])
     dev.off()
     dev.set(olddev)
 
