@@ -803,6 +803,10 @@ svgRaster <- function(x, y, width, height, angle=0, datauri, id=NULL,
                                   round(width, 2), ", ",
                                   round(-height, 2), ")")),
                           newXMLNode("image",
+                                     # Suppress the namespace warning because
+                                     # we know in this specific case it is
+                                     # a spurious warning
+                                     suppressNamespaceWarning = TRUE,
                                      attrs = list(x = 0,
                                          y = 0,
                                          width = 1,
