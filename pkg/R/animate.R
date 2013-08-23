@@ -230,8 +230,13 @@ animateGrob <- function(grob, ...,
     grob
 }
   
-grid.animate <- function(path, ...) {
-  grid.set(path, animateGrob(grid.get(path), ...), redraw=FALSE)
+grid.animate <- function(path, ..., group=FALSE, redraw = FALSE,
+                         strict=FALSE, grep=FALSE, global=FALSE) {
+    grobApply(path, function(path) {
+        grid.set(path, animateGrob(grid.get(path), ..., group=group),
+                 redraw = redraw)
+    }, strict = strict, grep = grep, global = global)
+    invisible()
 }
 
 applyAnimation <- function(x, ...) {

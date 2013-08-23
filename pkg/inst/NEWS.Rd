@@ -37,6 +37,10 @@
     \item New argument for 'grid.export()', 'compression'. This can take
     an integer value between 0 and 9 that describes the level of (gzip)
     compression applied to the exported image. (Simon)
+
+    \item Added 'group', 'strict', 'grep', and 'global' arguments
+    to grid.animate() (to bring it into line with grid.hyperlink()
+    and grid.garnish().
   }
 }
 
