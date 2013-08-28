@@ -13,7 +13,8 @@ animateGrob(grob, ...,
             duration=1,
             rep=FALSE, revert=FALSE,
             begin=0, interpolate="linear", group=FALSE)
-grid.animate(path, ...)
+grid.animate(path, ..., group=FALSE, redraw = FALSE,
+             strict=FALSE, grep=FALSE, global=FALSE)
 }
 \arguments{
   \item{grob}{ A grob to add animation to. }
@@ -31,6 +32,21 @@ grid.animate(path, ...)
   \item{group}{ A logical indicating whether the animation values
     should be applied to the overall group element in SVG or
     to individual SVG elements.}
+  \item{redraw}{
+    A logical value to indicate whether to redraw the grob.
+  }
+  \item{strict}{
+    A boolean indicating whether the \code{path} must be matched
+    exactly.
+  }
+  \item{grep}{
+    Whether the \code{path} should be treated as a regular expression.
+  }
+  \item{global}{
+    A boolean indicating whether the function should affect just the
+    first match of the \code{path}, or whether all matches should be
+    affected.
+  }
 }
 \value{
   An animated.grob object.
