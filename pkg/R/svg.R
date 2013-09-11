@@ -1519,12 +1519,14 @@ svgHeader <- function(width, height, svgdev=svgDevice()) {
     if (nzchar(get("prefix", envir = .gridSVGEnv)))
         attrs <- c(list(id = get("prefix", envir = .gridSVGEnv)), attrs)
     svgdoc <-
+        newXMLDoc(namespaces = list("http://www.w3.org/2000/svg",
+                       xlink = "http://www.w3.org/1999/xlink"), node = 
         newXMLNode("svg", attrs = attrs,
                    namespaceDefinitions = list("http://www.w3.org/2000/svg",
-                       xlink = "http://www.w3.org/1999/xlink"))
+                       xlink = "http://www.w3.org/1999/xlink")))
     # Invert the y-axis so that y and height values measure "up"
     rootg <- newXMLNode("g",
-                        parent = svgdoc,
+                        parent = xmlRoot(svgdoc),
                         attrs = list(transform = paste0("translate(0, ",
                                                         round(svgDevHeight(svgdev), 2),
                                                         ") scale(1, -1)")))
