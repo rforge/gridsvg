@@ -235,8 +235,11 @@ flattenClippedSVG <- function(node) {
     # Omitted - animation elements, 'use', 'ellipse', 'line'
     validElements <- c("animate", "animateTransform", "circle", "path",
                        "polygon", "polyline", "rect", "text")
+    clipPathID <- xmlGetAttr(node, "id")
     subset <- getNodeSet(node,
-                         paste0("//svg:", validElements, collapse = " | "),
+                         paste0("//svg:clipPath[@id = '", clipPathID, "']",
+                                "/descendant-or-self::*/svg:",
+                                validElements, collapse = " | "),
                          c(svg = "http://www.w3.org/2000/svg"))
     for (i in 1:length(subset)) {
         el <- subset[[i]]
