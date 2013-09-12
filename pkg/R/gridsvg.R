@@ -88,7 +88,7 @@ grid.export <- function(name = "Rplots.svg",
     assign("contextLevels", 0, envir = .gridSVGEnv)
 
     # Ensure we're at the top level
-    upViewport(0)
+    upViewport(0, recording=FALSE)
     rootgp <- get.gpar()
     rootvp <- current.viewport()
     roottm <- current.transform()

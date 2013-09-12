@@ -222,10 +222,10 @@ enforceVP <- function(vp, dev) {
     depth <- 0
     if (!is.null(vp)) {
         if (!inherits(vp, "vpPath")) {
-            pushViewport(vp)
+            pushViewport(vp, recording=FALSE)
             depth <- grid:::depth(vp)
         } else {
-            depth <- downViewport(vp)
+            depth <- downViewport(vp, recording=FALSE)
         }
         startGroup(grid:::grid.Call("L_currentViewport"), depth, dev)
     }
@@ -235,7 +235,7 @@ unwindVP <- function(vp, depth, dev) {
     if (depth > 0) {
         for (i in 1:depth)
             devEndGroup("", TRUE, dev)
-        upViewport(depth)
+        upViewport(depth, recording=FALSE)
     }
 }
 
@@ -1309,8 +1309,8 @@ primToDev.points <- function(x, dev) {
 grobToDev.gTree <- function(x, dev) {
   depth <- enforceVP(x$vp, dev)
   if (!is.null(x$childrenvp)) {
-    pushViewport(x$childrenvp)
-    upViewport(grid:::depth(x$childrenvp))
+    pushViewport(x$childrenvp, recording=FALSE)
+    upViewport(grid:::depth(x$childrenvp), recording=FALSE)
   }
   primToDev(x, dev)
   unwindVP(x$vp, depth, dev)
