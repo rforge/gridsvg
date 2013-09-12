@@ -206,6 +206,7 @@ grid.text("Two random walks",
 grid.rect()
 n <- 50
 x <- 1:n
+set.seed(1000)
 y1 <- runif(n, .6, .8)
 y2 <- runif(n, .2, .4)
 pushViewport(dataViewport(x, yscale=0:1))
