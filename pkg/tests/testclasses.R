@@ -1,3 +1,4 @@
+library(grid)
 library(gridSVG)
 
 pdf(file = NULL)

@@ -1,11 +1,5 @@
 
-importFrom("grid",
-           "drawDetails",
-           "validDetails",
-           "xDetails",
-           "yDetails",
-           "widthDetails",
-           "heightDetails")
+import(methods, grid, RJSONIO, XML)
 
 export("svgOpen",
        "svgClose",

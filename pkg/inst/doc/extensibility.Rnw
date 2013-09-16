@@ -30,6 +30,7 @@ This document describes how to write methods for a new grob
 class to work with \gridSVG{}.
 
 <<>>=
+library(grid)
 library(gridSVG)
 @ 
 

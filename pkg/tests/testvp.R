@@ -2,6 +2,7 @@
 # Test that 'vp' slots [viewports (vpTrees, vpLists, vpStacks) and vpPaths]
 # are being recorded correctly
 
+library(grid)
 library(gridSVG)
 
 grid.newpage()

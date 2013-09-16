@@ -1,4 +1,5 @@
 
+library(grid)
 library(gridSVG)
 
 # Primitives to support:

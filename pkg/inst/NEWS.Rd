@@ -41,6 +41,8 @@
     \item Added 'group', 'strict', 'grep', and 'global' arguments
     to grid.animate() (to bring it into line with grid.hyperlink()
     and grid.garnish().
+
+    \item Now Import rather than Depend on other packages.
   }
 }
 

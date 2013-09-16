@@ -1,3 +1,4 @@
+library(grid)
 library(gridSVG)
 
 dev.new(width=6, height=6)

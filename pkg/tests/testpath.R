@@ -1,4 +1,5 @@
 
+library(grid)
 require(gridSVG)
 
 example(grid.path)
