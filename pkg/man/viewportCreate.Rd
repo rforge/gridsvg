@@ -44,6 +44,8 @@ viewportCreate(vpname, newname = NULL,
   Simon Potter
 }
 \examples{\dontrun{
+  require(grid)
+
   grid.newpage()
 
   # Pushing a new VP to draw a rect within
