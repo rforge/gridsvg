@@ -4,6 +4,9 @@
 
 \section{Changes in version 1.4-1}{
   \itemize{
+    \item Fixed raster export so that original raster is never
+    exported at a resolution LOWER than its native resolution.
+    
     \item Added forceGrob() methods so that animations, garnishing,
     hyperlinks, etc are retained if a grob is forced.
     
