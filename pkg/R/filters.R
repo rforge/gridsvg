@@ -158,8 +158,8 @@ flatten.filter <- function(x, coords = TRUE) {
     } else {
         # location and width are relative to the object bounding box
         # (i.e., NOT grid units)
-        hjust <- grid:::resolveHJust(x$just, x$hjust)
-        vjust <- grid:::resolveVJust(x$just, x$vjust)
+        hjust <- resolveHJust(x$just, x$hjust)
+        vjust <- resolveVJust(x$just, x$vjust)
         x$x <- x$x - hjust*x$width
         x$y <- x$y - vjust*x$height
     }
@@ -979,3 +979,14 @@ feTurbulence <- function(baseFrequency = 0, numOctaves = 1, seed = 1,
     x
 }
 
+# Ensure the filters are retained on a forced grob
+forceGrob.filtered.grob <- function(x) {
+    y <- NextMethod()
+    if (inherits(y, "forcedgrob")) {
+        y$referenceLabel <- x$referenceLabel
+        y$filterLabel <- x$filterLabel
+        y$filterGroup <- x$filterGroup
+        class(y) <- unique(c("filtered.grob", class(y)))
+    }
+    y
+}

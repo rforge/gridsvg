@@ -2,6 +2,33 @@
 \title{NEWS file for the gridSVG package}
 \encoding{UTF-8}
 
+\section{Changes in version 1.4-1}{
+  \itemize{
+    \item Added forceGrob() methods so that animations, garnishing,
+    hyperlinks, etc are retained if a grob is forced.
+    
+    \item Fix for bug in gradient fill export (could get gradient
+    vertically flipped).
+    
+    \item Fix for export of downViewport(path) when the depth of the
+    resulting navigation is greater than depth(path).
+
+    The visible manifestation of this bug was that <g> elements were
+    generated with an incorrect (too long/wrong depth) 'id' attribute.
+  }
+}
+\section{Changes in version 1.4-0}{
+  \itemize{
+    \item Bumped R version requirement to R >= 3.1.0 because this
+    version of gridSVG depends on some new exports from 'grid'
+
+    \item Removed all nasty peeks into grid namespace (hence
+    dependence on R 3.1.0).
+
+    \item Tweaks to tests/ to make it easier to do QC checks.
+  }
+}
+
 \section{Changes in version 1.3-0}{
   \itemize{
     \item Added support for rotated viewports

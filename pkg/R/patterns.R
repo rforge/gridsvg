@@ -234,7 +234,7 @@ drawDef.patternFillDef <- function(def, dev) {
                              width = def$dev.width, height = def$dev.height)
         pushViewport(viewport(name = getID(prefix, "vp")))
         grid.draw(gTree(name = getID(prefix, "grob"),
-                  children = gList(grid:::force(def$grob)),
+                  children = gList(grid.force(def$grob)),
                   gp = get.gpar())) # Force gp to ensure correct styling
         grid.force(redraw = FALSE)
         gt <- grid.grab(name = "gridSVG", wrap = TRUE)
@@ -290,3 +290,15 @@ drawDef.patternFillRefDef <- function(def, dev) {
         parent = svgDevParent(svgdev))
 }
 
+# Ensure the patterns are retained on a forced grob
+forceGrob.patternFilled.grob <- function(x) {
+    y <- NextMethod()
+    if (inherits(y, "forcedgrob")) {
+        y$referenceLabel <- x$referenceLabel
+        y$patternFillLabel <- x$patternFillLabel
+        y$patternFillAlpha <- x$patternFillAlpha
+        y$patternFillGroup <- x$patternFillGroup
+        class(y) <- unique(c("patternFilled.grob", class(y)))
+    }
+    y
+}
