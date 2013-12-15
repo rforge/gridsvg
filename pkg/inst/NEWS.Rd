@@ -10,9 +10,6 @@
     \item Added forceGrob() methods so that animations, garnishing,
     hyperlinks, etc are retained if a grob is forced.
     
-    \item Fix for bug in gradient fill export (could get gradient
-    vertically flipped).
-    
     \item Fix for export of downViewport(path) when the depth of the
     resulting navigation is greater than depth(path).
 

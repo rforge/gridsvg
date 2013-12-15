@@ -195,17 +195,6 @@ flattenLinearGradient <- function(gradient) {
                               valueOnly = TRUE)
         height <- convertHeight(gradient$y2 - gradient$y1, "inches",
                                 valueOnly = TRUE)
-        # Check for flipped scales, if flipped, swap x/y variables
-        if (width < 0) {
-            tmp <- gradient$x1
-            gradient$x1 <- gradient$x2
-            gradient$x2 <- tmp
-        }
-        if (height < 0) {
-            tmp <- gradient$y1
-            gradient$y1 <- gradient$y2
-            gradient$y2 <- tmp
-        }
         gradient$x1 <- convertX(gradient$x1, "inches") + offsets[1]
         gradient$x2 <- convertX(gradient$x2, "inches") + offsets[1]
         gradient$y1 <- convertY(gradient$y1, "inches") + offsets[2]
