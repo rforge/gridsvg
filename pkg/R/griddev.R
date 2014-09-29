@@ -641,6 +641,7 @@ devGrob.clip <- function(x, dev) {
        y=cy(lb$y, dev),
        width=cw(dim$w, dev),
        height=ch(dim$h, dev),
+       angle=current.rotation(),
        classes=x$classes,
        name=getID(x$name, "grob"))
 }

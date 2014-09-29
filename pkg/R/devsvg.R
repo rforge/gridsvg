@@ -448,7 +448,8 @@ setMethod("devTextNode", signature(device="svgDevice"),
 setMethod("devStartClip", signature(device="svgDevice"),
           function(clip, gp, device) {
             svgClipPath(clip$name, clip$x, clip$y,
-                        clip$width, clip$height, device@dev)
+                        clip$width, clip$height, clip$angle,
+                        device@dev)
 
             # Because of the fact that we never stop clipping until
             # we pop our current viewport, we need to store information

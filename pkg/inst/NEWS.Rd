@@ -2,6 +2,11 @@
 \title{NEWS file for the gridSVG package}
 \encoding{UTF-8}
 
+\section{Changes in version 1.4-2}{
+  \itemize{
+    \item Fixed export of clip grob (reported by Matthew Plourde).
+  }
+}
 \section{Changes in version 1.4-1}{
   \itemize{
     \item Fixed raster export so that original raster is never
