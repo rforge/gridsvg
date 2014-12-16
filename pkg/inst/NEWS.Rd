@@ -5,6 +5,7 @@
 \section{Changes in version 1.4-2}{
   \itemize{
     \item Fixed export of clip grob (reported by Matthew Plourde).
+    \item Fixed support for primitiveUnits="bbox" in filterEffect().
   }
 }
 \section{Changes in version 1.4-1}{
