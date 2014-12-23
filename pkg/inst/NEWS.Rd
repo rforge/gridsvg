@@ -9,6 +9,11 @@
     length equal to 1.
 
     This was in response to a problem reported by Wolfgang Huber.
+
+    \item Fix evaluation of arguments when using the 'gridsvg' device.
+    These were not being evaluated before being passed to 'grid.export'.
+
+    Also reported by Wolfgang Huber.
   }
 }
 \section{Changes in version 1.4-2}{
