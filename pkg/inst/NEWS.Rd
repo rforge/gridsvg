@@ -2,6 +2,12 @@
 \title{NEWS file for the gridSVG package}
 \encoding{UTF-8}
 
+\section{Changes in version 1.4-4}{
+  \itemize{
+    \item Fixed bug where \code{gpar(col=c(foo="red"))} would not work
+    (the name \code{foo} is now stripped).  Reported by Simon Anders.
+  }
+}
 \section{Changes in version 1.4-3}{
   \itemize{
     \item Non-SVG style attributes are now \emph{removed} (with a

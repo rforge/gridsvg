@@ -299,11 +299,11 @@ svgStartGroup <- function(id=NULL, clip=FALSE, mask=FALSE,
   if (has.link)
     svgStartLink(links[id], show[id], svgdev)
 
-  attrlist <- list(id = prefixName(id),
-                   svgClipAttr(id, clip),
-                   svgMaskAttr(id, mask),
-                   svgStyleAttributes(style),
-                   svgAttribTxt(attributes, id))
+  attrlist <- c(list(id = prefixName(id)),
+                svgClipAttr(id, clip),
+                svgMaskAttr(id, mask),
+                svgStyleAttributes(style),
+                svgAttribTxt(attributes, id))
   attrlist <- attrList(attrlist)
 
   # Avoid clobbering "class" attribute if it exists
@@ -587,13 +587,13 @@ svgLines <- function(x, y, id=NULL, arrow = NULL,
   if (has.link)
     svgStartLink(links[id], show[id], svgdev)
 
-  attrlist <- list(id = prefixName(id),
-                   points = paste0(round(x, 2), ",",
-                                   round(y, 2),
-                                   collapse=" "),
-                   lineMarkerTxt,
-                   svgStyleAttributes(style),
-                   svgAttribTxt(attributes, id))
+  attrlist <- c(list(id = prefixName(id),
+                     points = paste0(round(x, 2), ",",
+                         round(y, 2),
+                         collapse=" ")),
+                lineMarkerTxt,
+                svgStyleAttributes(style),
+                svgAttribTxt(attributes, id))
   attrlist <- attrList(attrlist)
   newXMLNode("polyline", parent = svgDevParent(svgdev),
              attrs = attrlist)
@@ -708,12 +708,12 @@ svgPolygon <- function(x, y, id=NULL,
   if (has.link)
     svgStartLink(links[id], show[id], svgdev)
 
-  tmpattr <- list(id = prefixName(id),
-                  points = paste0(round(x, 2), ",",
-                                  round(y, 2),
-                                  collapse = " "),
-                  svgStyleAttributes(style),
-                  svgAttribTxt(attributes, id))
+  tmpattr <- c(list(id = prefixName(id),
+                    points = paste0(round(x, 2), ",",
+                        round(y, 2),
+                        collapse = " ")),
+               svgStyleAttributes(style),
+               svgAttribTxt(attributes, id))
   tmpattr <- attrList(tmpattr)
   newXMLNode("polygon", parent = svgDevParent(svgdev),
              attrs = tmpattr)
@@ -745,11 +745,11 @@ svgPath <- function(x, y, rule, id=NULL,
                           "Z")
                 }, x, y)
 
-    tmpattr <- list(id = prefixName(id),
-                    d = paste(unlist(d), collapse = " "),
-                    "fill-rule" = switch(rule, winding="nonzero", "evenodd"),
-                    svgStyleAttributes(style),
-                    svgAttribTxt(attributes, id))
+    tmpattr <- c(list(id = prefixName(id),
+                      d = paste(unlist(d), collapse = " "),
+                      "fill-rule" = switch(rule, winding="nonzero", "evenodd")),
+                 svgStyleAttributes(style),
+                 svgAttribTxt(attributes, id))
     tmpattr <- attrList(tmpattr)
 
 
@@ -838,14 +838,14 @@ svgRect <- function(x, y, width, height, angle=0, id=NULL,
   rx <- round(x, 2)
   ry <- round(y, 2)
 
-  attrlist <- list(id = prefixName(id),
-                   x = rx,
-                   y = ry,
-                   width = round(width, 2),
-                   height = round(height, 2),
-                   transform = svgAngleTransform(rx, ry, angle), 
-                   svgStyleAttributes(style),
-                   svgAttribTxt(attributes, id))
+  attrlist <- c(list(id = prefixName(id),
+                     x = rx,
+                     y = ry,
+                     width = round(width, 2),
+                     height = round(height, 2),
+                     transform = svgAngleTransform(rx, ry, angle)), 
+                svgStyleAttributes(style),
+                svgAttribTxt(attributes, id))
   attrlist <- attrList(attrlist)
   newXMLNode("rect", parent = svgDevParent(svgdev),
              attrs = attrlist)
@@ -896,12 +896,12 @@ svgTextElement <- function(text, id, rot, hjust, vjust,
                    list(transform = paste0("rotate(", round(-rot, 2), ")"))
                  else
                    NULL
-    attrlist <- list(x = 0,
-                     y = 0,
-                     id = paste(id, "text", sep=getSVGoption("id.sep")),
-                     transform,
-                     textAnchor(hjust),
-                     svgStyleAttributes(style))
+    attrlist <- c(list(x = 0,
+                       y = 0,
+                       id = paste(id, "text", sep=getSVGoption("id.sep"))),
+                  transform,
+                  textAnchor(hjust),
+                  svgStyleAttributes(style))
     attrlist <- attrList(attrlist)
     newpar <- newXMLNode("text", parent = svgDevParent(svgdev),
                          attrs = attrlist)
@@ -949,12 +949,12 @@ svgMathElement <- function(text, id, rot, hjust, vjust,
             y <- (ascent - fontheight)
     }
 
-    tmpattr <- list(x = round(x, 2),
-                    y = round(y, 2),
-                    id = paste(id, "mathtext", sep=getSVGoption("id.sep")),
-                    width = round(3*width, 2),
-                    height = round(3*height, 2),
-                    svgStyleAttributes(style))
+    tmpattr <- c(list(x = round(x, 2),
+                      y = round(y, 2),
+                      id = paste(id, "mathtext", sep=getSVGoption("id.sep")),
+                      width = round(3*width, 2),
+                      height = round(3*height, 2)),
+                 svgStyleAttributes(style))
     if (rot != 0)
         tmpattr$transform <- paste0("rotate(", round(-rot, 2), ")")
 
@@ -1039,12 +1039,12 @@ svgCircle <- function(x, y, r, id=NULL,
   if (has.link)
     svgStartLink(links[id], show[id], svgdev)
 
-  tmpattr <- list(id = prefixName(id),
-                  cx = round(x, 2),
-                  cy = round(y, 2),
-                  r = round(r, 2),
-                  svgStyleAttributes(style),
-                  svgAttribTxt(attributes, id))
+  tmpattr <- c(list(id = prefixName(id),
+                    cx = round(x, 2),
+                    cy = round(y, 2),
+                    r = round(r, 2)),
+               svgStyleAttributes(style),
+               svgAttribTxt(attributes, id))
   tmpattr <- attrList(tmpattr)
   has.link <- hasLink(links[id])
   newXMLNode("circle", parent = svgDevParent(svgdev),
@@ -1520,16 +1520,16 @@ svgHeader <- function(width, height, svgdev=svgDevice()) {
         attrs <- c(list(id = get("prefix", envir = .gridSVGEnv)), attrs)
     svgdoc <-
         newXMLDoc(namespaces = list("http://www.w3.org/2000/svg",
-                       xlink = "http://www.w3.org/1999/xlink"), node = 
-        newXMLNode("svg", attrs = attrs,
-                   namespaceDefinitions = list("http://www.w3.org/2000/svg",
-                       xlink = "http://www.w3.org/1999/xlink")))
+                      xlink = "http://www.w3.org/1999/xlink"),
+                  node =  newXMLNode("svg", attrs = attrs,
+                      namespaceDefinitions = list("http://www.w3.org/2000/svg",
+                          xlink = "http://www.w3.org/1999/xlink")))
     # Invert the y-axis so that y and height values measure "up"
     rootg <- newXMLNode("g",
                         parent = xmlRoot(svgdoc),
                         attrs = list(transform = paste0("translate(0, ",
-                                                        round(svgDevHeight(svgdev), 2),
-                                                        ") scale(1, -1)")))
+                                         round(svgDevHeight(svgdev), 2),
+                                         ") scale(1, -1)")))
     svgDevChangeParent(rootg, svgdev)
 }
 
@@ -1547,8 +1547,10 @@ svgAttrib <- function(...) {
 # Removes NULL values and flattens our attrib list
 # so we can include lists as elements in "alist"
 # and arrive at a flattened list
+# ALSO removes names from attr values so they don't corrupt attr names
+# e.g., avoid list(a=c(b=1)) becoming c(a.b=1)
 attrList <- function(alist) {
-  as.list(unlist(alist))
+  as.list(unlist(lapply(alist, unname)))
 }
 
 listToSVGAttrib <- function(alist) {
