@@ -641,14 +641,13 @@ svgMarker <- function(x, y, type, ends, direction, name,
     ids <- markerName("both", name)
     refXs <- direction * round(c(-width, width), 2)
     refYs <- round(c(-height / 2, height / 2), 2)
-    pathlist <- attrList(list(d = d, svgStyleAttributes(style)))
+    pathlist <- attrList(c(list(d = d), svgStyleAttributes(style)))
     # It is possible for width to be 0, i.e. when angle=90.
     # Ensure that the marker is always at least as wide as the
     # stroke width that it is given.
     mwidth <- max(as.numeric(pathlist$`stroke-width`), width)
     mheight <- max(as.numeric(pathlist$`stroke-width`), height)
-    pathattrs <- list(pathlist,
-                      pathlist)
+    pathattrs <- list(pathlist, pathlist)
     pathattrs[[1]]$transform <- "rotate(180)"
 
     newXMLNode("defs", parent = svgDevParent(svgdev),
