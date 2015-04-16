@@ -6,6 +6,13 @@
   \itemize{
     \item Fixed bug where \code{gpar(col=c(foo="red"))} would not work
     (the name \code{foo} is now stripped).  Reported by Simon Anders.
+
+    \item Fixed bug in feColorMatrix().  The color matrix required
+    transposing before export to SVG.
+
+    \item Fixed bug in feComponentTransfer().  Was generating an
+    feColorMatrix element \emph{and} was inlining transfer functions
+    as attributes (rather than generating feFunc elements as children).
   }
 }
 \section{Changes in version 1.4-3}{
