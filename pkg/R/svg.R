@@ -574,11 +574,6 @@ svgAnimateScale <- function(xvalues, yvalues,
 svgLines <- function(x, y, id=NULL, arrow = NULL,
                      attributes=svgAttrib(), links=NULL, show=NULL,
                      style=svgStyle(), svgdev=svgDevice()) {
-  # Grabbing arrow info for marker element references
-  if (! is.null(arrow$ends))
-      lineMarkerTxt <- markerTxt(arrow$ends, id)
-  else
-      lineMarkerTxt <- NULL
 
   # Never fill a line
   style$fill <- "none"
@@ -587,17 +582,47 @@ svgLines <- function(x, y, id=NULL, arrow = NULL,
   if (has.link)
     svgStartLink(links[id], show[id], svgdev)
 
-  attrlist <- c(list(id = prefixName(id),
-                     points = paste0(round(x, 2), ",",
-                         round(y, 2),
-                         collapse=" ")),
-                lineMarkerTxt,
-                svgStyleAttributes(style),
-                svgAttribTxt(attributes, id))
-  attrlist <- attrList(attrlist)
-  newXMLNode("polyline", parent = svgDevParent(svgdev),
-             attrs = attrlist)
-
+  # Handle NA values in (x, y)
+  xylist <- splitOnNA(x, y)
+  N <- length(xylist)
+  if (N > 0) {
+      if (N > 1) {
+          # assume no more than 26 NAs in (x, y)!
+          alpha <- letters[1:N]
+      } else {
+          alpha <- ""
+      }
+      for (i in 1:N) {
+          # Grabbing arrow info for marker element references
+          # Arrows NOT drawn at NA splits
+          if (! is.null(arrow$ends)) {
+              if (arrow$ends == "both" && i == 1 && N == 1) 
+                  lineMarkerTxt <- markerTxt("both", id)
+              else if ((arrow$ends == "both" || arrow$ends == "first") &&
+                       i == 1 && is.finite(x[1]) && is.finite(y[1]))
+                  lineMarkerTxt <- markerTxt("first", id)
+              else if ((arrow$ends == "both" || arrow$ends == "last") &&
+                       i == N &&
+                       is.finite(x[length(x)]) && is.finite(y[length(y)]))
+                  lineMarkerTxt <- markerTxt("last", id)
+              else 
+                  lineMarkerTxt <- NULL
+          } else {
+              lineMarkerTxt <- NULL
+          }
+          attrlist <- c(list(id = prefixName(paste0(id, alpha[i])),
+                             points = paste0(round(xylist[[i]]$x, 2), ",",
+                                 round(xylist[[i]]$y, 2),
+                                 collapse=" ")),
+                        lineMarkerTxt,
+                        svgStyleAttributes(style),
+                        svgAttribTxt(attributes, id))
+          attrlist <- attrList(attrlist)
+          newXMLNode("polyline", parent = svgDevParent(svgdev),
+                     attrs = attrlist)
+      }
+  }
+  
   if (has.link)
     svgEndLink(svgdev)
 }
@@ -707,15 +732,28 @@ svgPolygon <- function(x, y, id=NULL,
   if (has.link)
     svgStartLink(links[id], show[id], svgdev)
 
-  tmpattr <- c(list(id = prefixName(id),
-                    points = paste0(round(x, 2), ",",
-                        round(y, 2),
-                        collapse = " ")),
-               svgStyleAttributes(style),
-               svgAttribTxt(attributes, id))
-  tmpattr <- attrList(tmpattr)
-  newXMLNode("polygon", parent = svgDevParent(svgdev),
-             attrs = tmpattr)
+  # Handle NA values in (x, y)
+  xylist <- splitOnNA(x, y)
+  N <- length(xylist)
+  if (N > 0) {
+      if (N > 1) {
+          # assume no more than 26 NAs in (x, y)!
+          alpha <- letters[1:N]
+      } else {
+          alpha <- ""
+      }
+      for (i in 1:N) {
+          attrlist <- c(list(id = prefixName(paste0(id, alpha[i])),
+                             points = paste0(round(xylist[[i]]$x, 2), ",",
+                                 round(xylist[[i]]$y, 2),
+                                 collapse=" ")),
+                        svgStyleAttributes(style),
+                        svgAttribTxt(attributes, id))
+          attrlist <- attrList(attrlist)
+          newXMLNode("polygon", parent = svgDevParent(svgdev),
+                     attrs = attrlist)
+      }
+  }
 
   if (has.link)
     svgEndLink(svgdev)
@@ -729,11 +767,19 @@ svgPath <- function(x, y, rule, id=NULL,
         stop("x and y must be same length")
     if (is.atomic(x)) {
         if (is.atomic(y)) {
-            x <- list(x)
-            y <- list(y)
+            # NAs allowed;  turn into sub-paths
+            xy <- splitOnNA(x, y)
+            x <- lapply(xy, "[[", "x")
+            y <- lapply(xy, "[[", "y")
         } else {
             stop("'x' and 'y' must both be lists or both be atomic")
         }
+        # If the path contains multiple sub-paths then NAs are NOT allowed
+        # (to follow 'grid' behaviour)
+        bad <- !all(sapply(x, function(z) { all(is.finite(z)) })) ||
+            !all(sapply(y, function(z) { all(is.finite(z)) }))
+        if (bad)
+            stop("non-finite x or y in graphics path")
     }
     n <- length(x)
     d <- mapply(function(subx, suby) {
@@ -767,6 +813,10 @@ svgRaster <- function(x, y, width, height, angle=0, datauri, id=NULL,
                       just, vjust, hjust,
                       attributes=svgAttrib(), links=NULL, show=NULL,
                       style=svgStyle(), svgdev=svgDevice()) {
+    # Draw nothing if non-finite location or size
+    if (!(is.finite(x) && is.finite(y) &&
+              is.finite(width) && is.finite(height)))
+        return()
     has.link <- hasLink(links[id])
     if (has.link)
         svgStartLink(links[id], show[id], svgdev)
@@ -788,10 +838,10 @@ svgRaster <- function(x, y, width, height, angle=0, datauri, id=NULL,
     if (!is.null(angleTransform)) {
         transform <- paste(angleTransform, transform)
     }
-    attrlist <- list(id = prefixName(id),
-                     transform = transform,
-                     svgStyleAttributes(style),
-                     svgAttribTxt(attributes, id))
+    attrlist <- c(list(id = prefixName(id),
+                       transform = transform),
+                  svgStyleAttributes(style),
+                  svgAttribTxt(attributes, id))
     attrlist <- attrList(attrlist)
     newXMLNode("g", parent = svgDevParent(svgdev),
                attrs = attrlist,
@@ -820,37 +870,41 @@ svgRaster <- function(x, y, width, height, angle=0, datauri, id=NULL,
 svgRect <- function(x, y, width, height, angle=0, id=NULL,
                     attributes=svgAttrib(), links=NULL, show=NULL,
                     style=svgStyle(), svgdev=svgDevice()) {
-  has.link <- hasLink(links[id])
-  if (has.link)
-    svgStartLink(links[id], show[id], svgdev)
-
-  if (width < 0) {
-    x <- x + width # shifts x to the left
-    width <- abs(width)
-  }
-
-  if (height < 0) {
-    y <- y + height # shifts y down
-    height <- abs(height)
-  }
-  
-  rx <- round(x, 2)
-  ry <- round(y, 2)
-
-  attrlist <- c(list(id = prefixName(id),
-                     x = rx,
-                     y = ry,
-                     width = round(width, 2),
-                     height = round(height, 2),
-                     transform = svgAngleTransform(rx, ry, angle)), 
-                svgStyleAttributes(style),
-                svgAttribTxt(attributes, id))
-  attrlist <- attrList(attrlist)
-  newXMLNode("rect", parent = svgDevParent(svgdev),
-             attrs = attrlist)
-
-  if (has.link)
-    svgEndLink(svgdev)
+    # Draw nothing if non-finite location or size
+    if (!(is.finite(x) && is.finite(y) &&
+              is.finite(width) && is.finite(height)))
+        return()
+    has.link <- hasLink(links[id])
+    if (has.link)
+        svgStartLink(links[id], show[id], svgdev)
+    
+    if (width < 0) {
+        x <- x + width # shifts x to the left
+        width <- abs(width)
+    }
+    
+    if (height < 0) {
+        y <- y + height # shifts y down
+        height <- abs(height)
+    }
+    
+    rx <- round(x, 2)
+    ry <- round(y, 2)
+    
+    attrlist <- c(list(id = prefixName(id),
+                       x = rx,
+                       y = ry,
+                       width = round(width, 2),
+                       height = round(height, 2),
+                       transform = svgAngleTransform(rx, ry, angle)), 
+                  svgStyleAttributes(style),
+                  svgAttribTxt(attributes, id))
+    attrlist <- attrList(attrlist)
+    newXMLNode("rect", parent = svgDevParent(svgdev),
+               attrs = attrlist)
+    
+    if (has.link)
+        svgEndLink(svgdev)
 }
 
 svgTextSplitLines <- function(text, id, lineheight, charheight,
@@ -971,6 +1025,9 @@ svgText <- function(x, y, text, hjust="left", vjust="bottom", rot=0,
                     fontfamily="sans", fontface="plain",
                     id=NULL, attributes=svgAttrib(), links=NULL, show=NULL,
                     style=svgStyle(), svgdev=svgDevice()) {
+    # Draw nothing if x/y non-finite
+    if (!(is.finite(x) && is.finite(y)))
+        return()
     has.link <- hasLink(links[id])
     if (has.link)
         svgStartLink(links[id], show[id], svgdev)
@@ -1034,23 +1091,26 @@ svgText <- function(x, y, text, hjust="left", vjust="bottom", rot=0,
 svgCircle <- function(x, y, r, id=NULL,
                       attributes=svgAttrib(), links=NULL, show=NULL,
                       style=svgStyle(), svgdev=svgDevice()) {
-  has.link <- hasLink(links[id])
-  if (has.link)
-    svgStartLink(links[id], show[id], svgdev)
-
-  tmpattr <- c(list(id = prefixName(id),
-                    cx = round(x, 2),
-                    cy = round(y, 2),
-                    r = round(r, 2)),
-               svgStyleAttributes(style),
-               svgAttribTxt(attributes, id))
-  tmpattr <- attrList(tmpattr)
-  has.link <- hasLink(links[id])
-  newXMLNode("circle", parent = svgDevParent(svgdev),
+    # Draw nothing if non-finite location or size
+    if (!(is.finite(x) && is.finite(y) && is.finite(r)))
+        return()
+    has.link <- hasLink(links[id])
+    if (has.link)
+        svgStartLink(links[id], show[id], svgdev)
+    
+    tmpattr <- c(list(id = prefixName(id),
+                      cx = round(x, 2),
+                      cy = round(y, 2),
+                      r = round(r, 2)),
+                 svgStyleAttributes(style),
+                 svgAttribTxt(attributes, id))
+    tmpattr <- attrList(tmpattr)
+    has.link <- hasLink(links[id])
+    newXMLNode("circle", parent = svgDevParent(svgdev),
              attrs = tmpattr)
-
-  if (has.link)
-    svgEndLink(svgdev)
+    
+    if (has.link)
+        svgEndLink(svgdev)
 }
 
 svgScript <- function(body, href, type="application/ecmascript",
@@ -1082,76 +1142,79 @@ svgUseSymbol <- function(id, x, y, size, pch, angle=0,
                          attributes=svgAttrib(), links=NULL, show=NULL,
                          style=svgStyle(), svgdev=svgDevice()) {
 
-  has.link <- hasLink(links[id])
-  if (has.link)
-    svgStartLink(links[id], show[id], svgdev)
+    # Draw nothing if non-finite location or size
+    if (!(is.finite(x) && is.finite(y) && is.finite(size)))
+        return()
+    has.link <- hasLink(links[id])
+    if (has.link)
+        svgStartLink(links[id], show[id], svgdev)
 
-  # Ensure the "dot" is only 1px wide
-  if (pch == ".")
-    size <- 1
+    # Ensure the "dot" is only 1px wide
+    if (pch == ".")
+        size <- 1
 
-  # Ensure we refer to the correct <symbol> id
-  numpch <- if (is.character(pch))
-                as.numeric(charToRaw(pch))
-            else
-                pch
+    # Ensure we refer to the correct <symbol> id
+    numpch <- if (is.character(pch))
+                  as.numeric(charToRaw(pch))
+              else
+                  pch
+    
+    rx <- round(x, 2)
+    ry <- round(y, 2)
+    
+    tmpattr <- list(id = prefixName(id),
+                    "xlink:href" =
+                        paste0("#", prefixName(paste0("gridSVG.pch", numpch))),
+                    x = rx, y = ry,
+                    width = round(size, 2),
+                    height = round(size, 2))
 
-  rx <- round(x, 2)
-  ry <- round(y, 2)
-  
-  tmpattr <- list(id = prefixName(id),
-                  "xlink:href" =
-                    paste0("#", prefixName(paste0("gridSVG.pch", numpch))),
-                  x = rx, y = ry,
-                  width = round(size, 2),
-                  height = round(size, 2))
-
-  # centering adjustment
-  r <- round(-size / 2, 2)
-  tmpattr$transform <- paste0("translate(", r, ",", r, ")")
-  angleTransform <- svgAngleTransform(rx, ry, angle)
-  if (!is.null(angleTransform)) {
-      tmpattr$transform <- paste(angleTransform, tmpattr$transform)
-  }
-  
-  # Preserve order
-  tmpattr <- c(tmpattr,
-               svgStyleAttributes(style),
-               svgAttribTxt(attributes, id))
-
-  # Need to scale the stroke width otherwise for large points
-  # we also have large strokes
-  sw <- as.numeric(tmpattr$`stroke-width`)
-  scalef <- size / 10 # 10 is the point viewBox size
-  sw <- sw / scalef
-  tmpattr$`stroke-width` <- round(sw, 2)
-
-  # For pch outside 0-25 or characters
-  if (is.character(pch) || (is.numeric(pch) && pch > 25)) {
-    # When we have a "." we have a special case
-    if ((is.character(pch) && pch == ".") ||
-        (is.numeric(pch) && pch == 46)) {
-      # Strip unnecessary attribs
-      fsind <- which(names(tmpattr) == "font-size")
-      if (length(fsind) > 0)
-        tmpattr <- tmpattr[-fsind]
-      # Because we really want just a dot, use crispEdges
-      # as anti-aliasing isn't really necessary
-      tmpattr$`shape-rendering` <- "crispEdges"
-    } else {
-      # Make the s-w small so we see a stroke just barely
-      tmpattr$`stroke-width` <- "0.1"
-      # Set the font-size, otherwise it's going to mess with our scaling.
-      # 10px so it's the size of the point definition
-      tmpattr$`font-size` <- "10"
+    # centering adjustment
+    r <- round(-size / 2, 2)
+    tmpattr$transform <- paste0("translate(", r, ",", r, ")")
+    angleTransform <- svgAngleTransform(rx, ry, angle)
+    if (!is.null(angleTransform)) {
+        tmpattr$transform <- paste(angleTransform, tmpattr$transform)
     }
-  }
+  
+    # Preserve order
+    tmpattr <- c(tmpattr,
+                 svgStyleAttributes(style),
+                 svgAttribTxt(attributes, id))
+    
+    # Need to scale the stroke width otherwise for large points
+    # we also have large strokes
+    sw <- as.numeric(tmpattr$`stroke-width`)
+    scalef <- size / 10 # 10 is the point viewBox size
+    sw <- sw / scalef
+    tmpattr$`stroke-width` <- round(sw, 2)
 
-  newXMLNode("use", parent = svgDevParent(svgdev),
-             attrs = attrList(tmpattr))
+    # For pch outside 0-25 or characters
+    if (is.character(pch) || (is.numeric(pch) && pch > 25)) {
+        # When we have a "." we have a special case
+        if ((is.character(pch) && pch == ".") ||
+            (is.numeric(pch) && pch == 46)) {
+            # Strip unnecessary attribs
+            fsind <- which(names(tmpattr) == "font-size")
+            if (length(fsind) > 0)
+                tmpattr <- tmpattr[-fsind]
+            # Because we really want just a dot, use crispEdges
+            # as anti-aliasing isn't really necessary
+            tmpattr$`shape-rendering` <- "crispEdges"
+        } else {
+            # Make the s-w small so we see a stroke just barely
+            tmpattr$`stroke-width` <- "0.1"
+            # Set the font-size, otherwise it's going to mess with our scaling.
+            # 10px so it's the size of the point definition
+            tmpattr$`font-size` <- "10"
+        }
+    }
+    
+    newXMLNode("use", parent = svgDevParent(svgdev),
+               attrs = attrList(tmpattr))
 
-  if (has.link)
-    svgEndLink(svgdev)
+    if (has.link)
+        svgEndLink(svgdev)
 }
 
 # Dispatching function, simply following a naming scheme,
@@ -1718,5 +1781,19 @@ alignmentBaseline <- function(vjust) {
               centre="middle",
               top="top",
               "baseline"))
+}
+
+splitOnNA <- function(x, y) {
+    # Check for non-finite (rather than just NA)
+    nas <- !is.finite(x) | !is.finite(y)
+    wnas <- which(nas)
+    N <- max(length(x), length(y))
+    start <- c(1, pmin(wnas + 1, N))
+    end <- c(pmax(wnas - 1, 1), N)
+    xylist <- mapply(function(s, e) {
+                         if (e > s) list(x=x[s:e], y=y[s:e])
+                     },
+                     start, end, SIMPLIFY=FALSE)
+    xylist[!sapply(xylist, is.null)]
 }
 

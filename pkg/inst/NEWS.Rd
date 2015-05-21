@@ -13,6 +13,9 @@
     \item Fixed bug in feComponentTransfer().  Was generating an
     feColorMatrix element \emph{and} was inlining transfer functions
     as attributes (rather than generating feFunc elements as children).
+
+    \item Added support for NA values in locations and dimensions
+    of graphical primitives.
   }
 }
 \section{Changes in version 1.4-3}{
