@@ -25,10 +25,10 @@ htmlFile <- function(filename, svgdev) {
   fn <- saveXML(obj, file = htmlfile)
 }
 
-svgOpen <- function(width=200, height=200) {
+svgOpen <- function(width=200, height=200, strict=TRUE) {
   # Ensure all vp contexts are now zero
   assign("contextLevels", 0, envir = .gridSVGEnv)
-  svgdev <- svgDevice(width, height)
+  svgdev <- svgDevice(width, height, strict)
   svgHeader(width, height, svgdev)
   return(svgdev)
 }
@@ -302,8 +302,8 @@ svgStartGroup <- function(id=NULL, clip=FALSE, mask=FALSE,
   attrlist <- c(list(id = prefixName(id)),
                 svgClipAttr(id, clip),
                 svgMaskAttr(id, mask),
-                svgStyleAttributes(style),
-                svgAttribTxt(attributes, id))
+                svgStyleAttributes(style, svgdev),
+                svgAttribTxt(attributes, id, "g", svgdev))
   attrlist <- attrList(attrlist)
 
   # Avoid clobbering "class" attribute if it exists
@@ -615,8 +615,8 @@ svgLines <- function(x, y, id=NULL, arrow = NULL,
                                  round(xylist[[i]]$y, 2),
                                  collapse=" ")),
                         lineMarkerTxt,
-                        svgStyleAttributes(style),
-                        svgAttribTxt(attributes, id))
+                        svgStyleAttributes(style, svgdev),
+                        svgAttribTxt(attributes, id, "polyline", svgdev))
           attrlist <- attrList(attrlist)
           newXMLNode("polyline", parent = svgDevParent(svgdev),
                      attrs = attrlist)
@@ -666,7 +666,7 @@ svgMarker <- function(x, y, type, ends, direction, name,
     ids <- markerName("both", name)
     refXs <- direction * round(c(-width, width), 2)
     refYs <- round(c(-height / 2, height / 2), 2)
-    pathlist <- attrList(c(list(d = d), svgStyleAttributes(style)))
+    pathlist <- attrList(c(list(d = d), svgStyleAttributes(style, svgdev)))
     # It is possible for width to be 0, i.e. when angle=90.
     # Ensure that the marker is always at least as wide as the
     # stroke width that it is given.
@@ -747,8 +747,8 @@ svgPolygon <- function(x, y, id=NULL,
                              points = paste0(round(xylist[[i]]$x, 2), ",",
                                  round(xylist[[i]]$y, 2),
                                  collapse=" ")),
-                        svgStyleAttributes(style),
-                        svgAttribTxt(attributes, id))
+                        svgStyleAttributes(style, svgdev),
+                        svgAttribTxt(attributes, id, "polygon", svgdev))
           attrlist <- attrList(attrlist)
           newXMLNode("polygon", parent = svgDevParent(svgdev),
                      attrs = attrlist)
@@ -793,8 +793,8 @@ svgPath <- function(x, y, rule, id=NULL,
     tmpattr <- c(list(id = prefixName(id),
                       d = paste(unlist(d), collapse = " "),
                       "fill-rule" = switch(rule, winding="nonzero", "evenodd")),
-                 svgStyleAttributes(style),
-                 svgAttribTxt(attributes, id))
+                 svgStyleAttributes(style, svgdev),
+                 svgAttribTxt(attributes, id, "path", svgdev))
     tmpattr <- attrList(tmpattr)
 
 
@@ -840,8 +840,8 @@ svgRaster <- function(x, y, width, height, angle=0, datauri, id=NULL,
     }
     attrlist <- c(list(id = prefixName(id),
                        transform = transform),
-                  svgStyleAttributes(style),
-                  svgAttribTxt(attributes, id))
+                  svgStyleAttributes(style, svgdev),
+                  svgAttribTxt(attributes, id, "g", svgdev))
     attrlist <- attrList(attrlist)
     newXMLNode("g", parent = svgDevParent(svgdev),
                attrs = attrlist,
@@ -897,8 +897,8 @@ svgRect <- function(x, y, width, height, angle=0, id=NULL,
                        width = round(width, 2),
                        height = round(height, 2),
                        transform = svgAngleTransform(rx, ry, angle)), 
-                  svgStyleAttributes(style),
-                  svgAttribTxt(attributes, id))
+                  svgStyleAttributes(style, svgdev),
+                  svgAttribTxt(attributes, id, "rect", svgdev))
     attrlist <- attrList(attrlist)
     newXMLNode("rect", parent = svgDevParent(svgdev),
                attrs = attrlist)
@@ -954,7 +954,7 @@ svgTextElement <- function(text, id, rot, hjust, vjust,
                        id = paste(id, "text", sep=getSVGoption("id.sep"))),
                   transform,
                   textAnchor(hjust),
-                  svgStyleAttributes(style))
+                  svgStyleAttributes(style, svgdev))
     attrlist <- attrList(attrlist)
     newpar <- newXMLNode("text", parent = svgDevParent(svgdev),
                          attrs = attrlist)
@@ -1007,7 +1007,7 @@ svgMathElement <- function(text, id, rot, hjust, vjust,
                       id = paste(id, "mathtext", sep=getSVGoption("id.sep")),
                       width = round(3*width, 2),
                       height = round(3*height, 2)),
-                 svgStyleAttributes(style))
+                 svgStyleAttributes(style, svgdev))
     if (rot != 0)
         tmpattr$transform <- paste0("rotate(", round(-rot, 2), ")")
 
@@ -1052,7 +1052,7 @@ svgText <- function(x, y, text, hjust="left", vjust="bottom", rot=0,
         topattrs$transform <- paste(angleTransform, topattrs$transform)
     }
     topattrs$`stroke-width` <- "0.1"
-    topattrs <- c(topattrs, svgAttribTxt(attributes, id))
+    topattrs <- c(topattrs, svgAttribTxt(attributes, id, "g", svgdev))
 
     # Flip the y-direction again so that text is drawn "upright"
     # Do the flip in a separate <g> so that can animate the
@@ -1102,8 +1102,8 @@ svgCircle <- function(x, y, r, id=NULL,
                       cx = round(x, 2),
                       cy = round(y, 2),
                       r = round(r, 2)),
-                 svgStyleAttributes(style),
-                 svgAttribTxt(attributes, id))
+                 svgStyleAttributes(style, svgdev),
+                 svgAttribTxt(attributes, id, "circle", svgdev))
     tmpattr <- attrList(tmpattr)
     has.link <- hasLink(links[id])
     newXMLNode("circle", parent = svgDevParent(svgdev),
@@ -1179,8 +1179,8 @@ svgUseSymbol <- function(id, x, y, size, pch, angle=0,
   
     # Preserve order
     tmpattr <- c(tmpattr,
-                 svgStyleAttributes(style),
-                 svgAttribTxt(attributes, id))
+                 svgStyleAttributes(style, svgdev),
+                 svgAttribTxt(attributes, id, "use", svgdev))
     
     # Need to scale the stroke width otherwise for large points
     # we also have large strokes
@@ -1522,11 +1522,12 @@ svgPoint25 <- function(svgdev = svgDevice()) {
 # to be defined within user coordinates (see svgPushViewport
 # and svgPopViewport)
 
-svgDevice <- function(width=200, height=200) {
+svgDevice <- function(width=200, height=200, strict=TRUE) {
   dev <- new.env(FALSE, emptyenv())
   assign("width", width, envir=dev)
   assign("height", height, envir=dev)
   assign("parent", NULL, envir=dev)
+  assign("strict", strict, envir=dev)
   assign("id", 1, envir=dev)
   return(dev)
 }
@@ -1537,6 +1538,10 @@ svgDevWidth <- function(svgdev) {
 
 svgDevHeight <- function(svgdev) {
   get("height", envir=svgdev)
+}
+
+svgStrict <- function(svgdev) {
+    get("strict", envir=svgdev)
 }
 
 svgDevParent <- function(svgdev) {
@@ -1630,8 +1635,22 @@ svgClassList <- function(classes) {
         list(class = paste0(unique(classes), collapse = " "))
 }
 
+checkAttrs <- function(attrList, eltName) {
+    attrTable <- get("genAttrTable", .gridSVGEnv)
+    validAttrs <- attrTable$attribute[attrTable$element == eltName]
+    names <- names(attrList)
+    svgnames <- names %in% validAttrs
+    if (!all(svgnames)) {
+        warning(paste("Removing non-SVG attribute name(s):",
+                      paste(names[!svgnames], collapse=", ")))
+        attrList[names[svgnames]]
+    } else {
+        attrList
+    }
+}
+
 # Only use the attributes that are for this 'id'
-svgAttribTxt <- function(attributes, id) {
+svgAttribTxt <- function(attributes, id, eltName, svgdev) {
     if (emptyAttrib(attributes)) {
         list()
     } else {
@@ -1646,16 +1665,22 @@ svgAttribTxt <- function(attributes, id) {
                              id)
         # Drop NULL attributes
         attributes <- attributes[!sapply(attributes, is.null)]
-
         # Need to wipe out names because it messes things up when we
         # need to create an attribute list for nodes
-        if (length(attributes) > 0)
-            lapply(attributes, function(x) {
-                       names(x) <- NULL
-                       x
-                   })
-        else
+        if (length(attributes) > 0) {
+            attrs <- lapply(attributes,
+                            function(x) {
+                                names(x) <- NULL
+                                x
+                            })
+            if (svgStrict(svgdev)) {
+                checkAttrs(attrs, eltName)
+            } else {
+                attrs
+            }
+        } else {
             list()
+        }
     }
 }
 
@@ -1690,29 +1715,6 @@ svgStyleCSS <- function(svgstyle) {
 }
 
 # SVG version of gpar()
-assign("SVGParList",
-       # http://www.w3.org/TR/SVG11/shapes.html#RectElement
-       c(# graphical event attributes
-         'onfocusin', 'onfocusout', 'onactivate', 'onclick', 'onmousedown',
-         'onmouseup', 'onmouseover', 'onmousemove', 'onmouseout', 'onload',
-         # presentation attributes
-         'alignment-baseline', 'baseline-shift', 'clip', 'clip-path',
-         'clip-rule', 'color', 'color-interpolation',
-         'color-interpolation-filters', 'color-profile', 'color-rendering',
-         'cursor', 'direction', 'display', 'dominant-baseline',
-         'enable-background', 'fill', 'fill-opacity', 'fill-rule',
-         'filter', 'flood-color', 'flood-opacity', 'font-family', 'font-size',
-         'font-size-adjust', 'font-stretch', 'font-style', 'font-variant',
-         'font-weight', 'glyph-orientation-horizontal',
-         'glyph-orientation-vertical', 'image-rendering', 'kerning',
-         'letter-spacing', 'lighting-color', 'marker-end', 'marker-mid',
-         'marker-start', 'mask', 'opacity', 'overflow', 'pointer-events',
-         'shape-rendering', 'stop-color', 'stop-opacity', 'stroke',
-         'stroke-dasharray', 'stroke-dashoffset', 'stroke-linecap',
-         'stroke-linejoin', 'stroke-miterlimit', 'stroke-opacity',
-         'stroke-width', 'text-anchor', 'text-decoration', 'text-rendering',
-         'unicode-bidi', 'visibility', 'word-spacing', 'writing-mode'),
-       envir=.gridSVGEnv)
 
 # NOTE using SVG presentation attributes
 # RATHER THAN CSS style attribute
@@ -1723,14 +1725,14 @@ assign("SVGParList",
 # - presentation attributes have lower priority than CSS style
 #   SO this allows overriding by specifying CSS style later.
 #   Can also override with general style sheet later.
-svgStyleAttributes <- function(svgstyle) {
+svgStyleAttributes <- function(svgstyle, dev) {
     if (emptyStyle(svgstyle)) {
         list()
     } else {
         # Remove non-SVG style attributes (with warning)
         names <- names(svgstyle)
         svgnames <- names %in% get("SVGParList", envir=.gridSVGEnv)
-        if (any(!svgnames)) {
+        if (svgStrict(dev) && any(!svgnames)) {
             warning(paste("Removing non-SVG style attribute name(s):",
                           paste(names[!svgnames], collapse=", ")))
             svgstyle <- svgstyle[names[svgnames]]

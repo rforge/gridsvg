@@ -2,6 +2,12 @@
 \title{NEWS file for the gridSVG package}
 \encoding{UTF-8}
 
+\section{Changes in version 1.5-0}{
+  \itemize{
+    \item Added \code{strict} argument for \code{grid.export()}
+    and \code{gridsvg()}.
+  }
+}
 \section{Changes in version 1.4-4}{
   \itemize{
     \item Fixed bug where \code{gpar(col=c(foo="red"))} would not work
