@@ -21,6 +21,7 @@ grid.export(name = "Rplots.svg",
             progress = FALSE,
             compression = 0,
             strict = TRUE,
+            rootAttrs = NULL,
             xmldecl = xmlDecl())
 }
 \arguments{
@@ -132,6 +133,10 @@ grid.export(name = "Rplots.svg",
     attributes added to SVG elements are valid.  If this is
     \code{TRUE} and invalid attributes are detected, those
     attributes are removed, with a warning.
+  }
+  \item{rootAttrs}{
+    A named character vector containing attributes for the top-level
+    \code{<svg>} element.
   }
   \item{xmldecl}{
     This parameter sets the XML declaraction that will be applied to the

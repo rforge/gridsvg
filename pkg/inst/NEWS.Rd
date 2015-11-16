@@ -5,7 +5,12 @@
 \section{Changes in version 1.5-0}{
   \itemize{
     \item Added \code{strict} argument for \code{grid.export()}
-    and \code{gridsvg()}.
+    and \code{gridsvg()} to allow control over whether SVG attributes
+    are checked for validity.
+
+    \item Added \code{rootAttrs} argument for \code{grid.export()}
+    and \code{gridsvg()} to allow control over attributes of
+    top-level \code{<svg>} element.
   }
 }
 \section{Changes in version 1.4-4}{

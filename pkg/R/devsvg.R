@@ -603,8 +603,8 @@ setMethod("devClose", signature(device="svgDevice"),
 # User Functions
 #################
 
-openSVGDev <- function(name="Rplots.svg", width=6, height=6, res = NULL,
-                       strict=TRUE) {
+openSVGDev <- function(name="Rplots.svg", width=6, height=6, res=NULL,
+                       strict=TRUE, rootAttrs=NULL) {
     if (is.null(res))
         res <- par("cra")[1]/par("cin")[1]
         # par("cra")[2]/par("cin")[2]*height))
@@ -612,7 +612,7 @@ openSVGDev <- function(name="Rplots.svg", width=6, height=6, res = NULL,
     new("svgDevice",
         width=width, height=height,
         res=res,
-        dev=svgOpen(res*width, res*height, strict))
+        dev=svgOpen(res*width, res*height, strict, rootAttrs))
 }
                    
 

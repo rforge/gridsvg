@@ -25,10 +25,10 @@ htmlFile <- function(filename, svgdev) {
   fn <- saveXML(obj, file = htmlfile)
 }
 
-svgOpen <- function(width=200, height=200, strict=TRUE) {
+svgOpen <- function(width=200, height=200, strict=TRUE, rootAttrs=NULL) {
   # Ensure all vp contexts are now zero
   assign("contextLevels", 0, envir = .gridSVGEnv)
-  svgdev <- svgDevice(width, height, strict)
+  svgdev <- svgDevice(width, height, strict, rootAttrs)
   svgHeader(width, height, svgdev)
   return(svgdev)
 }
@@ -1522,12 +1522,13 @@ svgPoint25 <- function(svgdev = svgDevice()) {
 # to be defined within user coordinates (see svgPushViewport
 # and svgPopViewport)
 
-svgDevice <- function(width=200, height=200, strict=TRUE) {
+svgDevice <- function(width=200, height=200, strict=TRUE, rootAttrs) {
   dev <- new.env(FALSE, emptyenv())
   assign("width", width, envir=dev)
   assign("height", height, envir=dev)
   assign("parent", NULL, envir=dev)
   assign("strict", strict, envir=dev)
+  assign("rootAttrs", rootAttrs, envir=dev)
   assign("id", 1, envir=dev)
   return(dev)
 }
@@ -1542,6 +1543,10 @@ svgDevHeight <- function(svgdev) {
 
 svgStrict <- function(svgdev) {
     get("strict", envir=svgdev)
+}
+
+svgRootAttrs <- function(svgdev) {
+    get("rootAttrs", envir=svgdev)
 }
 
 svgDevParent <- function(svgdev) {
@@ -1578,17 +1583,35 @@ incID <- function(svgdev, n=1) {
 svgHeader <- function(width, height, svgdev=svgDevice()) {
     # This header tested on standalone SVG file in Firefox 3
     # FIXME:  add default xmlns for animation and scripts too?
-    attrs <- list(width = paste0(round(width, 2), "px"),
-                  height = paste0(round(height, 2), "px"),
-                  viewBox = paste(0, 0, round(width, 2), round(height, 2)),
-                  version = "1.1")
-    # Give the <svg> element an ID only if there is a prefix
-    if (nzchar(get("prefix", envir = .gridSVGEnv)))
-        attrs <- c(list(id = get("prefix", envir = .gridSVGEnv)), attrs)
+    attrs <- svgRootAttrs(svgdev)
+    # Resolve any conflict between rootAttrs[c("width", "height")]
+    # and 'width' and 'height' passed in (from device size)
+    if (!"width" %in% names(attrs)) {
+        attrs$width <- paste0(round(width, 2), "px")
+    }
+    if (!"height" %in% names(attrs)) {
+        attrs$height <- paste0(round(height, 2), "px")
+    }
+    if (!"viewBox" %in% names(attrs)) {
+        attrs$viewBox <- paste(0, 0, round(width, 2), round(height, 2))
+    }
+    if (!"version" %in% names(attrs)) {
+        attrs$version <- "1.1"
+    }
+    # Give the <svg> element an ID only if there is a prefix AND
+    # 'rootAttrs' does not specify an ID
+    if (!"id" %in% names(attrs)) {
+        if (nzchar(get("prefix", envir = .gridSVGEnv))) {
+            attrs$id <- get("prefix", envir = .gridSVGEnv)
+        }
+    }
+    if (svgStrict(svgdev)) {
+        checkAttrs(attrs, "svg")
+    }
     svgdoc <-
         newXMLDoc(namespaces = list("http://www.w3.org/2000/svg",
                       xlink = "http://www.w3.org/1999/xlink"),
-                  node =  newXMLNode("svg", attrs = attrs,
+                  node =  newXMLNode("svg", attrs = attrList(attrs),
                       namespaceDefinitions = list("http://www.w3.org/2000/svg",
                           xlink = "http://www.w3.org/1999/xlink")))
     # Invert the y-axis so that y and height values measure "up"
