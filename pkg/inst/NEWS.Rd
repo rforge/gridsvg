@@ -10,7 +10,8 @@
 
     \item Added \code{rootAttrs} argument for \code{grid.export()}
     and \code{gridsvg()} to allow control over attributes of
-    top-level \code{<svg>} element.
+    top-level \code{<svg>} element.  Suggestion and original patch
+    from Thell Fowler.
   }
 }
 \section{Changes in version 1.4-4}{
