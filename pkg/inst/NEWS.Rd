@@ -2,6 +2,12 @@
 \title{NEWS file for the gridSVG package}
 \encoding{UTF-8}
 
+\section{Changes in version 1.5-1}{
+  \itemize{
+    \item Fix for strict attribute checking now includes presentation
+    attributes.
+  }
+}
 \section{Changes in version 1.5-0}{
   \itemize{
     \item Added \code{strict} argument for \code{grid.export()}
