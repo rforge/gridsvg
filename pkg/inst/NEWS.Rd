@@ -6,6 +6,10 @@
   \itemize{
     \item Fix for strict attribute checking now includes presentation
     attributes.
+    
+    \item Fix for \pkg{gtable} support when grob in table cell has
+    viewport with non-centering alignment (e.g., a \pkg{ggplot2}
+    plot with more than one legend).  Reported by Tauno Metsalu.
   }
 }
 \section{Changes in version 1.5-0}{
