@@ -4,6 +4,9 @@
 
 \section{Changes in version 1.5-1}{
   \itemize{
+    \item Fix to ensure that \code{r} attribute in radial gradients
+    is non-negative.
+    
     \item Fix for strict attribute checking now includes presentation
     attributes.
     
