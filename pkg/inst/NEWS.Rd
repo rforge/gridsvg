@@ -13,6 +13,10 @@
     \item Fix for \pkg{gtable} support when grob in table cell has
     viewport with non-centering alignment (e.g., a \pkg{ggplot2}
     plot with more than one legend).  Reported by Tauno Metsalu.
+
+    \item Switched JSON library from \pkg{RJSONIO} to \pkg{jsonlite}.
+    \pkg{gridSVG} no longer needs to compile C code as it can import
+    a base64 encoding method from \pkg{jsonlite}.
   }
 }
 \section{Changes in version 1.5-0}{
