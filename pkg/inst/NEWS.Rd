@@ -17,6 +17,12 @@
     \item Switched JSON library from \pkg{RJSONIO} to \pkg{jsonlite}.
     \pkg{gridSVG} no longer needs to compile C code as it can import
     a base64 encoding method from \pkg{jsonlite}.
+
+    \item Bug fix to handle exporting par(lty="blank"), e.g., from
+    boxplot() (converted with \pkg{gridGraphics}).  Thanks to Volger
+    Sorge.
+
+    \item Bug fix to handle pch=NA.  Thanks to Volger Sorge.
   }
 }
 \section{Changes in version 1.5-0}{
