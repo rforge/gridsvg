@@ -19,10 +19,10 @@
     a base64 encoding method from \pkg{jsonlite}.
 
     \item Bug fix to handle exporting par(lty="blank"), e.g., from
-    boxplot() (converted with \pkg{gridGraphics}).  Thanks to Volger
+    boxplot() (converted with \pkg{gridGraphics}).  Thanks to Volker
     Sorge.
 
-    \item Bug fix to handle pch=NA.  Thanks to Volger Sorge.
+    \item Bug fix to handle pch=NA.  Thanks to Volker Sorge.
   }
 }
 \section{Changes in version 1.5-0}{
