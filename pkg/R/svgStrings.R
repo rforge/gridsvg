@@ -111,12 +111,13 @@ svgUseSymbolString <- function(id, x, y, size, pch, angle=0,
                                style=svgStyle(), svgdev=svgDevice()) {
 
     ## Draw nothing if non-finite location or size
-    draw <- is.finite(x) & is.finite(y) & is.finite(size)
+    draw <- is.finite(x) & is.finite(y) & is.finite(size) &
+        (is.character(pch) | is.finite(pch))
     ## Ensure the "dot" is only 1px wide
     size[pch == "."] <- 1
     ## Ensure we refer to the correct <symbol> id
     if (is.character(pch)) {
-        numpch <- as.numeric(charToRaw(pch))
+        numpch <- as.numeric(sapply(pch, charToRaw))
     } else {
         numpch <- pch
     }

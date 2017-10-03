@@ -583,10 +583,11 @@ setMethod("devEndSymbol", signature(device="svgDevice"),
 
 setMethod("devUseSymbol", signature(device="svgDevice"),
           function(point, gp, device) {
-            svgUseSymbol(point$name, point$x, point$y, point$size, point$pch,
-                         point$angle,
-                         device@attrs, device@links, device@show,
-                         devParToSVGStyle(gp, device), device@dev)
+            svgUseSymbolString(point$name, point$x, point$y,
+                               point$size, point$pch,
+                               point$angle,
+                               device@attrs, device@links, device@show,
+                               devParToSVGStyle(gp, device), device@dev)
           })
 
 setMethod("devClose", signature(device="svgDevice"),
