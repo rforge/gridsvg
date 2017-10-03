@@ -58,17 +58,21 @@ prefixName <- function(name) {
 gparToDevPars <- function(gp) {
     # Split up col into col plus colAlpha
     if (!is.null(gp$col)) {
-        if (is.numeric(gp$col) && gp$col == 0)
-            gp$col <- "transparent"
+        if (is.numeric(gp$col)) {
+            zeroCol <- gp$col == 0
+            gp$col[zeroCol] <- "transparent"
+        }
         rgba <- col2rgb(gp$col, alpha=TRUE)
-        gp$colAlpha <- rgba[4]
+        gp$colAlpha <- rgba[4,]
     }
     # Ditto fill
     if (!is.null(gp$fill)) {
-        if (is.numeric(gp$fill) && gp$fill == 0)
-            gp$fill <- "transparent"
+        if (is.numeric(gp$fill)) {
+            zeroFill <- gp$fill == 0
+            gp$fill[zeroFill] <- "transparent"
+        }
         rgba <- col2rgb(gp$fill, alpha=TRUE)
-        gp$fillAlpha <- rgba[4]
+        gp$fillAlpha <- rgba[4,]
     }
     gp
 }
@@ -404,15 +408,15 @@ devGrob.rastergrob <- function(x, dev) {
 }
 
 devGrob.rect <- function(x, dev) {
-  lb <- leftbottom(x$x, x$y, x$width, x$height, x$just, x$hjust, x$vjust, dev)
-  dim <- dimToInches(x$width, x$height, dev)
-  list(x=cx(lb$x, dev),
-       y=cy(lb$y, dev),
-       width=cw(dim$w, dev),
-       height=ch(dim$h, dev),
-       angle=current.rotation(),
-       classes=x$classes,
-       name=x$name)
+    lb <- leftbottom(x$x, x$y, x$width, x$height, x$just, x$hjust, x$vjust, dev)
+    dim <- dimToInches(x$width, x$height, dev)
+    list(x=cx(lb$x, dev),
+         y=cy(lb$y, dev),
+         width=cw(dim$w, dev),
+         height=ch(dim$h, dev),
+         angle=current.rotation(),
+         classes=x$classes,
+         name=x$name)
 }
 
 devGrob.text <- function(x, dev) {
@@ -1068,38 +1072,36 @@ primToDev.rastergrob <- function(x, dev) {
 }
 
 primToDev.rect <- function(x, dev) {
-  # Finding out how many rects we're dealing with
-  n <- max(length(x$x), length(x$y), length(x$width), length(x$height))
-  # Repeating components as necessary
-  xs <- rep(x$x, length.out = n)
-  ys <- rep(x$y, length.out = n)
-  widths <- rep(x$width, length.out = n)
-  heights <- rep(x$height, length.out = n)
+    ## Finding out how many rects we're dealing with
+    n <- max(length(x$x), length(x$y), length(x$width), length(x$height))
+    ## Repeating components as necessary
+    xs <- rep(x$x, length.out = n)
+    ys <- rep(x$y, length.out = n)
+    widths <- rep(x$width, length.out = n)
+    heights <- rep(x$height, length.out = n)
 
-  # Expand the gp such that it fully defines all sub-grobs
-  gp <- expandGpar(x$gp, n)
+    ## Expand the gp such that it fully defines all sub-grobs
+    gp <- expandGpar(x$gp, n)
+    
+    x$name <- getID(x$name, "grob")
 
-  x$name <- getID(x$name, "grob")
+    ## Grouping each sub-grob
+    devStartGroup(devGrob(x, dev), NULL, dev)
 
-  # Grouping each sub-grob
-  devStartGroup(devGrob(x, dev), NULL, dev)
-
-  for (i in 1:n) {
-      rg <- rectGrob(x = xs[i],
-                     y = ys[i],
-                     width = widths[i],
-                     height = heights[i],
-                     just = x$just,
-                     hjust = x$hjust,
-                     vjust = x$vjust,
-                     default.units = x$default.units,
-                     gp = gp[i],
-                     name = subGrobName(x$name, i))
-      devRect(devGrob(rg, dev), gparToDevPars(rg$gp), dev)
-  }
-
-  # Ending the group
-  devEndGroup(x$name, FALSE, dev)
+    rg <- rectGrob(x = xs,
+                   y = ys,
+                   width = widths,
+                   height = heights,
+                   just = x$just,
+                   hjust = x$hjust,
+                   vjust = x$vjust,
+                   default.units = x$default.units,
+                   gp = gp,
+                   name = subGrobName(x$name, 1:n))
+    devRect(devGrob(rg, dev), gparToDevPars(rg$gp), dev)
+    
+    ## Ending the group
+    devEndGroup(x$name, FALSE, dev)
 }
 
 primToDev.text <- function(x, dev) {
