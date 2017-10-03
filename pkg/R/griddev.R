@@ -489,12 +489,12 @@ devGrob.text <- function(x, dev) {
 }
 
 devGrob.circle <- function(x, dev) {
-  loc <- locToInches(x$x, x$y, dev)
-  list(x=cx(loc$x, dev),
-       y=cy(loc$y, dev),
-       r=cd(dToInches(x$r), dev),
-       classes=x$classes,
-       name=x$name)
+    loc <- locToInches(x$x, x$y, dev)
+    list(x=cx(loc$x, dev),
+         y=cy(loc$y, dev),
+         r=cd(dToInches(x$r), dev),
+         classes=x$classes,
+         name=x$name)
 }
 
 # Because viewports and grobs can be used many times, and each
@@ -1163,33 +1163,31 @@ primToDev.text <- function(x, dev) {
 }
 
 primToDev.circle <- function(x, dev) {
-  # Finding out how many circles we're dealing with
-  n <- max(length(x$x), length(x$y), length(x$r))
-  # Repeating components as necessary
-  xs <- rep(x$x, length.out = n)
-  ys <- rep(x$y, length.out = n)
-  rs <- rep(x$r, length.out = n)
+    ## Finding out how many circles we're dealing with
+    n <- max(length(x$x), length(x$y), length(x$r))
+    ## Repeating components as necessary
+    xs <- rep(x$x, length.out = n)
+    ys <- rep(x$y, length.out = n)
+    rs <- rep(x$r, length.out = n)
 
-  # Expand the gp such that it fully defines all sub-grobs
-  gp <- expandGpar(x$gp, n)
+    ## Expand the gp such that it fully defines all sub-grobs
+    gp <- expandGpar(x$gp, n)
 
-  x$name <- getID(x$name, "grob")
+    x$name <- getID(x$name, "grob")
 
-  # Grouping each sub-grob
-  devStartGroup(devGrob(x, dev), NULL, dev)
+    ## Grouping each sub-grob
+    devStartGroup(devGrob(x, dev), NULL, dev)
 
-  for (i in 1:n) {
-      cg <- circleGrob(x = xs[i],
-                       y = ys[i],
-                       r = rs[i],
-                       default.units = x$default.units,
-                       gp = gp[i],
-                       name = subGrobName(x$name, i))
-      devCircle(devGrob(cg, dev), gparToDevPars(cg$gp), dev)
-  }
+    cg <- circleGrob(x = xs,
+                     y = ys,
+                     r = rs,
+                     default.units = x$default.units,
+                     gp = gp,
+                     name = subGrobName(x$name, 1:n))
+    devCircle(devGrob(cg, dev), gparToDevPars(cg$gp), dev)
 
-  # Ending the group
-  devEndGroup(x$name, FALSE, dev)
+    ## Ending the group
+    devEndGroup(x$name, FALSE, dev)
 }
 
 adjustSymbolSize <- function(pointSize, pgp) {

@@ -60,6 +60,42 @@ svgEndLinkString <- function(href) {
     rep("</a>", length(href))
 }
 
+svgCircleString <- function(x, y, r, id=NULL,
+                            attributes=svgAttrib(), links=NULL, show=NULL,
+                            style=svgStyle(), svgdev=svgDevice()) {
+    # Draw nothing if non-finite location or size
+    draw <- is.finite(x) & is.finite(y) & is.finite(r)
+
+    tmpattr <- c(list(id = prefixName(id),
+                      cx = round(x, 2),
+                      cy = round(y, 2),
+                      r = round(r, 2)),
+                 svgStyleAttributesVec(style, svgdev),
+                 svgAttribTxt(attributes, id, "circle", svgdev))
+    attrlist <- attrListVec(tmpattr)
+    attrStrings <- mapply(function(a, aname) {
+                              paste0(aname, '="', a, '"')
+                          },
+                          attrlist, names(attrlist), SIMPLIFY=FALSE)
+    circleString <- paste0("<circle ",
+                           apply(matrix(unlist(attrStrings),
+                                        ncol=length(attrlist)),
+                                 1, paste, collapse=" "),
+                           "/>")
+    circleString[!draw] <- ""
+    ## Excapsulate within anchor ?
+    if (!is.null(links) && any(has.link <- !is.na(links))) {
+        circleString[has.link] <- paste0(svgStartLinkString(links[id],
+                                                            show[id]),
+                                         circleString[has.link],
+                                         svgEndLinkString(links[id]))
+    }
+    svgString <- paste0('<temp xmlns:xlink="http://www.w3.org/1999/xlink">',
+                        paste(circleString, collapse=""), "</temp>")
+    newNode <- xmlParse(svgString, asText=TRUE)
+    addChildren(svgDevParent(svgdev), kids=xmlChildren(xmlRoot(newNode)))
+}
+
 svgRectString <- function(x, y, width, height, angle=0, id=NULL,
                           attributes=svgAttrib(), links=NULL, show=NULL,
                           style=svgStyle(), svgdev=svgDevice()) {

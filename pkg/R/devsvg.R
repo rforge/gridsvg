@@ -410,9 +410,9 @@ setMethod("devText", signature(device="svgDevice"),
 
 setMethod("devCircle", signature(device="svgDevice"),
           function(circle, gp, device) {
-            svgCircle(circle$x, circle$y, circle$r, circle$name,
-                      device@attrs, device@links, device@show,
-                      devParToSVGStyle(gp, device), device@dev)
+              svgCircleString(circle$x, circle$y, circle$r, circle$name,
+                              device@attrs, device@links, device@show,
+                              devParToSVGStyle(gp, device), device@dev)
           })
 
 setMethod("devStartElement", signature(device="svgDevice"),
