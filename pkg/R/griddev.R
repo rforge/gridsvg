@@ -1298,7 +1298,7 @@ primToDev.points <- function(x, dev) {
     ## 46 == "."
     ## Don't do anything for a "." because we need a
     ## stroke for it to be visible
-    noStroke <- pchs %in% 15:20 | (pchs >= 32 & pchs != 46)
+    noStroke <- !is.na(pchs) & (pchs %in% 15:20 | (pchs >= 32 & pchs != 46))
     if (any(noStroke)) {
         pgp$fill[noStroke] <- pgp$col[noStroke]
         pgp$col[noStroke & pchs %in% 15:18] <- "transparent"
