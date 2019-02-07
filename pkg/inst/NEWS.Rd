@@ -2,6 +2,12 @@
 \title{NEWS file for the gridSVG package}
 \encoding{UTF-8}
 
+\section{Changes in version 1.7-0}{
+  \itemize{
+    \item Update for addition of \code{pathId} argument in
+    \code{grid.path}.
+  }
+}
 \section{Changes in version 1.6-1}{
   \itemize{
     \item Additional fix for \code{pch=NA}
