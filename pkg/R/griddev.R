@@ -986,7 +986,7 @@ primToDev.pathgrob <- function(x, dev) {
             n <- length(unique(x$pathId))
             pathId <- x$pathId
         }
-        if (is.null(x$id) && is.null(id.length)) {
+        if (is.null(x$id) && is.null(x$id.length)) {
             id <- rep(1, length(x$x))
         } else if (is.null(x$id)) {
             id <- rep(1L:length(x$id.lengths), x$id.lengths)
