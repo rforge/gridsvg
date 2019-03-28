@@ -245,6 +245,21 @@ applyAnimation <- function(x, ...) {
   UseMethod("applyAnimation")
 }
 
+############################
+## Functions to attempt to pull the "unit" off an existing unit
+## This is nasty and makes use of 'grid' internals knowledge,
+## but if it is any consolation, it used to be nastier
+
+unitUnit <- function(x) {
+    if (!inherits(x, "simpleUnit")) {
+        stop("Only simple units supported")
+    }
+    char <- as.character(x)
+    gsub(".+[0-9]([a-z]+)$", "\\1", char)
+}
+
+############################
+
 # Convert to animValue then take value(s) for shape "i"
 # This function is designed for animValues where timeid is NULL
 # so that each time period has only ONE value
@@ -266,7 +281,7 @@ ithValue <- function(animValues, i) {
 ithUnit <- function(animValues, origValue, i) {
     au <- as.animUnit(animValues,
                       # Only take the first "unit" value
-                      unit=attr(origValue, "unit")[1])
+                      unit=unitUnit(origValue)[1])
     if (!is.null(au$timeid))
         stop("Expecting only one value per time point")
     if (is.null(au$id))
@@ -297,7 +312,7 @@ ithAnimValue <- function(animValues, i) {
 ithAnimUnit <- function(animValues, origValue, i) {
     au <- as.animUnit(animValues,
                       # Only take the first "unit" value
-                      unit=attr(origValue, "unit")[1],
+                      unit=unitUnit(origValue)[1],
                       multVal=TRUE)
     if (is.null(au$timeid))
         stop("Expecting multiple values per time point")
@@ -1162,7 +1177,7 @@ applyAnimation.pathgrob <- function(x, animSet, animation, group, dev) {
         #        HAVE to follow the original series of M, L, Z to be
         #        valid;  otherwise behaviour of browser is undefined?
         if ("x" %in% names(animSet$animations)) {
-            au <- as.animUnit(animSet$animations$x, attr(x$x, "unit"))
+            au <- as.animUnit(animSet$animations$x, unitUnit(x$x))
             xx <- au$values
             pathid <- au$id
             timeid <- au$timeid
@@ -1170,7 +1185,7 @@ applyAnimation.pathgrob <- function(x, animSet, animation, group, dev) {
             xx <- x$x
         }
         if ("y" %in% names(animSet$animations)) {
-            au <- as.animUnit(animSet$animations$y, attr(x$y, "unit"))
+            au <- as.animUnit(animSet$animations$y, unitUnit(x$y))
             yy <- au$values
             pathid <- au$id
             timeid <- au$timeid
