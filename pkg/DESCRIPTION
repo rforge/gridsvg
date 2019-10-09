@@ -9,7 +9,6 @@ Description: Functions to export graphics drawn with package grid to SVG
   format.  Additional functions provide access to SVG features that
   are not available in standard R graphics, such as hyperlinks, 
   animation, filters, masks, clipping paths, and gradient and pattern fills.
-Depends: R (>= 3.6)
 Imports: grDevices, graphics, utils, methods, grid, jsonlite, XML
 Suggests: lattice
 License: GPL

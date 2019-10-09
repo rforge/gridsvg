@@ -4,7 +4,10 @@
 
 \section{Changes in version 1.7-1}{
   \itemize{
-    \item Fix for new representation of unit objects in \pkg{grid}.
+    \item Fix for evaluation of arguments passed to \code{pdf()}
+    device within \code{gridsvg()}.
+
+    Patch provided by Philipp Angerer.
   }  
 }
 \section{Changes in version 1.7-0}{
