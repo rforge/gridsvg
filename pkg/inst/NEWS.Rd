@@ -8,6 +8,8 @@
     device within \code{gridsvg()}.
 
     Patch provided by Philipp Angerer.
+
+    \item Avoid peeking at internal representation of \pkg{grid} units.
   }  
 }
 \section{Changes in version 1.7-0}{
