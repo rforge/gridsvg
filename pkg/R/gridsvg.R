@@ -270,7 +270,6 @@ gridsvg <- function(name = "Rplots.svg",
                     ...) {
     # Avoid multiple gridSVG devices (because referenced content can
     # have side effects across devices)
-    deviceNames <- unlist(.Devices)
     if (getDev() != 0)
         stop("Only one 'gridsvg' device may be used at a time")
     argnames <- setdiff(names(formals()), '...')
